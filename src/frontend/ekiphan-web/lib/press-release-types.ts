@@ -1,0 +1,20 @@
+export type PublicPressRelease = {
+  id: string;
+  title: string;
+  summary: string;
+  body?: string | null;
+  publishedAt: string;
+  coverImageUrl?: string | null;
+  coverAltText?: string | null;
+  attachmentUrl?: string | null;
+  attachmentFileName?: string | null;
+  slug: string;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  canonicalUrl: string | null;
+  noIndex: boolean;
+  noFollow: boolean;
+  openGraphTitle: string | null;
+  openGraphDescription: string | null;
+  openGraphImageUrl: string | null;
+};

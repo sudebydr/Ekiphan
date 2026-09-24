@@ -1,0 +1,68 @@
+.page { width: 100%; max-width: none; min-height: 100vh; margin: 0; padding: 0 0 4rem; background: #f7f3ed; color: #24211f; }
+.hero { position: relative; width: min(calc(100% - 4rem), 108rem); min-height: 22rem; margin: 0 auto; padding: 10.5rem clamp(2rem, 5vw, 5rem) 2.5rem; overflow: hidden; border-radius: 0 0 1rem 1rem; background: linear-gradient(90deg, rgb(13 12 11 / 84%), rgb(13 12 11 / 56%) 49%, rgb(13 12 11 / 16%)), url("/images/contact-kitchen-hero-ai-v1.png") center / cover no-repeat; color: #fff; }
+.heroCopy { position: relative; z-index: 1; max-width: 42rem; }
+.breadcrumb { display: flex; gap: .7rem; margin: 0 0 1.6rem; color: rgb(255 255 255 / 76%); font-size: .69rem; }
+.breadcrumb a { color: inherit; text-decoration: none; }.breadcrumb strong { color: #fff; }
+.heroCopy > p, .sectionLabel { margin: 0 0 .7rem; color: #b31434; font-size: .66rem; font-weight: 850; letter-spacing: .18em; text-transform: uppercase; }
+.hero h1 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.4rem, 4.2vw, 4.25rem); font-weight: 500; letter-spacing: -.045em; line-height: 1; }
+.heroCopy > span { display: block; max-width: 34rem; margin-top: 1rem; color: rgb(255 255 255 / 84%); font-size: .91rem; line-height: 1.75; }
+.layout { display: grid; width: min(calc(100% - 4rem), 108rem); grid-template-columns: minmax(0, 1.36fr) minmax(18rem, .94fr); gap: 1.1rem; margin: 1.2rem auto 0; align-items: start; }
+.formPanel, .infoCard { border: 1px solid rgb(74 56 45 / 10%); border-radius: .75rem; background: rgb(255 253 249 / 92%); box-shadow: 0 .75rem 2rem rgb(51 41 32 / 6%); }
+.formPanel { padding: clamp(1.6rem, 3vw, 2.35rem); }.formHeading { padding-bottom: 1.2rem; border-bottom: 1px solid rgb(74 56 45 / 10%); }.formHeading h2 { margin: 0; color: #29231f; font-family: Georgia, "Times New Roman", serif; font-size: clamp(1.8rem, 2.8vw, 2.65rem); font-weight: 500; letter-spacing: -.045em; }
+.infoCards { display: grid; gap: .75rem; }.infoCard { display: grid; grid-template-columns: 3rem minmax(0,1fr); gap: .95rem; align-items: start; min-height: 6.45rem; padding: 1.05rem; }.infoIcon { display: grid; width: 2.65rem; height: 2.65rem; place-items: center; border-radius: 50%; background: #f8f1eb; color: #ad1934; font-size: 1.1rem; }.infoCard h2 { margin: .05rem 0 .35rem; color: #342a26; font-family: Georgia, "Times New Roman", serif; font-size: 1.02rem; font-weight: 600; }.infoCard p { margin: 0; color: #756b63; font-size: .72rem; line-height: 1.55; }.infoCard a { display: inline-block; margin-top: .38rem; color: #b31434; font-size: .72rem; font-weight: 800; text-decoration: none; }
+.form { display: grid; gap: .7rem; padding-top: 1.25rem; }.row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }.form label { display: grid; gap: .35rem; }.form input, .form textarea, .form select { box-sizing: border-box; width: 100%; min-height: 2.65rem; padding: .7rem .8rem; border: 1px solid rgb(74 56 45 / 13%); border-radius: .42rem; outline: none; background: #fffdfa; color: #37302b; font: inherit; font-size: .76rem; }.form textarea { min-height: 6.25rem; resize: vertical; }.form input:focus, .form textarea:focus, .form select:focus { border-color: rgb(179 20 52 / 55%); box-shadow: 0 0 0 .2rem rgb(179 20 52 / 8%); }.form button { display: inline-flex; width: max-content; min-height: 2.7rem; align-items: center; gap: 1.1rem; padding: 0 1.25rem; border: 0; border-radius: .35rem; background: #b31434; box-shadow: 0 .65rem 1.3rem rgb(179 20 52 / 18%); color: #fff; cursor: pointer; font: inherit; font-size: .73rem; font-weight: 800; }.form button:disabled { opacity: .65; cursor: wait; }.form button span { font-size: 1.1rem; }.consent { display: flex !important; align-items: flex-start; gap: .5rem !important; color: #756b63; font-size: .64rem; line-height: 1.45; }.consent input { width: .9rem; min-height: .9rem; margin-top: .1rem; accent-color: #b31434; }.status { margin: 0; padding: .7rem; border-radius: .4rem; background: #f8f1eb; color: #8d1730; font-size: .72rem; }.honeypot { position: absolute !important; left: -10000px; }.srOnly { min-width: 0; }.page :focus-visible { outline: 3px solid #c9556b; outline-offset: 2px; }
+@media (max-width: 64rem) { .layout { grid-template-columns: 1fr; }.infoCards { grid-template-columns: repeat(2, minmax(0,1fr)); }.hero { min-height: 20rem; } }
+@media (max-width: 48rem) { .hero, .layout { width: calc(100% - 2rem); }.hero { min-height: 21rem; padding: 8rem 1.35rem 1.75rem; }.row, .infoCards { grid-template-columns: 1fr; }.formPanel { padding: 1.35rem; } }
+/* Contact hero only: full-width warm contrast, with no side bands. */
+.page[data-public-page] > .hero {
+  width: 100%;
+  min-height: 24rem;
+  margin: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(90deg, rgb(30 23 18 / 86%) 0%, rgb(30 23 18 / 64%) 48%, rgb(30 23 18 / 24%) 100%),
+    url("/images/contact-kitchen-hero-ai-v1.png") center / cover no-repeat;
+}
+
+.page[data-public-page] > .hero .heroCopy {
+  width: min(calc(100% - 4rem), 108rem);
+  margin: 0 auto;
+}
+
+@media (max-width: 48rem) {
+  .page[data-public-page] > .hero .heroCopy {
+    width: calc(100% - 2rem);
+  }
+}
+/* Contact hero: begin below the fixed two-row navigation instead of behind it. */
+@media (min-width: 48.0625rem) {
+  .page[data-public-page] > .hero {
+    min-height: 25rem;
+    margin-top: 11.5rem;
+    padding-top: 3.75rem;
+    padding-bottom: 3.75rem;
+    background-position: center 54%;
+  }
+}
+
+@media (max-width: 48rem) {
+  .page[data-public-page] > .hero {
+    margin-top: 5.5rem;
+    padding-top: 3.25rem;
+  }
+}
+
+/* Map shown only under the factory and centre contact card. */
+.locationMap {
+  width: 100%;
+  height: 12.5rem;
+  grid-column: 1 / -1;
+  margin-top: .2rem;
+  border: 0;
+  border-radius: .6rem;
+  filter: saturate(.78) contrast(.94);
+}
+
+@media (max-width: 48rem) {
+  .locationMap { height: 11rem; }
+}

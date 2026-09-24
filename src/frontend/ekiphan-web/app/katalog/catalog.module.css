@@ -1,0 +1,3367 @@
+.page {
+  display: block;
+  width: min(100% - 2rem, 86rem);
+  max-width: none;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 8.5rem;
+}
+
+.topbar,
+.hero,
+.resultsHeader,
+.pagination,
+.detailHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.topbar {
+  min-height: 4.5rem;
+  border-bottom: 1px solid #d8d2c7;
+}
+
+.brand,
+.topbar a,
+.productCard,
+.backLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand {
+  font-weight: 850;
+  letter-spacing: 0.16em;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.topbar nav a,
+.backLink {
+  color: #25543a;
+  font-weight: 750;
+}
+
+.topbar a:focus-visible,
+.page button:focus-visible,
+.page input:focus-visible,
+.page select:focus-visible,
+.productCard:focus-visible,
+.relatedCard:focus-visible {
+  outline: 3px solid #d18b29;
+  outline-offset: 4px;
+}
+
+.hero {
+  align-items: flex-end;
+  padding: 8.5rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.8rem;
+  color: #8b6327;
+  font-size: 0.75rem;
+  font-weight: 850;
+  letter-spacing: 0.19em;
+}
+
+.hero h1,
+.detailHeader h1 {
+  max-width: 16ch;
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3rem, 7vw, 6.5rem);
+  font-weight: 500;
+  line-height: 0.9;
+}
+
+.heroText,
+.detailLead {
+  max-width: 34rem;
+  color: #516058;
+  font-size: 1.05rem;
+}
+
+.catalogLayout {
+  display: grid;
+  grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.filterPanel {
+  position: sticky;
+  top: 1rem;
+  border: 1px solid #d8d2c7;
+  border-radius: 1rem;
+  background: #fffdf8;
+  overflow: hidden;
+}
+
+.filterPanel summary {
+  display: flex;
+  min-height: 3.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.35rem;
+  color: #254d37;
+  cursor: pointer;
+  font-weight: 850;
+}
+
+.filterPanel summary span {
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: #e5ece6;
+  font-size: 0.72rem;
+}
+
+.filterPanel[open] summary {
+  border-bottom: 1px solid #d8d2c7;
+}
+
+.filters {
+  display: grid;
+  gap: 1rem;
+  padding: 1.35rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.dynamicFilters {
+  display: grid;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #d8d2c7;
+}
+
+.dynamicFilters h3 {
+  margin: 0;
+  color: #254d37;
+  font-size: .9rem;
+}
+
+.rangeField {
+  display: grid;
+  gap: .45rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.rangeField legend {
+  padding: 0;
+  color: #45534b;
+  font-size: .8rem;
+  font-weight: 750;
+}
+
+.rangeField > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .5rem;
+}
+
+.rangeField label {
+  display: grid;
+  gap: .3rem;
+  color: #647168;
+  font-size: .72rem;
+}
+
+.rangeField input {
+  width: 100%;
+  min-width: 0;
+  min-height: 2.6rem;
+  padding: .55rem;
+  border: 1px solid #aeb5af;
+  border-radius: .5rem;
+  font: inherit;
+}
+
+.field label {
+  color: #45534b;
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #aeb5af;
+  border-radius: 0.55rem;
+  background: white;
+  color: #17211b;
+  font: inherit;
+}
+
+.filterActions {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1rem;
+  border: 0;
+  border-radius: 0.55rem;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.primaryButton {
+  background: #235b3d;
+  color: white;
+}
+
+.secondaryButton {
+  border: 1px solid #b8beb9;
+  background: transparent;
+  color: #254d37;
+}
+
+.resultsHeader {
+  align-items: baseline;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid #d8d2c7;
+}
+
+.resultsHeader h2,
+.resultsHeader p {
+  margin: 0;
+}
+
+.activeFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+  padding: 1rem 0 0;
+}
+
+.activeFilters > span {
+  color: #5e6a63;
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+.activeFilter,
+.clearFilters {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  color: #254d37;
+  font-size: 0.8rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.activeFilter {
+  background: #e5ece6;
+}
+
+.activeFilter span {
+  font-size: 1.1rem;
+  line-height: 0.8;
+}
+
+.clearFilters {
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+.productCard {
+  display: grid;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #d8d2c7;
+  border-radius: 0.9rem;
+  background: #fffdf8;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.productCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 1rem 2.5rem rgb(35 65 48 / 10%);
+}
+
+.productVisual,
+.detailVisual {
+  display: grid;
+  aspect-ratio: 4 / 3;
+  place-items: center;
+  background:
+    radial-gradient(circle at 35% 35%, #f5e8c9 0 12%, transparent 13%),
+    linear-gradient(145deg, #e8e5dc, #dce5dc);
+  color: #315b43;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.5rem, 6vw, 4.8rem);
+}
+
+.productBody {
+  display: grid;
+  gap: 0.55rem;
+  padding: 1.15rem;
+}
+
+.meta,
+.sku {
+  color: #6a756e;
+  font-size: 0.78rem;
+}
+
+.productBody h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.25;
+}
+
+.productBody p {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: #56635c;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.empty,
+.error {
+  margin-top: 1rem;
+  padding: 2rem;
+  border: 1px solid #d8d2c7;
+  border-radius: 0.9rem;
+  background: #fffdf8;
+}
+
+.error {
+  border-color: #c98078;
+  background: #fff3f0;
+  color: #792820;
+}
+
+.productVisual {
+  overflow: hidden;
+}
+
+.productVisual img,
+.detailVisual img,
+.gallery img,
+.relatedVisual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pagination {
+  justify-content: center;
+  padding-top: 2rem;
+}
+
+.pagination span {
+  color: #657169;
+}
+
+.detailPage {
+  display: block;
+}
+
+.backLink {
+  display: inline-block;
+  margin: 2rem 0;
+}
+
+.detailHeader {
+  align-items: stretch;
+}
+
+.detailCopy,
+.detailVisual {
+  flex: 1 1 0;
+}
+
+.detailCopy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem 2rem 2rem 0;
+}
+
+.detailVisual {
+  overflow: hidden;
+  min-height: 30rem;
+  border-radius: 1rem;
+}
+
+.gallery {
+  padding: 2rem 0;
+}
+
+.gallery h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+.galleryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.galleryGrid img {
+  aspect-ratio: 4 / 3;
+  border-radius: 0.8rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.3rem;
+}
+
+.quoteAction {
+  margin-top: 1.5rem;
+}
+
+.quoteAction p {
+  margin-top: 0.6rem;
+  color: #3e5f4b;
+}
+
+.chip {
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: #e5ece6;
+  color: #2c5940;
+  font-size: 0.8rem;
+}
+
+.detailSections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  padding: 4rem 0;
+}
+
+.detailSections h2 {
+  margin-top: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+.attributeList {
+  margin: 0;
+}
+
+.attributeRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid #d8d2c7;
+}
+
+.attributeRow dt {
+  color: #5e6a63;
+}
+
+.attributeRow dd {
+  margin: 0;
+  font-weight: 750;
+  text-align: right;
+}
+
+.relatedSection {
+  padding: 1rem 0 3rem;
+}
+
+.relatedSection h2 {
+  margin: 0 0 1.25rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 500;
+}
+
+.relatedGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.relatedCard {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #d8d2c7;
+  border-radius: 0.9rem;
+  background: #fffdf8;
+  color: inherit;
+  text-decoration: none;
+}
+
+.relatedCard > span:last-child {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.relatedCard small,
+.relatedCard span span {
+  color: #5e6a63;
+}
+
+.relatedCard strong {
+  font-size: 1.05rem;
+}
+
+.relatedVisual {
+  display: grid;
+  width: 5rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 0.65rem;
+  background: #e4e9e3;
+  color: #25543a;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  overflow: hidden;
+}
+
+@media (max-width: 64rem) {
+  .productGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .relatedGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .galleryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 48rem) {
+  .hero,
+  .detailHeader {
+    display: grid;
+  }
+
+  .catalogLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .filterPanel {
+    position: static;
+  }
+
+  .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filterActions {
+    grid-column: 1 / -1;
+  }
+
+  .detailCopy {
+    padding-right: 0;
+  }
+
+  .detailVisual {
+    min-height: 20rem;
+  }
+}
+
+@media (max-width: 34rem) {
+  .page {
+    width: min(100% - 1rem, 86rem);
+  }
+
+  .hero {
+    padding-top: 3rem;
+  }
+
+  .productGrid,
+    .galleryGrid,
+    .relatedGrid,
+    .filters,
+  .detailSections {
+    grid-template-columns: 1fr;
+  }
+
+  .field,
+  .filterActions {
+    grid-column: 1;
+  }
+
+  .resultsHeader {
+    align-items: flex-start;
+  }
+}
+
+/* Stitch-aligned catalogue finish */
+.hero {
+  min-height: 27rem;
+}
+
+.filterPanel,
+.productCard,
+.relatedCard,
+.empty,
+.error,
+.detailVisual,
+.galleryGrid img {
+  border-radius: 0;
+}
+
+.filterPanel {
+  border-top: 3px solid #88051f;
+  box-shadow: 0 1.2rem 3rem rgb(23 26 29 / 7%);
+}
+
+.primaryButton {
+  background: #88051f;
+}
+
+.secondaryButton,
+.topbar nav a,
+.backLink {
+  color: #88051f;
+}
+
+.activeFilter,
+.chip {
+  background: #eee8e4;
+  color: #660416;
+}
+
+.productVisual,
+.detailVisual {
+  background: linear-gradient(145deg, #ece9e5, #d8d5d0);
+  color: #88051f;
+}
+
+.productCard {
+  border-color: #ddd8d2;
+  background: #fff;
+}
+
+.productCard:hover {
+  box-shadow: 0 1.2rem 2.8rem rgb(23 26 29 / 13%);
+}
+
+.detailHeader h1,
+.relatedSection h2,
+.detailSections h2,
+.gallery h2 {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 760;
+  letter-spacing: -0.045em;
+}
+
+.loadingStatus {
+  color: rgb(255 255 255 / 68%);
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.loadingLayout {
+  display: grid;
+  grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
+  gap: 2.5rem;
+  padding-top: 2rem;
+}
+
+.loadingFilters {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  min-height: 26rem;
+  padding: 1.35rem;
+  border: 1px solid #ddd8d2;
+  border-top: 3px solid #88051f;
+  background: #fff;
+}
+
+.loadingFilters span,
+.loadingHeading,
+.loadingCard span,
+.loadingCard i {
+  display: block;
+  overflow: hidden;
+  background: #e7e2dc;
+}
+
+.loadingFilters span {
+  height: 2.75rem;
+}
+
+.loadingHeading {
+  width: 34%;
+  height: 2rem;
+  margin-bottom: 1.2rem;
+}
+
+.loadingGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.loadingCard {
+  display: grid;
+  gap: .75rem;
+  padding-bottom: 1rem;
+  border: 1px solid #ddd8d2;
+  background: #fff;
+}
+
+.loadingCard span {
+  aspect-ratio: 4 / 3;
+  background: #dedad5;
+}
+
+.loadingCard i {
+  width: calc(100% - 2rem);
+  height: .8rem;
+  margin: 0 1rem;
+}
+
+.loadingCard i:last-child {
+  width: 55%;
+}
+
+.loadingFilters span,
+.loadingHeading,
+.loadingCard span,
+.loadingCard i {
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 70%),
+    transparent
+  );
+  background-size: 220% 100%;
+  animation: loadingSweep 1.35s ease-in-out infinite;
+}
+
+@keyframes loadingSweep {
+  from { background-position: 100% 0; }
+  to { background-position: -120% 0; }
+}
+
+@media (max-width: 64rem) {
+  .loadingGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 48rem) {
+  .loadingLayout,
+  .loadingGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .loadingFilters {
+    min-height: auto;
+  }
+}
+
+/* Ana sayfa ile uyumlu katalog aÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±lÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â± */
+.catalogPage {
+  width: 100%;
+  margin: 0;
+  padding: 0 0 5rem;
+  background: #f8f4ee;
+}
+
+.catalogTopbar {
+  position: absolute;
+  z-index: 20;
+  top: 1rem;
+  left: 50%;
+  display: grid;
+  width: min(calc(100% - 3rem), 82rem);
+  min-height: 4.65rem;
+  margin: 0;
+  padding: 0.55rem 0.8rem;
+  grid-template-columns: minmax(11rem, 0.7fr) minmax(0, 1.6fr) minmax(14rem, 0.7fr);
+  gap: clamp(1.25rem, 3vw, 3.5rem);
+  align-items: center;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 1rem;
+  background: linear-gradient(110deg, rgb(18 25 29 / 82%), rgb(30 43 50 / 66%));
+  box-shadow:
+    0 1rem 3rem rgb(0 0 0 / 16%),
+    inset 0 1px 0 rgb(255 255 255 / 7%);
+  backdrop-filter: blur(1rem) saturate(125%);
+  transform: translateX(-50%);
+}
+
+.catalogPage[data-public-page] > .catalogTopbar {
+  position: absolute;
+  margin: 0;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid rgb(144 31 59 / 10%);
+  border-radius: 1.15rem;
+  background: rgb(243 239 233 / 82%);
+  color: #252321;
+  box-shadow:
+    0 1rem 3rem rgb(58 48 40 / 12%),
+    inset 0 1px 0 rgb(255 255 255 / 76%);
+  backdrop-filter: blur(0.7rem) saturate(108%);
+}
+
+.catalogBrand {
+  display: inline-grid;
+  justify-self: start;
+  gap: 0.45rem;
+  color: #252321;
+  text-decoration: none;
+}
+
+.catalogPage[data-public-page] > .catalogTopbar > .catalogBrand::before {
+  display: none !important;
+  content: none !important;
+}
+
+.catalogBrand strong {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-start;
+  color: #252321;
+  font-size: clamp(1.45rem, 2vw, 1.85rem);
+  font-weight: 760;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.catalogBrand strong span {
+  width: 0.34rem;
+  height: 0.34rem;
+  margin: 0.02rem 0 0 0.14rem;
+  border-radius: 50%;
+  background: #bd0d36;
+  box-shadow: 0 0 0.8rem rgb(189 13 54 / 45%);
+}
+
+.catalogBrand small {
+  color: #6f6962;
+  font-size: 0.46rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+}
+
+.catalogTopbar.catalogTopbar > nav {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
+}
+
+.catalogTopbar nav a {
+  color: #383532;
+}
+
+.headerActions {
+  display: flex;
+  grid-column: 3;
+  grid-row: 1;
+  align-items: center;
+  justify-self: end;
+  gap: 0.45rem;
+  padding-left: 0.65rem;
+  border-left: 1px solid rgb(31 31 31 / 9%);
+}
+
+.quoteButton {
+  display: inline-flex;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.3rem;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: 999px;
+  background: rgb(143 29 52 / 92%);
+  box-shadow:
+    0 0.75rem 1.8rem rgb(57 0 14 / 22%),
+    inset 0 1px 0 rgb(255 255 255 / 15%);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.045em;
+  text-decoration: none;
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.catalogPage[data-public-page] > .catalogTopbar .quoteButton {
+  border-radius: 999px;
+}
+
+.quoteButton:hover {
+  background: #a52b47;
+  transform: translateY(-0.1rem);
+}
+
+.headerLanguage {
+  display: inline-flex;
+  min-width: 2.45rem;
+  height: 2.45rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(144 31 59 / 9%);
+  border-radius: 999px;
+  background: rgb(144 31 59 / 4%);
+  color: #383532;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.headerSearch {
+  display: grid;
+  width: 2.55rem;
+  height: 2.55rem;
+  place-items: center;
+  border: 1px solid rgb(31 31 31 / 14%);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 58%);
+  color: #252321;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 72%);
+  text-decoration: none;
+  transition: background-color 180ms ease, border-color 180ms ease,
+    color 180ms ease, transform 180ms ease;
+}
+
+.catalogPage[data-public-page] > .catalogTopbar .headerSearch {
+  border-radius: 50%;
+}
+
+.headerSearch span {
+  position: relative;
+  display: block;
+  width: 0.82rem;
+  height: 0.82rem;
+  border: 1.6px solid currentColor;
+  border-radius: 50%;
+}
+
+.headerSearch span::after {
+  position: absolute;
+  right: -0.36rem;
+  bottom: -0.24rem;
+  width: 0.44rem;
+  height: 1.6px;
+  background: currentColor;
+  content: "";
+  transform: rotate(45deg);
+  transform-origin: left center;
+}
+
+.headerSearch:hover {
+  border-color: #901f3b;
+  background: #901f3b;
+  color: white;
+  transform: translateY(-0.1rem);
+}
+
+.catalogHero {
+  position: relative;
+  display: block;
+  min-height: clamp(36rem, 72vh, 44rem);
+  padding: 0;
+  overflow: hidden;
+  background: #ece7df;
+}
+
+.heroVisual,
+.heroShade {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.heroVisual {
+  object-fit: cover;
+  object-position: center center;
+}
+
+.heroShade {
+  background:
+    linear-gradient(90deg, rgb(248 244 238 / 94%) 0%, rgb(248 244 238 / 87%) 27%, rgb(248 244 238 / 50%) 45%, transparent 66%),
+    linear-gradient(180deg, rgb(18 25 29 / 12%) 0%, transparent 24%, rgb(248 244 238 / 13%) 100%);
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  width: min(calc(100% - 3rem), 82rem);
+  margin: 0 auto;
+  padding: clamp(11rem, 22vh, 14rem) 0 6rem;
+}
+
+.catalogHero .eyebrow {
+  color: #901f3b;
+}
+
+.catalogHero h1 {
+  max-width: 10ch;
+  color: #1f1f1f;
+  font-size: clamp(3.35rem, 6.15vw, 6.15rem);
+  font-weight: 500;
+  letter-spacing: -0.055em;
+  line-height: 0.9;
+}
+
+.catalogHero .heroText {
+  max-width: 31rem;
+  margin: 1.5rem 0 0;
+  color: #5f5b56;
+  line-height: 1.65;
+}
+
+.heroCta {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  margin-top: 1.75rem;
+  padding: 0 1.35rem;
+  border-radius: 999px;
+  background: #901f3b;
+  box-shadow: 0 0.75rem 2rem rgb(144 31 59 / 20%);
+  color: white;
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.heroCta:hover {
+  background: #74142a;
+  transform: translateY(-0.12rem);
+}
+
+.catalogPage .catalogLayout {
+  width: min(calc(100% - 3rem), 82rem);
+  margin: 0 auto;
+  padding-top: 3.5rem;
+}
+
+@media (max-width: 64rem) {
+  .catalogTopbar {
+    grid-template-columns: minmax(10rem, 1fr) auto;
+  }
+
+  .catalogTopbar.catalogTopbar > nav {
+    grid-column: 2;
+  }
+
+  .headerActions {
+    display: none;
+  }
+}
+
+@media (max-width: 48rem) {
+  .catalogTopbar {
+    width: calc(100% - 2rem);
+  }
+
+  .catalogHero {
+    min-height: 38rem;
+  }
+
+  .heroVisual {
+    object-position: 62% center;
+  }
+
+  .heroShade {
+    background:
+      linear-gradient(90deg, rgb(248 244 238 / 91%), rgb(248 244 238 / 42%)),
+      linear-gradient(180deg, transparent 42%, rgb(248 244 238 / 84%) 86%);
+  }
+
+  .heroContent {
+    width: calc(100% - 2rem);
+    padding-top: 10rem;
+  }
+
+  .catalogHero h1 {
+    font-size: clamp(2.9rem, 14vw, 4.45rem);
+  }
+
+  .catalogPage .catalogLayout {
+    width: calc(100% - 2rem);
+    padding-top: 2rem;
+  }
+}
+
+/* Catalog filter refinement */
+.catalogLayout {
+  gap: clamp(1.5rem, 3vw, 3.25rem);
+}
+
+.filterPanel {
+  border: 1px solid rgb(82 49 39 / 14%);
+  border-radius: 1rem;
+  background: linear-gradient(160deg, rgb(255 253 249 / 98%), rgb(246 241 234 / 98%));
+  box-shadow: 0 1.25rem 3.5rem rgb(48 37 29 / 11%);
+}
+
+.filterPanel::before {
+  display: block;
+  height: 0.24rem;
+  background: linear-gradient(90deg, #9e1234, #d58a9a 72%, transparent);
+  content: "";
+}
+
+.filterPanel summary {
+  min-height: 4rem;
+  padding: 1.05rem 1.25rem;
+  color: #273f31;
+  font-size: 1.05rem;
+  letter-spacing: -0.015em;
+}
+
+.filterPanel summary::marker {
+  color: #9e1234;
+}
+
+.filterPanel summary span {
+  border: 1px solid rgb(158 18 52 / 16%);
+  background: rgb(158 18 52 / 8%);
+  color: #97102f;
+  font-weight: 800;
+}
+
+.filters {
+  gap: 1.15rem;
+  padding: 1.3rem 1.25rem 1.4rem;
+}
+
+.field {
+  gap: 0.52rem;
+}
+
+.field label {
+  color: #405448;
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.02em;
+}
+
+.field input,
+.field select {
+  min-height: 3.25rem;
+  padding: 0.7rem 0.85rem;
+  border-color: rgb(82 49 39 / 16%);
+  border-radius: 0.5rem;
+  background: rgb(255 255 255 / 74%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 80%);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.field input:hover,
+.field select:hover {
+  border-color: rgb(158 18 52 / 34%);
+  background: #fff;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: #9e1234;
+  box-shadow: 0 0 0 0.2rem rgb(158 18 52 / 12%);
+  outline: 0;
+}
+
+.dynamicFilters {
+  gap: 1.1rem;
+  padding-top: 1.2rem;
+  border-top-color: rgb(82 49 39 / 12%);
+}
+
+.filterActions {
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+}
+
+.primaryButton,
+.secondaryButton {
+  min-height: 3.15rem;
+  border-radius: 0.45rem;
+  font-size: 0.88rem;
+  letter-spacing: 0.01em;
+}
+
+.primaryButton {
+  background: linear-gradient(135deg, #9e1234, #bb2347);
+  box-shadow: 0 0.8rem 1.6rem rgb(120 8 35 / 20%);
+}
+
+.primaryButton:hover {
+  background: linear-gradient(135deg, #850b2a, #a9153a);
+  transform: translateY(-0.1rem);
+}
+
+.secondaryButton {
+  border: 1px solid rgb(82 49 39 / 23%);
+  background: rgb(255 255 255 / 58%);
+  color: #8b0b2b;
+}
+
+.secondaryButton:hover {
+  border-color: #9e1234;
+  background: rgb(158 18 52 / 6%);
+}
+.productCard {
+  overflow: hidden;
+}
+
+.productBrand {
+  margin: 0.3rem 0 0;
+  color: #8b0b2b;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.productActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  margin-top: 1.15rem;
+}
+
+.productDetailLink,
+.productQuoteButton {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid #9e1234;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: #8b0b2b;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.productQuoteButton {
+  border: 0;
+  background: #9e1234;
+  color: #fff;
+}
+
+.productDetailLink:hover,
+.productQuoteButton:hover {
+  transform: translateY(-0.08rem);
+}
+
+@media (max-width: 40rem) {
+  .productActions {
+    align-items: stretch;
+  }
+
+  .productDetailLink,
+  .productQuoteButton {
+    flex: 1 1 10rem;
+  }
+}
+/* Premium catalog and product-detail refinement */
+.page {
+  width: min(100% - 3rem, 90rem);
+  padding: 0 0 6rem;
+}
+
+.catalogPage .catalogLayout {
+  padding-top: 2rem;
+}
+
+.catalogPage .hero {
+  min-height: 23rem;
+  padding: 5rem clamp(1.5rem, 6vw, 5rem);
+}
+
+.catalogPage .hero h1 {
+  max-width: 13ch;
+  font-size: clamp(2.65rem, 5vw, 4.5rem);
+  font-weight: 650;
+  line-height: 0.98;
+}
+
+.filterPanel {
+  top: 7.25rem;
+  border-radius: 1.15rem;
+  background: #fffdfa;
+}
+
+.productGrid {
+  gap: clamp(1.5rem, 2.2vw, 2rem);
+  padding-top: 1.6rem;
+}
+
+.productCard {
+  border-radius: 1rem;
+  transition: transform 280ms ease, box-shadow 280ms ease, border-color 280ms ease;
+}
+
+.productCard:hover {
+  transform: translateY(-4px);
+  border-color: rgb(169 31 61 / 28%);
+  box-shadow: 0 1.4rem 3rem rgb(24 24 24 / 11%);
+}
+
+.productVisual {
+  aspect-ratio: 4 / 3;
+  padding: clamp(1.25rem, 2.5vw, 2.25rem);
+  background: #faf9f6;
+}
+
+.productVisual img,
+.detailVisual img,
+.relatedVisual img,
+.gallery img {
+  object-fit: contain;
+}
+
+.productVisual img {
+  transition: transform 340ms ease;
+}
+
+.productCard:hover .productVisual img {
+  transform: scale(1.025);
+}
+
+.productBody {
+  gap: 0.6rem;
+  padding: 1.35rem 1.35rem 1.45rem;
+}
+
+.meta {
+  color: #a91f3d;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.productBody h3 {
+  font-size: clamp(1.22rem, 1.6vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.productBody p {
+  line-height: 1.55;
+  -webkit-line-clamp: 3;
+}
+
+.detailPage {
+  width: min(100% - 3rem, 90rem);
+}
+
+.backLink {
+  margin: 2.4rem 0 1.4rem;
+  font-size: 0.9rem;
+}
+
+.detailHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(2.25rem, 6vw, 6rem);
+  min-height: 42rem;
+  padding: clamp(1.5rem, 4vw, 4rem) 0;
+}
+
+.detailCopy {
+  padding: 1rem 0;
+}
+
+.detailHeader h1 {
+  max-width: 14ch;
+  font-size: clamp(2.625rem, 5vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.01;
+}
+
+.detailLead {
+  color: #465249;
+  font-size: clamp(1rem, 1.25vw, 1.125rem);
+  line-height: 1.65;
+}
+
+.detailVisual {
+  min-height: 34rem;
+  border-radius: 1rem;
+  background: #f8f7f3;
+}
+
+:global(.productGallery) {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 1rem;
+  padding: clamp(1.5rem, 5vw, 5rem);
+}
+
+:global(.productGalleryMain) {
+  display: grid;
+  min-height: 0;
+  place-items: center;
+}
+
+:global(.productGalleryMain img) {
+  width: min(100%, 38rem);
+  max-height: 25rem;
+  height: 100%;
+  object-fit: contain;
+}
+
+:global(.productGalleryThumbnails) {
+  display: flex;
+  justify-content: center;
+  gap: 0.65rem;
+}
+
+:global(.productGalleryThumb) {
+  width: 4.5rem;
+  height: 4.5rem;
+  padding: 0.25rem;
+  border: 1px solid #d8d2c7;
+  border-radius: 0.4rem;
+  background: #fff;
+  cursor: pointer;
+}
+
+:global(.productGalleryThumbSelected) {
+  border: 2px solid #a91f3d;
+}
+
+:global(.productGalleryThumb img) {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.detailSections {
+  grid-template-columns: minmax(0, 42fr) minmax(0, 58fr);
+  gap: clamp(2rem, 6vw, 6rem);
+  margin-top: 3rem;
+  padding: clamp(3.5rem, 7vw, 7rem) 0;
+  border-top: 1px solid #e2ddd6;
+}
+
+.detailSections h2 {
+  font-size: clamp(1.8rem, 3vw, 2.65rem);
+}
+
+.detailSections > section:first-child > p {
+  max-width: 35rem;
+  color: #465249;
+  line-height: 1.7;
+}
+
+.attributeRow {
+  grid-template-columns: minmax(8rem, 40%) 1fr;
+  padding: 1rem 0;
+}
+
+.attributeRow dd {
+  text-align: left;
+  font-weight: 700;
+}
+
+.relatedSection {
+  margin-inline: calc(50% - 50vw);
+  padding: clamp(3.5rem, 7vw, 6.5rem) max(1.5rem, calc((100vw - 90rem) / 2));
+  background: #f4f0ea;
+}
+
+.relatedGrid {
+  gap: 1.5rem;
+}
+
+.relatedCard {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
+  padding: 1rem;
+  border-radius: 0.9rem;
+}
+
+.relatedVisual {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 0.65rem;
+  background: #faf9f6;
+}
+
+@media (max-width: 48rem) {
+  .page,
+  .detailPage {
+    width: calc(100% - 2.25rem);
+  }
+
+  .catalogPage .catalogLayout {
+    padding-top: 2.5rem;
+  }
+
+  .detailHeader {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    gap: 1.5rem;
+    padding-top: 1rem;
+  }
+
+  .detailVisual {
+    min-height: 24rem;
+    order: 2;
+  }
+
+  .detailCopy {
+    order: 1;
+  }
+
+  .detailSections {
+    grid-template-columns: 1fr;
+    margin-top: 1.5rem;
+  }
+}
+
+@media (max-width: 34rem) {
+  .catalogPage .hero {
+    min-height: 20rem;
+    padding: 3.25rem 1.25rem;
+  }
+
+  .filterPanel summary {
+    min-height: 3.5rem;
+  }
+
+  .filters {
+    padding: 1rem;
+  }
+
+  .detailHeader h1 {
+    font-size: clamp(2.35rem, 12vw, 3.2rem);
+  }
+
+  .detailVisual {
+    min-height: 20rem;
+  }
+
+  :global(.productGallery) {
+    padding: 1.5rem;
+  }
+
+  :global(.productGalleryMain img) {
+    max-height: 17rem;
+  }
+
+  .relatedSection {
+    padding-inline: 1.125rem;
+  }
+}
+/* Catalog filter viewport fit */
+@media (min-width: 48.0625rem) {
+  .filterPanel {
+    display: flex;
+    max-height: calc(100dvh - 8.5rem);
+    flex-direction: column;
+  }
+
+  .filterPanel summary {
+    flex: 0 0 auto;
+  }
+
+  .filterPanel[open] .filters {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-color: rgb(158 18 52 / 42%) transparent;
+    scrollbar-width: thin;
+  }
+
+  .filterPanel[open] .filterActions {
+    position: sticky;
+    z-index: 1;
+    bottom: -1.4rem;
+    margin-top: .35rem;
+    padding: 1rem 0 1.4rem;
+    background: linear-gradient(180deg, rgb(255 253 250 / 0%), #fffdfa 1rem);
+  }
+}
+/* Compact fixed catalog filters */
+@media (min-width: 48.0625rem) {
+  .filterPanel {
+    top: 1rem;
+    max-height: calc(100dvh - 2rem);
+  }
+
+  .filterPanel summary {
+    min-height: 3.35rem;
+    padding: .8rem 1rem;
+    font-size: .98rem;
+  }
+
+  .filterPanel[open] .filters {
+    gap: .62rem;
+    padding: .8rem 1rem 1rem;
+  }
+
+  .field {
+    gap: .28rem;
+  }
+
+  .field label {
+    font-size: .72rem;
+  }
+
+  .field input,
+  .field select {
+    min-height: 2.55rem;
+    padding: .48rem .7rem;
+    font-size: .92rem;
+  }
+
+  .filterPanel[open] .filterActions {
+    grid-template-columns: 1fr 1fr;
+    gap: .5rem;
+    bottom: -1rem;
+    margin-top: .15rem;
+    padding: .75rem 0 1rem;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    min-height: 2.55rem;
+    padding: .45rem .55rem;
+    font-size: .76rem;
+    white-space: nowrap;
+  }
+}
+/* Editorial product detail experience */
+.detailPage { width: min(100% - 3rem, 90rem); padding-bottom: 0; }
+.detailPage > :global(header) { margin-bottom: 0; }
+.breadcrumb { display:flex; flex-wrap:wrap; gap:.55rem; align-items:center; margin:clamp(2rem,4vw,3.5rem) 0 1rem; color:#827b74; font-size:.72rem; font-weight:750; letter-spacing:.055em; text-transform:uppercase; }
+.breadcrumb a { color:#74142a; text-decoration:none; transition:color 180ms ease; }
+.breadcrumb a:hover { color:#a3153c; }
+.detailHeader { grid-template-columns:minmax(0,45fr) minmax(0,55fr); min-height:43rem; gap:clamp(2.25rem,6vw,6rem); padding:clamp(1.25rem,3.2vw,3rem) 0 clamp(3.25rem,5vw,5rem); }
+.detailCopy { animation:detailFadeUp .7s cubic-bezier(.2,.7,.2,1) both; }
+.detailVisual { border-radius:1.5rem; background:#f9f7f2; box-shadow:0 1.5rem 4rem rgb(39 31 25 / 10%); animation:detailVisualIn .75s cubic-bezier(.2,.7,.2,1) both; }
+.detailHeader h1 { max-width:12ch; font-size:clamp(3.25rem,5.3vw,5.5rem); font-family:Arial,Helvetica,sans-serif; font-weight:720; letter-spacing:-.075em; line-height:.91; }
+.brandSku { margin:1.2rem 0 0; color:#6c6a65; font-size:.86rem; font-weight:700; }
+.brandSku span { margin:0 .35rem; color:#a3153c; }
+.detailLead { max-width:31rem; margin:1.25rem 0 0; font-size:clamp(1rem,1.25vw,1.14rem); line-height:1.7; }
+.chips { margin-top:1.5rem; }
+.chip { padding:.48rem .82rem; border:1px solid rgb(55 47 41 / 16%); background:rgb(255 255 255 / 55%); color:#4f4b46; font-size:.78rem; transition:border-color 180ms ease,color 180ms ease; }
+.chip:hover { border-color:#a3153c; color:#8b1232; }
+.quoteAction { display:flex; flex-wrap:wrap; align-items:start; gap:.75rem; margin-top:1.65rem; }
+.quoteAction > div { display:grid; gap:.35rem; }
+.quoteAction .primaryButton { min-height:3.5rem; padding:0 1.75rem; border-radius:.55rem; background:#9d1437; box-shadow:0 .85rem 1.7rem rgb(132 15 45 / 18%); transition:background-color 180ms ease,transform 180ms ease; }
+.quoteAction .primaryButton:hover { background:#7d0e2b; transform:translateY(-.12rem); }
+.catalogButton { display:inline-flex; min-height:3.5rem; align-items:center; gap:.6rem; padding:0 1.15rem; border:1px solid rgb(57 48 42 / 20%); border-radius:.55rem; color:#332e2a; font-size:.82rem; font-weight:800; text-decoration:none; transition:border-color 180ms ease, color 180ms ease; }
+.catalogButton:hover { border-color:#9d1437; color:#8b1232; }
+.catalogButton span,.relatedHeading a span { transition:transform 180ms ease; }
+.catalogButton:hover span,.relatedHeading a:hover span { transform:translateX(.22rem); }
+.detailSections { grid-template-columns:minmax(0,42fr) minmax(0,58fr); gap:clamp(2rem,7vw,7rem); margin:0; padding:clamp(4rem,8vw,7.5rem) 0; border-top:0; }
+.aboutSection,.specSection { animation:detailFadeUp .65s cubic-bezier(.2,.7,.2,1) both; }
+.specSection { animation-delay:.1s; }
+.sectionLabel { margin:0 0 .75rem; color:#a3153c; font-size:.7rem; font-weight:850; letter-spacing:.16em; text-transform:uppercase; }
+.detailSections h2 { margin:0; color:#25211f; font-family:Arial,Helvetica,sans-serif; font-size:clamp(2rem,3vw,3.1rem); font-weight:720; letter-spacing:-.055em; line-height:1; }
+.aboutSection > p { margin:1.4rem 0 0; color:#4e5550; font-size:clamp(1.05rem,1.45vw,1.23rem); line-height:1.75; }
+.specSection .attributeList { margin-top:1.2rem; }
+.attributeRow { grid-template-columns:40% 60%; padding:1.08rem .15rem; border-bottom:1px solid rgb(48 39 33 / 10%); transition:background-color 180ms ease; }
+.attributeRow:hover { background:#faf8f4; }
+.attributeRow dt { color:#69716b; font-size:.9rem; font-weight:650; }
+.attributeRow dd { color:#292724; font-weight:700; }
+.relatedSection { background:#f7f3ed; }
+.relatedHeading { display:flex; align-items:end; justify-content:space-between; gap:1.5rem; margin-bottom:1.6rem; }
+.relatedHeading h2 { margin:0; color:#25211f; font-family:Arial,Helvetica,sans-serif; font-weight:720; letter-spacing:-.055em; }
+.relatedHeading a { display:inline-flex; align-items:center; gap:.45rem; color:#8b1232; font-size:.82rem; font-weight:800; text-decoration:none; white-space:nowrap; }
+.relatedGrid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.relatedCard { min-height:100%; gap:0; padding:0; overflow:hidden; border:1px solid rgb(59 49 42 / 14%); border-radius:1.15rem; background:#fff; transition:transform 300ms ease,box-shadow 300ms ease,border-color 300ms ease; }
+.relatedCard:hover { border-color:rgb(157 20 55 / 32%); box-shadow:0 1.25rem 2.5rem rgb(39 31 25 / 11%); transform:translateY(-.35rem); }
+.relatedVisual { border-radius:0; background:#faf9f6; }
+.relatedVisual img { padding:clamp(1.5rem,3vw,2.25rem); transition:transform 300ms ease; }
+.relatedCard:hover .relatedVisual img { transform:scale(1.025); }
+.relatedCard > span:last-child { padding:1.15rem 1.2rem 1.3rem; }
+.relatedCard > span:last-child::after { margin-top:.7rem; color:#8b1232; content:"DetayÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â± incele ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒâ€šÃ‚Â¢"; font-size:.78rem; font-weight:800; }
+@keyframes detailFadeUp { from { opacity:0; transform:translateY(1rem); } to { opacity:1; transform:translateY(0); } }
+@keyframes detailVisualIn { from { opacity:0; transform:scale(.96); } to { opacity:1; transform:scale(1); } }
+@media (prefers-reduced-motion:reduce) { .detailCopy,.detailVisual,.aboutSection,.specSection { animation:none; } }
+@media (max-width:48rem) { .detailPage { width:calc(100% - 2rem); } .breadcrumb { margin-top:1.5rem; font-size:.65rem; } .detailHeader { grid-template-columns:1fr; min-height:0; padding-bottom:3.25rem; } .detailHeader h1 { font-size:clamp(2.65rem,12vw,4rem); } .detailVisual { min-height:22rem; } .detailSections { grid-template-columns:1fr; gap:3rem; padding-block:4rem; } .relatedHeading { align-items:start; flex-direction:column; gap:.8rem; } .relatedGrid { display:flex; overflow-x:auto; padding-bottom:.75rem; scroll-snap-type:x mandatory; } .relatedCard { min-width:min(78vw,19rem); scroll-snap-align:start; } }
+/* Keep the catalog controls clear of the floating public header. */
+.catalogPage .catalogLayout {
+  padding-top: 8.25rem;
+}
+
+@media (min-width: 48.0625rem) {
+  .filterPanel {
+    top: 6.75rem;
+    max-height: calc(100dvh - 7.75rem);
+  }
+}
+
+@media (max-width: 48rem) {
+  .catalogPage .catalogLayout {
+    padding-top: 7.5rem;
+  }
+}
+/* Softer pill-shaped catalog actions. */
+.primaryButton,
+.secondaryButton,
+.productDetailLink,
+.productQuoteButton {
+  border-radius: 999px;
+  transition:
+    background-color 280ms ease,
+    border-color 280ms ease,
+    color 280ms ease,
+    box-shadow 280ms ease;
+}
+
+.primaryButton:hover,
+.productQuoteButton:hover {
+  box-shadow: 0 0.75rem 1.5rem rgb(120 8 35 / 16%);
+  transform: none;
+}
+
+.secondaryButton:hover,
+.productDetailLink:hover {
+  box-shadow: 0 0.55rem 1.25rem rgb(120 8 35 / 8%);
+  transform: none;
+}
+
+.primaryButton:active,
+.secondaryButton:active,
+.productDetailLink:active,
+.productQuoteButton:active {
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primaryButton,
+  .secondaryButton,
+  .productDetailLink,
+  .productQuoteButton {
+    transition: none;
+  }
+}
+/* Persistent quote-list shortcut. */
+.floatingQuoteButton {
+  position: fixed;
+  z-index: 18;
+  right: clamp(1rem, 2.5vw, 2rem);
+  bottom: clamp(1rem, 2.5vw, 2rem);
+  display: inline-flex;
+  min-height: 3.35rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.4rem;
+  border: 1px solid rgb(255 255 255 / 28%);
+  border-radius: 999px;
+  background: #9e1234;
+  box-shadow: 0 1rem 2.25rem rgb(68 7 25 / 24%);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 850;
+  text-decoration: none;
+  transition: background-color 260ms ease, box-shadow 260ms ease;
+}
+
+.floatingQuoteButton:hover {
+  background: #83102c;
+  box-shadow: 0 1.15rem 2.5rem rgb(68 7 25 / 30%);
+}
+
+.floatingQuoteButton:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (max-width: 34rem) {
+  .floatingQuoteButton {
+    right: 0.75rem;
+    bottom: 0.75rem;
+    min-height: 3rem;
+    padding-inline: 1.1rem;
+    font-size: 0.78rem;
+  }
+}
+/* Final soft catalog button treatment. */
+.catalogPage .filterActions .primaryButton,
+.catalogPage .filterActions .secondaryButton,
+.catalogPage .productActions .productDetailLink,
+.catalogPage .productActions .productQuoteButton,
+.catalogPage .floatingQuoteButton {
+  border-radius: 1rem !important;
+  transition:
+    background-color 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 420ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+.catalogPage .filterActions .primaryButton,
+.catalogPage .productActions .productQuoteButton,
+.catalogPage .floatingQuoteButton {
+  background: #a8153a;
+  box-shadow: 0 0.55rem 1.25rem rgb(112 12 39 / 12%);
+}
+
+.catalogPage .filterActions .primaryButton:hover,
+.catalogPage .productActions .productQuoteButton:hover,
+.catalogPage .floatingQuoteButton:hover {
+  background: #941334;
+  box-shadow: 0 0.8rem 1.6rem rgb(112 12 39 / 17%);
+  transform: none !important;
+}
+
+.catalogPage .filterActions .secondaryButton,
+.catalogPage .productActions .productDetailLink {
+  border-color: rgb(168 21 58 / 45%);
+  background: rgb(255 255 255 / 72%);
+}
+
+.catalogPage .filterActions .secondaryButton:hover,
+.catalogPage .productActions .productDetailLink:hover {
+  border-color: rgb(168 21 58 / 68%);
+  background: rgb(168 21 58 / 6%);
+  box-shadow: 0 0.5rem 1.2rem rgb(112 12 39 / 7%);
+  transform: none !important;
+}
+/* Product cards: clean link typography and comfortably padded actions. */
+.catalogPage .productCardMain {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.catalogPage .productCardMain:hover,
+.catalogPage .productCardMain:focus-visible {
+  text-decoration: none;
+}
+
+.catalogPage .productActions {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.15fr);
+  gap: 0.7rem;
+  width: 100%;
+  margin-top: 0;
+  padding: 0 1.15rem 1.15rem;
+}
+
+.catalogPage .productActions > div {
+  display: flex;
+  min-width: 0;
+}
+
+.catalogPage .productActions .productDetailLink,
+.catalogPage .productActions .productQuoteButton {
+  width: 100%;
+  min-width: 0;
+  min-height: 3rem;
+  padding-inline: 1.1rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 28rem) {
+  .catalogPage .productActions {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* The catalogue filter belongs to the document flow; it does not follow the viewport. */
+.catalogPage .filterPanel{position:static;top:auto;max-height:none}
+@media(min-width:48.0625rem){.catalogPage .filterPanel{position:static;top:auto;max-height:none}}
+
+/* Persistent desktop catalogue filters: stay available while results scroll. */
+@media(min-width:48.0625rem){.catalogPage .filterPanel{position:sticky;top:6.75rem;align-self:start;max-height:calc(100dvh - 7.75rem);overflow-y:auto;overscroll-behavior:contain}}
+
+/* Catalogue toolbar: keep the primary controls above the product results. */
+@media (min-width: 48.0625rem) {
+  .catalogPage .catalogLayout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.75rem;
+  }
+
+  .catalogPage .filterPanel {
+    position: static;
+    display: grid;
+    grid-template-columns: 12.75rem minmax(0, 1fr);
+    align-items: start;
+    gap: 1.5rem;
+    max-height: none;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .catalogPage .filterPanel::before {
+    display: none;
+  }
+
+  .catalogPage .filterPanel summary {
+    min-height: 3rem;
+    padding: 0.72rem 1rem;
+    border: 1px solid rgb(82 49 39 / 20%);
+    border-radius: 0;
+    background: rgb(255 255 255 / 48%);
+    color: #3b302b;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .catalogPage .filterPanel[open] summary {
+    border-bottom: 1px solid rgb(82 49 39 / 20%);
+  }
+
+  .catalogPage .filterPanel[open] .filters {
+    display: flex;
+    min-height: 0;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 0.75rem;
+    overflow: visible;
+    padding: 0;
+  }
+
+  .catalogPage .filters .field {
+    flex: 0 1 12rem;
+    min-width: 10.5rem;
+  }
+
+  .catalogPage .filters .field:has(#category) {
+    order: -3;
+  }
+
+  .catalogPage .filters .field:has(#sort) {
+    order: -2;
+  }
+
+  .catalogPage .filters .field label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .catalogPage .filters .field select {
+    min-height: 3rem;
+    border-radius: 0;
+    background: rgb(255 255 255 / 48%);
+    font-size: 0.9rem;
+  }
+
+  .catalogPage .filters .filterActions {
+    display: flex;
+    grid-template-columns: none;
+    align-items: end;
+    gap: 0.5rem;
+    padding: 0;
+  }
+
+  .catalogPage .filters .primaryButton,
+  .catalogPage .filters .secondaryButton {
+    min-height: 3rem;
+  }
+}
+
+/* Three-control catalogue toolbar with a side filter drawer. */
+.catalogPage .filters {
+  position: relative;
+}
+
+.catalogPage .quickFilterBar {
+  display: flex;
+  align-items: start;
+  gap: 0.75rem;
+}
+
+.catalogPage .quickFilterBar > .quickField {
+  flex: 0 0 10.5rem;
+  min-width: 0;
+}
+
+.catalogPage .quickFilterBar > .quickField label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.catalogPage .quickFilterBar > .quickField select,
+.catalogPage .filterPanel summary {
+  min-height: 3rem;
+  border: 1px solid rgb(82 49 39 / 20%);
+  border-radius: 0;
+  background: rgb(255 255 255 / 48%);
+  color: #3b302b;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.catalogPage .filterPanel {
+  position: relative;
+  z-index: 3;
+  display: block;
+  flex: 0 0 12.75rem;
+  max-height: none;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.catalogPage .filterPanel::before {
+  display: none;
+}
+
+.catalogPage .filterPanel summary {
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.72rem 1rem;
+}
+
+.catalogPage .filterPanel[open] summary {
+  border-bottom: 1px solid rgb(82 49 39 / 20%);
+}
+
+.catalogPage .filterDrawer {
+  position: absolute;
+  top: calc(100% + 0.75rem);
+  left: 0;
+  width: min(22rem, calc(100vw - 3rem));
+  padding: 1.25rem;
+  border: 1px solid rgb(82 49 39 / 15%);
+  border-radius: 0.9rem;
+  background: #fffdf9;
+  box-shadow: 0 1.25rem 3rem rgb(48 37 29 / 15%);
+}
+
+.catalogPage .filterDrawer .field,
+.catalogPage .filterDrawer .dynamicFilters {
+  margin-bottom: 0.9rem;
+}
+
+.catalogPage .filterDrawer .filterActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+  margin-top: 1.1rem;
+}
+
+.catalogPage .filterDrawer .primaryButton,
+.catalogPage .filterDrawer .secondaryButton {
+  min-height: 2.8rem;
+}
+
+@media (max-width: 48rem) {
+  .catalogPage .quickFilterBar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .catalogPage .filterPanel {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .catalogPage .quickFilterBar > .quickField {
+    width: auto;
+  }
+
+  .catalogPage .filterDrawer {
+    width: 100%;
+  }
+}
+
+@media (max-width: 28rem) {
+  .catalogPage .quickFilterBar {
+    grid-template-columns: 1fr;
+  }
+}
+
+.catalogPage .filters {
+  display: block;
+  gap: 0;
+  padding: 0;
+}
+
+/* Keep all three controls on the same top line and reserve space for the opened drawer. */
+.catalogPage .quickFilterBar > .filterPanel {
+  order: 0;
+}
+
+.catalogPage .quickFilterBar > .quickField:has(#sort) {
+  order: 1;
+}
+
+.catalogPage .quickFilterBar > .quickField:has(#category) {
+  order: 2;
+}
+
+.catalogPage .filterDrawer {
+  position: static;
+  width: min(22rem, calc(100vw - 3rem));
+  margin-top: 0.75rem;
+}
+
+@media (min-width: 48.0625rem) {
+  .catalogPage .quickFilterBar {
+    display: grid !important;
+    grid-template-columns: 12.75rem 10.5rem 13rem;
+    align-items: start;
+    gap: 0.75rem;
+  }
+
+  .catalogPage .quickFilterBar > .filterPanel {
+    grid-column: 1;
+    grid-row: 1;
+    width: auto;
+    margin: 0;
+  }
+
+  .catalogPage .quickFilterBar > .quickField:has(#sort) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .catalogPage .quickFilterBar > .quickField:has(#category) {
+    grid-column: 3;
+    grid-row: 1;
+  }
+}
+
+/* Final catalogue control alignment. */
+@media (min-width: 48.0625rem) {
+  .catalogPage .quickFilterBar {
+    display: grid !important;
+    grid-template-columns: 12.75rem 10.5rem 13rem !important;
+    grid-template-rows: auto;
+    align-items: start;
+    gap: 0.75rem;
+  }
+
+  .catalogPage .quickFilterBar > details.filterPanel {
+    display: block !important;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    order: 0 !important;
+    align-self: start;
+  }
+
+  .catalogPage .quickFilterBar > .quickField:has(#sort) {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    order: 0 !important;
+  }
+
+  .catalogPage .quickFilterBar > .quickField:has(#category) {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    order: 0 !important;
+  }
+
+  .catalogPage .quickFilterBar > details.filterPanel > summary,
+  .catalogPage .quickFilterBar > .quickField select {
+    box-sizing: border-box;
+    height: 3rem;
+    min-height: 3rem;
+  }
+}
+
+/* Force the desktop control order without depending on older flex/grid rules. */
+@media (min-width: 48.0625rem) {
+  .catalogPage .quickFilterBar {
+    position: relative;
+    display: block !important;
+    min-height: 3rem;
+    padding-left: 13.5rem;
+  }
+
+  .catalogPage .quickFilterBar > details.filterPanel {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    display: block !important;
+    width: 12.75rem;
+    margin: 0;
+  }
+
+  .catalogPage .quickFilterBar > .quickField {
+    display: inline-grid !important;
+    width: 10.5rem;
+    min-width: 10.5rem;
+    margin: 0 0.75rem 0 0;
+    vertical-align: top;
+  }
+
+  .catalogPage .quickFilterBar > .quickField:has(#category) {
+    width: 13rem;
+    min-width: 13rem;
+  }
+}
+
+/* Refine the three catalogue controls without changing their placement. */
+.catalogPage .quickFilterBar > details.filterPanel > summary,
+.catalogPage .quickFilterBar > .quickField select {
+  border-color: rgb(82 49 39 / 16%);
+  border-radius: 0.5rem;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 70%);
+  white-space: nowrap;
+}
+
+.catalogPage .quickFilterBar > details.filterPanel > summary {
+  padding-inline: 1.3rem;
+}
+
+.catalogPage .quickFilterBar > .quickField select {
+  padding: 0.7rem 2.8rem 0.7rem 1.15rem;
+  appearance: none;
+  background-color: rgb(255 255 255 / 58%);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' viewBox='0 0 14 8'%3E%3Cpath d='m1 1 6 6 6-6' fill='none' stroke='%233b302b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 0.72rem auto;
+}
+
+.catalogPage .quickFilterBar > .quickField select:hover,
+.catalogPage .quickFilterBar > details.filterPanel > summary:hover {
+  border-color: rgb(144 31 59 / 34%);
+  background-color: rgb(255 255 255 / 72%);
+}
+
+/* Keep the category label fully visible inside its existing control. */
+.catalogPage .quickFilterBar > .quickField:has(#category) select {
+  padding-right: 2.2rem;
+  padding-left: 1rem;
+  font-size: 0.86rem;
+  letter-spacing: -0.01em;
+  text-overflow: clip;
+}
+
+/* Give the category selector enough room for the full ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“TÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼m kategorilerÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â label. */
+.catalogPage .quickFilterBar > .quickField:has(#category){min-width:14rem!important}.catalogPage .quickFilterBar > .quickField:has(#category) select{width:100%;min-width:14rem;padding-right:2.55rem!important;font-size:.84rem!important}
+@media(max-width:48rem){.catalogPage .quickFilterBar > .quickField:has(#category),.catalogPage .quickFilterBar > .quickField:has(#category) select{min-width:0;width:100%}}
+
+.catalogPage .quickFilterBar > details.filterPanel > summary::before {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+  margin-right: 0.55rem;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M2 4h12M4.5 8h7M6.5 12h3' stroke='%23901f3b' stroke-linecap='round' stroke-width='1.5'/%3E%3C/svg%3E") center / contain no-repeat;
+  content: "";
+}
+
+.catalogPage .quickFilterBar > details.filterPanel > summary {
+  justify-content: flex-start;
+}
+
+.catalogPage .quickFilterBar > details.filterPanel > summary span {
+  margin-left: auto;
+}
+
+/* Open the detailed filters as a left-side drawer from the filter control. */
+@media (min-width: 48.0625rem) {
+  .catalogPage .quickFilterBar > details.filterPanel > .filterDrawer {
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    left: 0;
+    z-index: 10;
+    margin-top: 0;
+  }
+}
+
+/* More compact catalogue cards: preserve the existing shape, reduce only the surrounding frame. */
+.catalogPage .productGrid{gap:clamp(1rem,1.6vw,1.4rem)}
+.catalogPage .productVisual{padding:clamp(.7rem,1.4vw,1.2rem)}
+.catalogPage .productBody{gap:.45rem;padding:1rem 1rem .9rem}
+.catalogPage .productActions{gap:.55rem;padding:0 1rem 1rem}
+.catalogPage .productActions .productDetailLink,.catalogPage .productActions .productQuoteButton{min-height:2.65rem;padding-inline:.8rem}
+
+/* Detailed filters open as a real left-side drawer. */
+@media (min-width: 48.0625rem) {
+  .catalogPage .quickFilterBar > details.filterPanel > .filterDrawer {
+    position: fixed;
+    z-index: 100;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(24rem, 88vw);
+    height: 100dvh;
+    margin: 0;
+    padding: 7rem 1.5rem 2rem;
+    overflow-y: auto;
+    border: 0;
+    border-radius: 0 1.1rem 1.1rem 0;
+    background: #f5f2ec;
+    box-shadow: 1.25rem 0 3rem rgb(48 37 29 / 20%);
+  }
+}
+
+/* Keep catalog filters below the two-row public header. */
+.page {
+  padding-top: 11.5rem;
+}
+
+@media (max-width: 64rem) {
+  .page {
+    padding-top: 6.5rem;
+  }
+}
+/* Place the catalog content below the fixed two-row header without double offsets. */
+.catalogPage {
+  padding-top: 13rem !important;
+}
+
+.catalogPage .catalogLayout {
+  padding-top: 0 !important;
+}
+
+@media (max-width: 64rem) {
+  .catalogPage {
+    padding-top: 6.75rem !important;
+  }
+}
+/* Catalog toolbar, flow-based filter panel, and compact four-column product grid. */
+.catalogPage {
+  width: 100%;
+  max-width: none;
+  padding-inline: 0 !important;
+}
+
+.catalogPage .catalogLayout {
+  width: min(calc(100% - 4rem), 93.75rem);
+  max-width: 93.75rem;
+  margin-inline: auto;
+  gap: 1.5rem;
+}
+
+.catalogPage .filters {
+  position: relative;
+  z-index: 25;
+  display: block;
+  padding: 0;
+}
+
+.catalogPage .catalogToolbar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+}
+
+.catalogPage .filterPanel {
+  position: static !important;
+  z-index: auto;
+  display: contents;
+  width: auto;
+  max-height: none;
+  margin: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.catalogPage .filterPanel summary {
+  display: inline-flex;
+  min-height: 2.85rem;
+  align-items: center;
+  gap: .55rem;
+  padding: 0 .95rem;
+  border: 1px solid rgb(82 49 39 / 20%);
+  border-radius: .65rem;
+  background: rgb(255 255 255 / 64%);
+  color: #3b302b;
+  cursor: pointer;
+  font-size: .84rem;
+  font-weight: 750;
+  list-style: none;
+}
+
+.catalogPage .filterPanel summary::-webkit-details-marker { display: none; }
+.catalogPage .filterPanel summary::before { margin: 0; }
+.catalogPage .filterPanel summary::after {
+  width: .45rem;
+  height: .45rem;
+  margin-left: .15rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  content: "";
+  transform: rotate(45deg) translateY(-.15rem);
+  transition: transform .22s ease;
+}
+.catalogPage .filterPanel[open] summary::after { transform: rotate(225deg) translateY(-.08rem); }
+.catalogPage .filterPanel[open] summary { border-color: rgb(144 31 59 / 34%); }
+
+.catalogPage .productCount {
+  color: #69615b;
+  font-size: .86rem;
+  font-weight: 650;
+}
+
+.catalogPage .toolbarActions,
+.catalogPage .viewActions {
+  display: flex;
+  align-items: center;
+}
+.catalogPage .toolbarActions { gap: .8rem; }
+.catalogPage .viewActions { gap: .25rem; }
+.catalogPage .viewButton {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border: 1px solid rgb(82 49 39 / 17%);
+  border-radius: .5rem;
+  background: rgb(255 255 255 / 52%);
+  color: #5c534d;
+  cursor: pointer;
+  font-size: 1.05rem;
+}
+.catalogPage .viewButton[aria-pressed="true"] { border-color: rgb(144 31 59 / 45%); color: #901f3b; }
+.catalogPage .sortField { display: block; }
+.catalogPage .sortField label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.catalogPage .sortField select {
+  min-height: 2.85rem;
+  padding: .6rem 2.4rem .6rem .85rem;
+  border: 1px solid rgb(82 49 39 / 20%);
+  border-radius: .65rem;
+  background-color: rgb(255 255 255 / 64%);
+  color: #3b302b;
+  font-size: .82rem;
+  font-weight: 650;
+}
+
+.catalogPage .filterDrawer {
+  position: static !important;
+  display: none;
+  width: auto !important;
+  height: auto !important;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0;
+  margin: .8rem 0 0 !important;
+  padding: 1.25rem;
+  overflow: visible !important;
+  border: 1px solid rgb(82 49 39 / 15%);
+  border-radius: .9rem;
+  background: #fffdf9;
+  box-shadow: 0 .8rem 2rem rgb(48 37 29 / 10%);
+  animation: catalogFilterOpen .22s ease both;
+}
+.catalogPage .filterPanel[open] .filterDrawer { display: grid; }
+.catalogPage .filterColumn {
+  min-width: 0;
+  padding: 0 1rem;
+  border-left: 1px solid rgb(82 49 39 / 12%);
+}
+.catalogPage .filterColumn:first-child { padding-left: 0; border-left: 0; }
+.catalogPage .filterColumn:last-child { padding-right: 0; }
+.catalogPage .filterColumn h3,
+.catalogPage .filterColumn .dynamicFilters > h3 {
+  margin: 0 0 .8rem;
+  color: #7f1732;
+  font-size: .68rem;
+  font-weight: 850;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.catalogPage .filterColumn .field { margin: 0 0 .65rem; }
+.catalogPage .filterColumn .field label { display: none; }
+.catalogPage .filterColumn input,
+.catalogPage .filterColumn select {
+  width: 100%;
+  min-height: 2.4rem;
+  padding: .5rem .65rem;
+  border: 1px solid rgb(82 49 39 / 17%);
+  border-radius: .45rem;
+  background: #fff;
+  color: #403933;
+  font: inherit;
+  font-size: .78rem;
+}
+.catalogPage .filterColumn .dynamicFilters > h3 { display: none; }
+.catalogPage .priceFields { display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; }
+.catalogPage .priceRange { accent-color: #901f3b; }
+.catalogPage .filterColumn .filterActions { display: grid; grid-template-columns: 1fr; gap: .45rem; margin-top: .75rem; }
+.catalogPage .filterColumn .filterActions button { min-height: 2.35rem; padding-inline: .6rem; font-size: .72rem; }
+
+.catalogPage .resultsHeader { display: none; }
+.catalogPage .productGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+}
+.catalogPage .productCard { min-width: 0; }
+.catalogPage .productVisual { min-height: 0; height: clamp(13.75rem, 16vw, 15.5rem); padding: 1rem; }
+.catalogPage .productVisual img { width: 100%; height: 100%; object-fit: contain; }
+.catalogPage .productBody { padding: 1rem 1rem .85rem; }
+.catalogPage .productBody h3 { font-size: clamp(1.05rem, 1.25vw, 1.25rem); }
+.catalogPage .productActions { padding: 0 1rem 1rem; }
+
+@keyframes catalogFilterOpen { from { opacity: 0; transform: translateY(-.45rem); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 79.9375rem) {
+  .catalogPage .filterDrawer { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .catalogPage .filterColumn:nth-child(4) { padding-left: 0; border-left: 0; }
+  .catalogPage .productGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 48rem) {
+  .catalogPage .catalogLayout { width: min(calc(100% - 2rem), 93.75rem); }
+  .catalogPage .catalogToolbar { grid-template-columns: auto 1fr; }
+  .catalogPage .toolbarActions { grid-column: 1 / -1; justify-content: space-between; }
+  .catalogPage .filterDrawer { grid-template-columns: 1fr; }
+  .catalogPage .filterColumn { padding: .85rem 0; border-top: 1px solid rgb(82 49 39 / 12%); border-left: 0; }
+  .catalogPage .filterColumn:first-child { border-top: 0; }
+  .catalogPage .productGrid { grid-template-columns: 1fr; }
+}
+/* Faceted catalogue filter types: category tree, checkboxes, swatches and tags. */
+.catalogPage .filterDrawer { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.catalogPage .filterColumn { max-height: 19rem; overflow: auto; }
+.catalogPage .categoryTree > details { margin-bottom: .45rem; }
+.catalogPage .categoryTree > details > summary {
+  min-height: 0;
+  padding: .25rem 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #403933;
+  font-size: .79rem;
+  font-weight: 750;
+}
+.catalogPage .categoryTree > details > summary::before,
+.catalogPage .categoryTree > details > summary::after { display: none; }
+.catalogPage .checkboxList { display: grid; gap: .45rem; }
+.catalogPage .checkOption,
+.catalogPage .colorOption {
+  display: flex;
+  min-height: 1.35rem;
+  align-items: center;
+  gap: .45rem;
+  color: #514942;
+  cursor: pointer;
+  font-size: .76rem;
+  line-height: 1.25;
+}
+.catalogPage .checkOption input,
+.catalogPage .colorOption input { width: .95rem; min-height: .95rem; margin: 0; accent-color: #901f3b; }
+.catalogPage .categoryTree .checkOption { padding-left: .75rem; }
+.catalogPage .brandSearch { margin: 0 0 .65rem; }
+.catalogPage .colorOption i { width: .78rem; height: .78rem; flex: 0 0 .78rem; border: 1px solid rgb(52 47 43 / 20%); border-radius: 50%; }
+.catalogPage .swatchBeyaz { background: #fff; }
+.catalogPage .swatchKrem { background: #e7dbbf; }
+.catalogPage .swatchSiyah { background: #272523; }
+.catalogPage .swatchSeffaf { background: linear-gradient(135deg, #fff 0 45%, #c6d3d6 45% 55%, #fff 55%); }
+.catalogPage .swatchGri { background: #9b9b9b; }
+.catalogPage .swatchMavi { background: #547ba3; }
+.catalogPage .swatchYesil { background: #647d62; }
+.catalogPage .swatchDiger { background: #b56b82; }
+.catalogPage .tagOptions { display: flex; flex-wrap: wrap; gap: .4rem; }
+.catalogPage .tagOption input { position: absolute; opacity: 0; pointer-events: none; }
+.catalogPage .tagOption span { display: inline-flex; min-height: 1.85rem; align-items: center; padding: .25rem .55rem; border: 1px solid rgb(82 49 39 / 17%); border-radius: 999px; color: #5a5049; cursor: pointer; font-size: .7rem; }
+.catalogPage .tagOption input:checked + span { border-color: #901f3b; background: rgb(144 31 59 / 8%); color: #901f3b; }
+.catalogPage .muted { color: #837970; font-size: .75rem; }
+
+@media (max-width: 79.9375rem) { .catalogPage .filterDrawer { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 48rem) { .catalogPage .filterDrawer { grid-template-columns: 1fr; } .catalogPage .filterColumn { max-height: none; overflow: visible; } }
+/* Keep each supplied product image fully visible inside its existing visual frame. */
+.catalogPage .productVisual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.catalogPage .productVisual img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+/* Catalogue product copy uses the clean sans-serif face from the reference. */
+.catalogPage .productCard,
+.catalogPage .productCard h3,
+.catalogPage .productCard p,
+.catalogPage .productCard .meta,
+.catalogPage .productCard .sku,
+.catalogPage .productCard .productBrand {
+  font-family: Arial, Helvetica, sans-serif;
+}
+/* Present the existing filters as a left-side drawer without changing filter logic. */
+@media (min-width: 48.0625rem) {
+  .catalogPage .filterPanel[open] { display: block; }
+  .catalogPage .filterPanel[open]::before { position: fixed; z-index: 1090; inset: 0; background: rgb(24 20 17 / 42%); content: ""; }
+  .catalogPage .filterPanel[open] > summary { position: fixed; z-index: 1102; top: 0; left: 0; display: flex; width: min(29rem, 92vw); height: 5.25rem; min-height: 0; justify-content: space-between; padding: 0 1.55rem; border: 0; border-bottom: 1px solid rgb(82 49 39 / 12%); border-radius: 0; background: #fffdf9; color: #2f2a27; font-size: 1.15rem; }
+  .catalogPage .filterPanel[open] > summary::before { display: none; }
+  .catalogPage .filterPanel[open] > summary::after { width: 1.35rem; height: 1.35rem; margin: 0; border: 0; content: "ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â"; font-size: 2rem; font-weight: 300; line-height: 1; transform: none; }
+  .catalogPage .filterPanel[open] > .filterDrawer { position: fixed !important; z-index: 1101; top: 5.25rem; bottom: 0; left: 0; display: grid; width: min(29rem, 92vw) !important; height: auto !important; grid-template-columns: 1fr; gap: 0; margin: 0 !important; padding: 1.15rem 1.55rem 2rem; overflow-y: auto !important; border: 0; border-radius: 0; background: #fffdf9; box-shadow: 1.1rem 0 2.75rem rgb(35 27 21 / 18%); animation: catalogFilterDrawerIn .22s ease both; }
+  .catalogPage .filterPanel[open] .filterColumn { max-height: none; padding: 1.15rem 0; overflow: visible; border-top: 1px solid rgb(82 49 39 / 11%); border-left: 0; }
+  .catalogPage .filterPanel[open] .filterColumn:first-child { padding-top: 0; border-top: 0; }
+  .catalogPage .filterPanel[open] .filterColumn:last-child { padding-bottom: 0; }
+}
+@keyframes catalogFilterDrawerIn { from { opacity: 0; transform: translateX(-1.1rem); } to { opacity: 1; transform: translateX(0); } }
+/* Keep the compact filter drawer above the public header and within the viewport. */
+@media (min-width: 48.0625rem) {
+  .catalogPage .filterPanel[open]::before { z-index: 9998; }
+  .catalogPage .filterPanel[open] > summary {
+    z-index: 10000;
+    width: min(42rem, 96vw);
+    height: 3.85rem;
+    padding-inline: 1.1rem;
+    font-size: 1rem;
+  }
+  .catalogPage .filterPanel[open] > .filterDrawer {
+    z-index: 9999;
+    top: 3.85rem;
+    width: min(42rem, 96vw) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    column-gap: 1.25rem;
+    row-gap: 0;
+    padding: .75rem 1.1rem 1rem;
+    overflow: hidden !important;
+  }
+  .catalogPage .filterPanel[open] .filterColumn {
+    padding: .6rem 0;
+    border-top: 1px solid rgb(82 49 39 / 11%);
+  }
+  .catalogPage .filterPanel[open] .filterColumn:nth-child(2) { border-top: 0; padding-top: 0; }
+  .catalogPage .filterPanel[open] .filterColumn h3,
+  .catalogPage .filterPanel[open] .filterColumn .dynamicFilters > h3 { margin-bottom: .45rem; font-size: .64rem; }
+  .catalogPage .filterPanel[open] .checkboxList { gap: .27rem; }
+  .catalogPage .filterPanel[open] .checkOption,
+  .catalogPage .filterPanel[open] .colorOption { min-height: 1.1rem; font-size: .71rem; }
+  .catalogPage .filterPanel[open] .brandSearch { min-height: 2rem; margin-bottom: .38rem; padding-block: .35rem; }
+  .catalogPage .filterPanel[open] .tagOptions { gap: .25rem; }
+  .catalogPage .filterPanel[open] .tagOption span { min-height: 1.55rem; padding: .16rem .42rem; font-size: .64rem; }
+  .catalogPage .filterPanel[open] .filterColumn .filterActions { grid-template-columns: 1fr 1fr; gap: .4rem; margin-top: .45rem; }
+  .catalogPage .filterPanel[open] .filterColumn .filterActions button { min-height: 2rem; font-size: .65rem; }
+}
+/* Start the drawer from the filter control instead of pinning it to the viewport top. */
+@media (min-width: 48.0625rem) {
+  .catalogPage .filterPanel[open]::before { display: none; }
+  .catalogPage .filterPanel[open] > summary {
+    position: static;
+    z-index: auto;
+    width: auto;
+    height: auto;
+    min-height: 2.85rem;
+    justify-content: flex-start;
+    padding: 0 .95rem;
+    border: 1px solid rgb(82 49 39 / 20%);
+    border-radius: .65rem;
+    background: rgb(255 255 255 / 64%);
+    font-size: .84rem;
+  }
+  .catalogPage .filterPanel[open] > summary::before { display: block; }
+  .catalogPage .filterPanel[open] > summary::after {
+    width: .45rem;
+    height: .45rem;
+    margin-left: .15rem;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    content: "";
+    font-size: inherit;
+    transform: rotate(225deg) translateY(-.08rem);
+  }
+  .catalogPage .filterPanel[open] > .filterDrawer {
+    position: absolute !important;
+    z-index: 1080;
+    top: calc(100% + .7rem);
+    right: auto;
+    bottom: auto;
+    left: 0;
+    width: min(42rem, calc(100vw - 2rem)) !important;
+    max-height: none;
+    min-height: 0;
+    height: auto !important;
+    overflow: visible !important;
+    box-shadow: 0 .9rem 2.3rem rgb(35 27 21 / 18%);
+  }
+}
+/* Catalog filters only: keep colour choices collapsed until requested. */
+.catalogPage .colorFilter > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 1.5rem;
+  color: #7f1732;
+  cursor: pointer;
+  font-size: .68rem;
+  font-weight: 850;
+  letter-spacing: .1em;
+  list-style: none;
+  text-transform: uppercase;
+}
+.catalogPage .colorFilter > summary::-webkit-details-marker { display: none; }
+.catalogPage .colorFilter > summary::after {
+  width: .4rem;
+  height: .4rem;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  content: "";
+  transform: rotate(45deg) translateY(-.1rem);
+  transition: transform .18s ease;
+}
+.catalogPage .colorFilter[open] > summary::after { transform: rotate(225deg) translateY(-.05rem); }
+.catalogPage .colorFilter > .checkboxList { display: none; margin-top: .45rem; }
+.catalogPage .colorFilter[open] > .checkboxList { display: grid; }
+/* Catalog filter drawer only: all filter groups share the compact disclosure pattern. */
+.catalogPage .compactFilter > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 1.5rem;
+  color: #7f1732;
+  cursor: pointer;
+  font-size: .68rem;
+  font-weight: 850;
+  letter-spacing: .1em;
+  list-style: none;
+  text-transform: uppercase;
+}
+.catalogPage .compactFilter > summary::-webkit-details-marker { display: none; }
+.catalogPage .compactFilter > summary::after {
+  width: .4rem;
+  height: .4rem;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  content: "";
+  transform: rotate(45deg) translateY(-.1rem);
+  transition: transform .18s ease;
+}
+.catalogPage .compactFilter[open] > summary::after { transform: rotate(225deg) translateY(-.05rem); }
+.catalogPage .compactFilter > .categoryTree,
+.catalogPage .compactFilter > .checkboxList,
+.catalogPage .compactFilter > .brandSearch,
+.catalogPage .compactFilter > .tagOptions,
+.catalogPage .compactFilter > .filterActions { display: none; }
+.catalogPage .compactFilter[open] > .categoryTree,
+.catalogPage .compactFilter[open] > .checkboxList,
+.catalogPage .compactFilter[open] > .brandSearch,
+.catalogPage .compactFilter[open] > .tagOptions,
+.catalogPage .compactFilter[open] > .filterActions { display: grid; }
+.catalogPage .compactFilter[open] > .brandSearch { display: block; margin-top: .45rem; }
+.catalogPage .compactFilter[open] > .categoryTree,
+.catalogPage .compactFilter[open] > .checkboxList,
+.catalogPage .compactFilter[open] > .tagOptions,
+.catalogPage .compactFilter[open] > .filterActions { margin-top: .45rem; }
+/* Catalog filter drawer only: compact single-column accordion, matching the reference. */
+@media (min-width: 48.0625rem) {
+  .catalogPage .filterPanel[open] > .filterDrawer {
+    width: 18rem !important;
+    grid-template-columns: 1fr;
+    gap: .55rem;
+    padding: .8rem;
+    border: 1px solid rgb(127 23 50 / 12%);
+    border-radius: .7rem;
+    background: rgb(255 253 249 / 96%);
+    box-shadow: 0 .8rem 2rem rgb(48 37 29 / 14%);
+  }
+
+  .catalogPage .filterPanel[open] .filterColumn {
+    padding: 0;
+    border: 0;
+  }
+
+  .catalogPage .filterPanel[open] .compactFilter {
+    border: 1px solid rgb(174 35 64 / 20%);
+    border-radius: .6rem;
+    background: rgb(255 255 255 / 52%);
+    overflow: hidden;
+  }
+
+  .catalogPage .filterPanel[open] .compactFilter > summary {
+    min-height: 2.35rem;
+    padding: 0 .8rem;
+    color: #861b33;
+    font-size: .72rem;
+  }
+
+  .catalogPage .filterPanel[open] .compactFilter[open] > summary {
+    border-bottom: 1px solid rgb(174 35 64 / 16%);
+  }
+
+  .catalogPage .filterPanel[open] .compactFilter > .categoryTree,
+  .catalogPage .filterPanel[open] .compactFilter > .checkboxList,
+  .catalogPage .filterPanel[open] .compactFilter > .brandSearch,
+  .catalogPage .filterPanel[open] .compactFilter > .tagOptions,
+  .catalogPage .filterPanel[open] .compactFilter > .filterActions {
+    margin: .6rem .8rem .75rem;
+  }
+
+  .catalogPage .filterPanel[open] .compactFilter > .brandSearch {
+    width: calc(100% - 1.6rem);
+  }
+
+  .catalogPage .filterPanel[open] .checkOption,
+  .catalogPage .filterPanel[open] .colorOption {
+    min-height: 1.7rem;
+    font-size: .75rem;
+  }
+}
+/* Desktop filter groups expand into an adjacent panel, keeping the drawer compact. */
+@media (min-width: 48.0625rem) {
+  .catalogPage .filterPanel[open] > .filterDrawer {
+    overflow: visible !important;
+  }
+
+  .catalogPage .filterPanel[open] .compactFilter[open] {
+    position: static;
+    overflow: visible;
+  }
+
+  .catalogPage .filterPanel[open] .compactFilter[open] > .categoryTree,
+  .catalogPage .filterPanel[open] .compactFilter[open] > .checkboxList,
+  .catalogPage .filterPanel[open] .compactFilter[open] > .brandSearch,
+  .catalogPage .filterPanel[open] .compactFilter[open] > .tagOptions,
+  .catalogPage .filterPanel[open] .compactFilter[open] > .filterActions {
+    position: absolute;
+    left: calc(100% + .75rem);
+    width: 16rem;
+    max-height: 19rem;
+    margin: 0;
+    padding: .85rem;
+    overflow-y: auto;
+    border: 1px solid rgb(174 35 64 / 20%);
+    border-radius: .65rem;
+    background: #fffdf9;
+    box-shadow: 0 .8rem 2rem rgb(48 37 29 / 14%);
+  }
+
+  .catalogPage .filterPanel[open] .compactFilter[open] > .categoryTree,
+  .catalogPage .filterPanel[open] .compactFilter[open] > .checkboxList,
+  .catalogPage .filterPanel[open] .compactFilter[open] > .tagOptions { top: 0; }
+  .catalogPage .filterPanel[open] .compactFilter[open] > .brandSearch { top: 0; }
+  .catalogPage .filterPanel[open] .compactFilter[open] > .filterActions { top: 0; }
+
+  .catalogPage .filterPanel[open] .compactFilter[open] > .brandSearch + .checkboxList {
+    top: 3.55rem;
+    max-height: 15.45rem;
+  }
+}
+/* Catalogue copy scale only: preserve the existing card geometry. */
+.catalogPage .productBody h3 { font-size: clamp(.98rem, 1.05vw, 1.12rem); line-height: 1.2; }
+.catalogPage .productCard .productBrand { font-size: .76rem; }
+.catalogPage .productCard .productDescription,
+.catalogPage .productCard .productBody p { font-size: .78rem; line-height: 1.5; }
+.catalogPage .productCard .sku,
+.catalogPage .productCard .meta { font-size: .68rem; }
+.catalogPage .productActions .productDetailLink,
+.catalogPage .productActions .productQuoteButton { font-size: .72rem; }
+.catalogPage .filterPanel[open] .compactFilter > summary { font-size: .64rem; }
+.catalogPage .filterPanel[open] .compactFilter .checkOption,
+.catalogPage .filterPanel[open] .compactFilter .colorOption { font-size: .7rem; }
+/* Desktop catalogue layout: keep the filter rail fixed and reserve the results area for three cards. */
+@media (min-width: 80rem) {
+  .catalogPage .catalogLayout {
+    grid-template-columns: 18rem minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+
+  .catalogPage .filters {
+    position: sticky;
+    top: 12.25rem;
+  }
+
+  .catalogPage .filterPanel[open] > .filterDrawer {
+    width: 18rem !important;
+  }
+
+  .catalogPage .productGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Keep the open filter inside the catalogue flow so it cannot overlap the footer. */
+@media (min-width: 48.0625rem) {
+  .catalogPage .filterPanel[open] > .filterDrawer {
+    position: static !important;
+    grid-column: 1 / -1;
+    width: 18rem !important;
+    margin-top: .75rem !important;
+  }
+}
+
+/* Expand each catalogue filter group beneath its own heading, never beside the drawer. */
+@media (min-width: 48.0625rem) {
+  .catalogPage .filterPanel[open] .compactFilter[open] > .categoryTree,
+  .catalogPage .filterPanel[open] .compactFilter[open] > .checkboxList,
+  .catalogPage .filterPanel[open] .compactFilter[open] > .brandSearch,
+  .catalogPage .filterPanel[open] .compactFilter[open] > .tagOptions,
+  .catalogPage .filterPanel[open] .compactFilter[open] > .filterActions {
+    position: static;
+    width: auto;
+    max-height: 12rem;
+    margin: .6rem .8rem .75rem;
+    padding: 0;
+    overflow-y: auto;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .catalogPage .filterPanel[open] .compactFilter[open] > .brandSearch {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .catalogPage .filterPanel[open] .compactFilter[open] > .brandSearch + .checkboxList {
+    max-height: 9rem;
+  }
+}
+
+/* Place only the sort selector in the free results header space. */
+@media (min-width: 80rem) {
+  .catalogPage .toolbarActions .sortField {
+    position: absolute;
+    top: 0;
+    left: calc(100% + 1.5rem);
+    width: 13rem;
+  }
+
+  .catalogPage .toolbarActions .sortField select {
+    width: 100%;
+  }
+}
+
+/* Let the catalogue filters follow the page scroll instead of sticking mid-screen. */
+@media (min-width: 80rem) {
+  .catalogPage .filters {
+    position: relative;
+    top: auto;
+  }
+}
+
+/* Grainger-style placement: a dedicated left filter rail beside the results. */
+@media (min-width: 80rem) {
+  .catalogPage .catalogLayout {
+    grid-template-columns: 20rem minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .catalogPage .filters {
+    grid-column: 1;
+    width: 20rem;
+  }
+
+  .catalogPage .catalogLayout > section {
+    grid-column: 2;
+    min-width: 0;
+  }
+
+  .catalogPage .filterPanel[open] > .filterDrawer {
+    width: 100% !important;
+  }
+}
+
+/* Keep the already-open filter rail visible while results scroll; its grid container
+   ends before the footer, so the rail never overlaps the footer. */
+@media (min-width: 80rem) {
+  .catalogPage .catalogLayout {
+    align-items: start;
+  }
+
+  .catalogPage .filters {
+    position: sticky;
+    top: 12.25rem;
+    align-self: start;
+  }
+}
+
+/* Simple vertical filter fields, matching the supplied reference layout. */
+@media (min-width: 48.0625rem) {
+  .catalogPage .filterPanel > summary {
+    display: none;
+  }
+
+  .catalogPage .filterPanel[open] > .filterDrawer {
+    display: block;
+    width: 100% !important;
+    margin-top: 0 !important;
+    padding: 1.25rem !important;
+    border: 1px solid rgb(82 49 39 / 15%);
+    border-radius: 0;
+    background: #fffdf9;
+    box-shadow: 0 .75rem 1.75rem rgb(48 37 29 / 9%);
+  }
+
+  .catalogPage .simpleFilterFields {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .catalogPage .simpleFilterFields .field {
+    display: grid;
+    gap: .45rem;
+    margin: 0;
+  }
+
+  .catalogPage .simpleFilterFields .field label {
+    display: block;
+    color: #40564b;
+    font-size: .74rem;
+    font-weight: 800;
+  }
+
+  .catalogPage .simpleFilterFields .field input,
+  .catalogPage .simpleFilterFields .field select {
+    min-height: 3rem;
+    padding: .7rem .85rem;
+    border: 1px solid rgb(74 56 45 / 14%);
+    border-radius: 0;
+    background: #f7f4ee;
+    color: #342f2b;
+    font-size: .82rem;
+  }
+
+  .catalogPage .simpleFilterFields .dynamicFilters {
+    gap: .85rem;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .catalogPage .simpleFilterFields .filterActions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .75rem;
+    margin-top: .25rem;
+  }
+
+  .catalogPage .simpleFilterFields .filterActions button {
+    width: 100%;
+    min-height: 3rem;
+    border-radius: 0;
+  }
+}
+
+/* Keep results in the first catalogue row; the tall filter rail must not push cards down. */
+@media (min-width: 80rem) {
+  .catalogPage .catalogLayout {
+    position: relative;
+  }
+
+  .catalogPage .catalogToolbar {
+    position: absolute;
+    top: 0;
+    left: calc(20rem + 1.5rem);
+    right: 0;
+    z-index: 1;
+  }
+
+  .catalogPage .catalogLayout > section {
+    grid-row: 1;
+    padding-top: 3.75rem;
+  }
+}
+
+/* Final desktop catalogue alignment: sidebar and first product row share the same top edge. */
+@media (min-width: 80rem) {
+  .catalogPage .catalogLayout {
+    grid-template-columns: 17.5rem minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .catalogPage .filters {
+    grid-column: 1;
+    width: 17.5rem;
+    margin-top: 3.75rem;
+    padding-top: 0;
+    align-self: start;
+    position: sticky;
+    top: 12.25rem;
+  }
+
+  .catalogPage .filterPanel[open] > .filterDrawer {
+    width: 100% !important;
+  }
+
+  .catalogPage .catalogToolbar {
+    left: calc(17.5rem + 1.5rem);
+  }
+
+  .catalogPage .catalogLayout > section {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 0;
+    padding-top: 3.75rem;
+    align-self: start;
+  }
+}
+
+/* Always-open filter rail: no toggle bar and no sticky gap while scrolling. */
+@media (min-width: 48.0625rem) {
+  .catalogPage .filterPanel > summary,
+  .catalogPage .filterPanel[open] > summary {
+    display: none !important;
+  }
+
+  .catalogPage .filterPanel[open] > .filterDrawer {
+    display: block !important;
+  }
+}
+
+@media (min-width: 80rem) {
+  .catalogPage .filters {
+    top: 1rem;
+  }
+}
+
+/* Reduce only the catalogue's top breathing room while keeping the filter and cards aligned. */
+@media (min-width: 80rem) {
+  .catalogPage {
+    padding-top: 10.5rem !important;
+  }
+}
+
+/* Center the result controls vertically between the navigation and active filters. */
+@media (min-width: 80rem) {
+  .catalogPage .catalogToolbar {
+    top: 2rem;
+  }
+}
+
+/* Blend product packshot backgrounds into the visual area without changing card layout. */
+.catalogPage .productVisual {
+  background: #f5f2ec;
+}
+
+.catalogPage .productVisual img {
+  mix-blend-mode: multiply;
+  opacity: .98;
+}
+
+/* Match the filter panel surface to the product card surface. */
+.catalogPage .filterPanel[open] > .filterDrawer {
+  background: #fffdf8;
+}
+
+/* Make each product visual fill its card edge-to-edge; remove the right-side white strip. */
+.catalogPage .productCardMain,
+.catalogPage .productVisual {
+  width: 100%;
+}
+
+.catalogPage .productVisual {
+  box-sizing: border-box;
+}
+
+/* Product-card quote quantity control. */
+.catalogPage .quoteQuantity {
+  display: grid;
+  min-width: 0;
+  gap: .35rem;
+}
+
+.catalogPage .quoteQuantity :global(.quoteQuantityControl) {
+  display: grid;
+  min-height: 3rem;
+  grid-template-columns: 2.6rem minmax(0, 1fr) 2.6rem;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: #a8153a;
+  color: #fff;
+}
+
+.catalogPage .quoteQuantity :global(.quoteQuantityControl) button,
+.catalogPage .quoteQuantity :global(.quoteQuantityControl) output {
+  display: grid;
+  min-width: 0;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 800;
+}
+
+.catalogPage .quoteQuantity :global(.quoteQuantityControl) button {
+  cursor: pointer;
+  font-size: 1.25rem;
+}
+
+.catalogPage .quoteQuantity :global(.quoteQuantityControl) button:hover {
+  background: rgb(0 0 0 / 10%);
+}
+
+.catalogPage .quoteQuantity :global(.quoteAddMessage) {
+  color: #8c1633;
+  font-size: .67rem;
+  font-weight: 750;
+  text-align: center;
+}
+
+/* Product-card quote quantity control. */
+.catalogPage .quoteQuantity { display: grid; min-width: 0; gap: .35rem; }
+.catalogPage .quoteQuantity :global(.quoteQuantityControl) { display: grid; min-height: 3rem; grid-template-columns: 2.6rem minmax(0, 1fr) 2.6rem; overflow: hidden; border-radius: 1rem; background: #a8153a; color: #fff; }
+.catalogPage .quoteQuantity :global(.quoteQuantityControl) button, .catalogPage .quoteQuantity :global(.quoteQuantityControl) output { display: grid; min-width: 0; place-items: center; border: 0; background: transparent; color: inherit; font: inherit; font-weight: 800; }
+.catalogPage .quoteQuantity :global(.quoteQuantityControl) button { cursor: pointer; font-size: 1.25rem; }
+.catalogPage .quoteQuantity :global(.quoteQuantityControl) button:hover { background: rgb(0 0 0 / 10%); }
+.catalogPage .quoteQuantity :global(.quoteAddMessage) { color: #8c1633; font-size: .67rem; font-weight: 750; text-align: center; }
+
+/* Keep the add confirmation beside the compact counter. */
+.catalogPage .quoteQuantity {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: .65rem;
+}
+
+.catalogPage .quoteQuantity :global(.quoteQuantityControl) {
+  width: 6.25rem;
+  min-height: 3rem;
+  grid-template-columns: 2rem 1fr 2rem;
+}
+
+.catalogPage .quoteQuantity :global(.quoteAddMessage) {
+  text-align: left;
+  line-height: 1.2;
+}
+
+/* Catalogue card actions: clear add state, then a compact quantity state. */
+.catalogPage .productActions {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  width: 100%;
+}
+
+.catalogPage .productActions .productDetailLink,
+.catalogPage .productActions .productQuoteButton {
+  min-height: 3rem;
+  height: 3rem;
+  padding: 0 1.35rem;
+  border-radius: .75rem !important;
+  font-size: .78rem;
+  font-weight: 750;
+}
+
+.catalogPage .productActions .productDetailLink {
+  flex: 1 1 auto;
+  background: #fff;
+  color: #ae1238;
+  text-align: center;
+}
+
+.catalogPage .productActions .productDetailLink:hover {
+  background: #ae1238;
+  color: #fff;
+}
+
+.catalogPage .productActions > div:not(.quoteQuantity) {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.catalogPage .productActions .productQuoteButton {
+  min-width: 10.75rem;
+  border: 0;
+  background: #ae1238;
+  color: #fff;
+}
+
+.catalogPage .productActions .quoteQuantity {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.catalogPage .productActions .quoteQuantity :global(.quoteQuantityControl) {
+  width: auto;
+  min-width: 8rem;
+  height: 3rem;
+  min-height: 3rem;
+  grid-template-columns: 2.75rem minmax(2rem, 1fr) 2.75rem;
+  border: 1px solid #e3ddd6;
+  border-radius: .75rem;
+  background: #f8f5f1;
+  color: #ae1238;
+  box-shadow: none;
+}
+
+.catalogPage .productActions .quoteQuantity :global(.quoteQuantityControl) button,
+.catalogPage .productActions .quoteQuantity :global(.quoteQuantityControl) output {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.catalogPage .productActions .quoteQuantity :global(.quoteQuantityControl) button:hover {
+  background: rgb(174 18 56 / 8%);
+}
+
+/* Product card actions only: stacked reference-button layout. */
+.catalogPage .productActions {
+  flex-direction: column;
+  align-items: stretch;
+  gap: .7rem;
+}
+.catalogPage .productActions .productDetailLink,
+.catalogPage .productActions > div:not(.quoteQuantity),
+.catalogPage .productActions .productQuoteButton,
+.catalogPage .productActions .quoteQuantity {
+  width: 100%;
+}
+.catalogPage .productActions .productDetailLink {
+  flex: 0 0 auto;
+  border: 1px solid rgb(174 18 56 / 45%);
+  border-radius: .8rem !important;
+}
+.catalogPage .productActions > div:not(.quoteQuantity) { display: block; }
+.catalogPage .productActions .productQuoteButton { min-width: 0; border-radius: .8rem !important; }
+.catalogPage .productActions .quoteQuantity :global(.quoteQuantityControl) { width: 100%; }

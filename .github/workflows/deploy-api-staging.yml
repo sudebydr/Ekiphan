@@ -1,0 +1,51 @@
+name: Deploy API - Staging
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [staging]
+    paths:
+      - "src/backend/**"
+      - "tests/**"
+      - "Ekiphan.sln"
+      - ".github/workflows/deploy-api-staging.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ekiphan-api-staging
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore Ekiphan.sln
+
+      - name: Test
+        run: dotnet test Ekiphan.sln --configuration Release --no-restore
+
+      - name: Publish API
+        run: >-
+          dotnet publish
+          src/backend/Ekiphan.Api/Ekiphan.Api.csproj
+          --configuration Release
+          --no-restore
+          --output artifacts/api
+
+      - name: Deploy API to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_STAGING_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_STAGING_PUBLISH_PROFILE }}
+          package: artifacts/api

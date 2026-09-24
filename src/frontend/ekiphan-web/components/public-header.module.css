@@ -1,0 +1,1127 @@
+.catalogTopbar {
+  position: fixed;
+  z-index: 100;
+  top: 1rem;
+  left: 50%;
+  display: grid;
+  width: min(calc(100% - 3rem), 82rem);
+  min-height: 4.65rem;
+  margin: 0;
+  padding: 0.55rem 0.9rem;
+  grid-template-columns: minmax(11rem, 0.7fr) minmax(0, 1.6fr) minmax(14rem, 0.7fr);
+  gap: clamp(1.25rem, 3vw, 3.5rem);
+  align-items: center;
+  border: 1px solid rgb(144 31 59 / 10%);
+  border-radius: 1.15rem;
+  background: rgb(243 239 233 / 82%);
+  color: #252321;
+  box-shadow:
+    0 1rem 3rem rgb(58 48 40 / 12%),
+    inset 0 1px 0 rgb(255 255 255 / 76%);
+  backdrop-filter: blur(0.7rem) saturate(108%);
+  transform: translateX(-50%);
+}
+
+.catalogBrand {
+  display: inline-grid;
+  justify-self: start;
+  gap: 0.45rem;
+  color: #252321;
+  text-decoration: none;
+}
+
+.catalogBrand strong {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-start;
+  color: #252321;
+  font-size: clamp(1.45rem, 2vw, 1.85rem);
+  font-weight: 760;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.catalogBrand strong span {
+  width: 0.34rem;
+  height: 0.34rem;
+  margin: 0.02rem 0 0 0.14rem;
+  border-radius: 50%;
+  background: #bd0d36;
+  box-shadow: 0 0 0.8rem rgb(189 13 54 / 45%);
+}
+
+.catalogBrand small {
+  color: #6f6962;
+  font-size: 0.46rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+}
+
+.catalogTopbar > nav {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  justify-self: center;
+}
+
+.catalogTopbar nav a {
+  color: #383532;
+}
+
+.headerActions {
+  display: flex;
+  grid-column: 3;
+  grid-row: 1;
+  align-items: center;
+  justify-self: end;
+  gap: 0.45rem;
+  padding-left: 0.65rem;
+  border-left: 1px solid rgb(31 31 31 / 9%);
+}
+
+.quoteButton {
+  display: inline-flex;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.3rem;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: 999px;
+  background: rgb(143 29 52 / 92%);
+  box-shadow:
+    0 0.75rem 1.8rem rgb(57 0 14 / 22%),
+    inset 0 1px 0 rgb(255 255 255 / 15%);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.045em;
+  text-decoration: none;
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.quoteButton:hover {
+  background: #a52b47;
+  transform: translateY(-0.1rem);
+}
+
+.headerLanguage {
+  display: inline-flex;
+  min-width: 2.45rem;
+  height: 2.45rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(144 31 59 / 9%);
+  border-radius: 999px;
+  background: rgb(144 31 59 / 4%);
+  color: #383532;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.headerSearch {
+  display: grid;
+  width: 2.55rem;
+  height: 2.55rem;
+  place-items: center;
+  border: 1px solid rgb(31 31 31 / 14%);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 58%);
+  color: #252321;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 72%);
+  text-decoration: none;
+  transition: background-color 180ms ease, border-color 180ms ease,
+    color 180ms ease, transform 180ms ease;
+}
+
+.headerSearch span {
+  position: relative;
+  display: block;
+  width: 0.82rem;
+  height: 0.82rem;
+  border: 1.6px solid currentColor;
+  border-radius: 50%;
+}
+
+.headerSearch span::after {
+  position: absolute;
+  right: -0.36rem;
+  bottom: -0.24rem;
+  width: 0.44rem;
+  height: 1.6px;
+  background: currentColor;
+  content: "";
+  transform: rotate(45deg);
+  transform-origin: left center;
+}
+
+.headerSearch:hover {
+  border-color: #901f3b;
+  background: #901f3b;
+  color: white;
+  transform: translateY(-0.1rem);
+}
+
+/* Reserve a clear action column so the Ã„Â°letiÃ…Å¸im link never sits beneath the divider. */
+@media(min-width:64.0625rem){.catalogTopbar{grid-template-columns:minmax(10rem,.62fr) minmax(0,1.7fr) minmax(15.5rem,.88fr);gap:clamp(.65rem,1.4vw,1.4rem)}.catalogTopbar nav{min-width:0}.catalogTopbar nav :global(a){padding-inline:.58rem;font-size:.67rem;letter-spacing:.06em}.headerActions{position:relative;z-index:1;padding-left:.9rem;background:rgb(243 239 233 / 82%)}}
+
+/* Keep the header action area transparent over the shared header surface. */
+@media(min-width:64.0625rem){.headerActions{background:transparent}}
+
+/* Header product search popover. */
+.headerSearch{cursor:pointer}.headerSearchForm{position:absolute;z-index:3;right:.9rem;top:calc(100% + .65rem);display:flex;gap:.5rem;width:min(22rem,calc(100vw - 2rem));padding:.6rem;border:1px solid rgb(144 31 59 / 16%);border-radius:.7rem;background:#f3efe9;box-shadow:0 .75rem 1.8rem rgb(38 29 24 / 14%)}.headerSearchForm input{min-width:0;flex:1;border:1px solid #d8d2c9;background:#fffdfa;padding:.65rem .75rem;color:#252321;outline:0}.headerSearchForm input:focus{border-color:#901f3b}.headerSearchForm button{border:0;background:#901f3b;padding:0 1rem;color:#fff;font-size:.72rem;font-weight:800;cursor:pointer}@media(max-width:48rem){.headerSearchForm{right:0;top:calc(100% + .45rem)}}
+
+.headerSearchForm{display:none}.headerSearchPanel{position:absolute;z-index:5;right:.9rem;top:calc(100% + .65rem);width:min(24rem,calc(100vw - 2rem));border:1px solid rgb(144 31 59 / 16%);border-radius:.7rem;background:#f3efe9;box-shadow:0 .75rem 1.8rem rgb(38 29 24 / 14%);overflow:hidden}.headerSearchPanel label{display:block;padding:.6rem}.headerSearchPanel input{width:100%;border:1px solid #d8d2c9;background:#fffdfa;padding:.72rem .8rem;color:#252321;outline:0}.headerSearchPanel input:focus{border-color:#901f3b}.headerSearchResults{border-top:1px solid #ded8d0}.headerSearchResults>a{display:grid;gap:.2rem;padding:.75rem 1rem;color:#282421;text-decoration:none}.headerSearchResults>a:hover{background:#fffdfa;color:#901f3b}.headerSearchResults span,.headerSearchResults p{color:#77716b;font-size:.74rem}.headerSearchResults p{margin:0;padding:.9rem 1rem}.srOnly{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* Restore the compact header search field and remove result-panel presentation. */
+.headerSearchPanel{display:none}
+
+/* Fit the extended desktop navigation without letting Ã„Â°letiÃ…Å¸im fall beneath the action rail. */
+@media(min-width:64.0625rem){.catalogTopbar{width:min(calc(100% - 2rem),92rem);grid-template-columns:minmax(9rem,.52fr) minmax(0,2fr) minmax(14rem,.72fr);gap:clamp(.35rem,.8vw,.8rem)}.catalogTopbar nav :global(.rootList){gap:0}.catalogTopbar nav :global(a){padding-inline:clamp(.32rem,.48vw,.55rem);font-size:clamp(.58rem,.58vw,.67rem);letter-spacing:.045em}.headerActions{gap:.3rem;padding-left:.55rem}.quoteButton{padding-inline:1.05rem}.headerLanguage{min-width:2.25rem}.headerSearch{width:2.4rem;height:2.4rem}}
+
+.catalogBrand small {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 600;
+}
+
+/* Two-row Ekiphan corporate header. */
+.catalogTopbar {
+  width: min(calc(100% - 3rem), 92rem);
+  min-height: 8.2rem;
+  padding: .7rem 1.25rem 0;
+  grid-template-columns: minmax(12rem, 1fr) auto;
+  grid-template-rows: 3.35rem 3rem;
+  gap: 0;
+  border-radius: 0;
+  background: #dcd5cb;
+  box-shadow: 0 .8rem 2rem rgb(33 26 21 / 14%);
+}
+
+.catalogBrand {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.catalogBrand strong {
+  color: #171513;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(1.7rem, 2.1vw, 2.15rem);
+  font-weight: 800;
+}
+
+.catalogBrand small {
+  color: #6c6761;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: .5rem;
+  font-weight: 700;
+  letter-spacing: .15em;
+}
+
+.catalogTopbar > nav {
+  grid-column: 1 / -1 !important;
+  grid-row: 2 !important;
+  width: 100%;
+  justify-self: stretch;
+  align-self: stretch;
+  border-top: 1px solid rgb(35 28 23 / 13%);
+}
+
+.catalogTopbar > nav :global(.rootList) {
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  gap: clamp(.55rem, 1.4vw, 1.65rem);
+}
+
+.catalogTopbar nav :global(a),
+.dark .navigation a,
+.dark a,
+.light .navigation a,
+.light a {
+  min-height: 3rem;
+  padding-inline: 0;
+  color: #2d2926;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(.61rem, .68vw, .72rem);
+  font-weight: 650;
+  letter-spacing: .05em;
+}
+
+.catalogTopbar nav a[aria-current="page"] {
+  box-shadow: inset 0 -2px 0 #801523;
+  color: #801523;
+}
+
+.headerActions {
+  grid-column: 2;
+  grid-row: 1;
+  gap: .55rem;
+  padding-left: 1rem;
+  border-left: 1px solid rgb(35 28 23 / 13%);
+}
+
+.quoteButton {
+  height: 2.55rem;
+  background: #801523;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: .7rem;
+  font-weight: 800;
+}
+
+.headerLanguage {
+  width: 2.45rem;
+  min-width: 2.45rem;
+  height: 2.45rem;
+  border-color: rgb(35 28 23 / 23%);
+  background: transparent;
+  color: #302b28;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.headerSearch {
+  width: 2.45rem;
+  height: 2.45rem;
+  border-color: rgb(35 28 23 / 23%);
+  background: rgb(255 255 255 / 36%);
+}
+
+@media (max-width: 64rem) {
+  .catalogTopbar {
+    min-height: 4.8rem;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: 1fr;
+    padding: .55rem 1rem;
+    border-radius: 1rem;
+  }
+
+  .catalogTopbar > nav {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: auto;
+    border: 0;
+  }
+
+  .headerActions { grid-row: 1; }
+}
+/* Reference header: centered search on the top row, navigation below. */
+.catalogTopbar {
+  grid-template-columns: minmax(12rem, 1fr) minmax(18rem, 37rem) minmax(12rem, 1fr);
+}
+
+.catalogTopbar .headerActions {
+  display: contents;
+}
+
+.headerSearchForm {
+  position: static;
+  display: flex;
+  grid-column: 2;
+  grid-row: 1;
+  width: 100%;
+  height: 2.75rem;
+  align-self: center;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgb(35 28 23 / 10%);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 .3rem .9rem rgb(39 29 23 / 7%);
+}
+
+.headerSearchForm input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 0 1.25rem;
+  color: #292522;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: .82rem;
+  outline: 0;
+}
+
+.headerSearchForm input::placeholder { color: #9a948d; }
+
+.headerSearchForm button {
+  display: grid;
+  width: 3rem;
+  flex: 0 0 3rem;
+  border: 0;
+  border-left: 1px solid rgb(35 28 23 / 9%);
+  background: transparent;
+  color: #393431;
+  cursor: pointer;
+  place-items: center;
+}
+
+.headerSearchForm button span { position: relative; width: .75rem; height: .75rem; border: 1.5px solid currentColor; border-radius: 50%; }
+.headerSearchForm button span::after { position: absolute; right: -.32rem; bottom: -.2rem; width: .4rem; height: 1.5px; background: currentColor; content: ""; transform: rotate(45deg); transform-origin: left center; }
+.headerSearchForm button:hover { background: #801523; color: #fff; }
+
+.quoteButton { grid-column: 3; grid-row: 1; justify-self: end; }
+.headerLanguage { grid-column: 3; grid-row: 1; justify-self: end; margin-right: 3.1rem; }
+
+@media (max-width: 64rem) {
+  .catalogTopbar { grid-template-columns: 1fr auto; }
+  .headerSearchForm { display: none; }
+  .quoteButton, .headerLanguage { grid-column: auto; grid-row: auto; margin: 0; }
+}
+
+/* Stable desktop navigation layout. The list belongs to PublicNavigation's CSS module, so target the native elements here. */
+@media (min-width: 64.0625rem) {
+  .catalogTopbar .headerActions {
+    display: flex;
+    grid-column: 3;
+    grid-row: 1;
+    align-items: center;
+    justify-self: end;
+    gap: 12px;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .headerActions .quoteButton,
+  .headerActions .headerLanguage {
+    grid-column: auto;
+    grid-row: auto;
+    justify-self: auto;
+    margin: 0;
+  }
+
+  .catalogTopbar > nav > ul {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .catalogTopbar > nav > ul > li {
+    display: block;
+    flex: 0 0 auto;
+  }
+
+  .catalogTopbar > nav > ul > li > a {
+    display: inline-flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    white-space: nowrap;
+  }
+}
+
+/* Keep the logo, compact menu and actions in separate cells below desktop.
+   Previously the logo and navigation were both placed in column 1, which
+   made the top bar appear stacked against the left edge at tablet widths. */
+@media (max-width: 64rem) {
+  .catalogTopbar { grid-template-columns: minmax(0, 1fr) auto auto; }
+  .catalogBrand { grid-column: 1; grid-row: 1; }
+  .catalogTopbar > nav { grid-column: 3 !important; grid-row: 1 !important; justify-self: end; }
+  .catalogTopbar .headerActions { display: flex; grid-column: 2; grid-row: 1; align-items: center; justify-self: end; gap: .45rem; padding-left: 0; border-left: 0; }
+  .headerActions .quoteButton,
+  .headerActions .headerLanguage,
+  .headerActions .headerSearch { grid-column: auto; grid-row: auto; justify-self: auto; margin: 0; }
+}
+.quoteButton { white-space: nowrap; }
+
+/* Compact the tablet header so it does not leave an empty band beneath the controls. */
+@media (max-width: 64rem) {
+  .catalogTopbar {
+    min-height: 4rem;
+    padding: .4rem .75rem;
+  }
+
+  .catalogBrand {
+    gap: 0;
+  }
+
+  .catalogBrand small {
+    display: none;
+  }
+
+  .catalogTopbar > nav :global(.mobileMenu) summary {
+    min-height: 2.35rem;
+    padding-block: .35rem;
+  }
+}
+/* Premium two-row desktop header. */
+@media (min-width: 75rem) {
+  .catalogTopbar {
+    position: fixed;
+    z-index: 100;
+    top: 22px;
+    left: 22px;
+    display: block;
+    width: calc(100% - 44px);
+    max-width: none;
+    min-height: 0;
+    margin: 0;
+    padding: 0 28px;
+    border: 0;
+    border-radius: 0;
+    background: #e5ded4;
+    color: #282421;
+    box-shadow: 0 .8rem 2rem rgb(33 26 21 / 14%);
+    transform: none;
+  }
+
+  .headerTop {
+    display: grid;
+    height: 82px;
+    grid-template-columns: 250px minmax(320px, 740px) minmax(180px, 1fr);
+    gap: clamp(24px, 3vw, 52px);
+    align-items: center;
+  }
+
+  .catalogBrand {
+    display: grid;
+    width: 250px;
+    gap: 5px;
+    justify-self: start;
+  }
+
+  .catalogBrand strong {
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .catalogBrand small {
+    display: block;
+    font-size: .52rem;
+  }
+
+  .headerSearchForm {
+    display: flex;
+    grid-column: auto;
+    grid-row: auto;
+    width: min(100%, 740px);
+    height: 56px;
+    justify-self: center;
+    border-radius: 28px;
+  }
+
+  .headerSearchForm input {
+    padding-inline: 24px;
+    font-size: .86rem;
+  }
+
+  .headerSearchForm button {
+    width: 56px;
+    flex-basis: 56px;
+  }
+
+  .headerActions {
+    display: flex;
+    grid-column: auto;
+    grid-row: auto;
+    align-items: center;
+    justify-self: end;
+    gap: 12px;
+    padding: 0;
+    border: 0;
+  }
+
+  .quoteButton {
+    display: inline-flex;
+    height: 44px;
+    min-width: 108px;
+    padding-inline: 22px;
+    white-space: nowrap;
+  }
+
+  .headerLanguage {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    margin: 0;
+  }
+
+  .catalogTopbar > nav {
+    display: flex;
+    width: 100%;
+    height: 80px;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    align-items: center;
+    justify-self: auto;
+    border-top: 1px solid rgb(44 38 33 / 15%);
+  }
+
+  .catalogTopbar > nav > ul {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: clamp(24px, 1.75vw, 28px);
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .catalogTopbar > nav > ul > li {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    height: 100%;
+  }
+
+  .catalogTopbar > nav > ul > li > a {
+    position: relative;
+    display: inline-flex;
+    min-height: 80px;
+    align-items: center;
+    padding: 0;
+    color: #302b28;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: clamp(.78rem, .86vw, .875rem);
+    font-weight: 600;
+    letter-spacing: .015em;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .catalogTopbar > nav > ul > li > a[aria-current="page"] {
+    color: #801523;
+    box-shadow: none;
+  }
+
+  .catalogTopbar > nav > ul > li > a[aria-current="page"]::after {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 78px;
+    height: 2px;
+    border-radius: 999px;
+    background: #801523;
+    content: "";
+    transform: translateX(-50%);
+  }
+
+  .catalogTopbar > nav :global(.mobileMenu) {
+    display: none;
+  }
+}
+/* Compact, gap-based desktop navigation only. */
+@media (min-width: 75rem) {
+  .catalogTopbar > nav {
+    height: 62px;
+    min-height: 62px;
+    border-top: 1px solid rgb(44 38 33 / 15%);
+    background: transparent;
+  }
+
+  .catalogTopbar > nav > ul {
+    height: 62px;
+    gap: 28px;
+    align-items: center;
+    justify-content: flex-start;
+    white-space: nowrap;
+  }
+
+  .catalogTopbar > nav > ul > li {
+    height: 62px;
+  }
+
+  .catalogTopbar > nav > ul > li > a {
+    display: flex;
+    min-height: 62px;
+    height: 100%;
+    align-items: center;
+    padding: 0;
+    border-radius: 0;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #302b28;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .015em;
+    line-height: 1;
+    text-decoration: none;
+    transition: color .2s ease;
+  }
+
+  .catalogTopbar > nav > ul > li > a:hover,
+  .catalogTopbar > nav > ul > li > a:focus-visible {
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #9f263d;
+    transform: none;
+  }
+
+  .catalogTopbar > nav > ul > li > a[aria-current="page"] {
+    position: relative;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #9f263d;
+  }
+
+  .catalogTopbar > nav > ul > li > a[aria-current="page"]::after {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background: #9f263d;
+    transform: none;
+  }
+}
+/* Soften only the outer header panel corners. */
+@media (min-width: 75rem) {
+  .catalogTopbar {
+    overflow: hidden;
+    border-radius: 18px;
+  }
+}
+/* Let the Products dropdown extend below the header at every viewport width. */
+.catalogTopbar {
+  overflow: visible !important;
+}
+/* The public header owns the top visual layer while its dropdown is open. */
+.catalogTopbar {
+  z-index: 1000;
+}
+
+/* Animated, suggestion-led search interaction. */
+.headerSearchForm {
+  position: relative;
+  transition: width 260ms ease, box-shadow 260ms ease, border-color 260ms ease, transform 260ms ease;
+}
+
+.headerSearchFormActive {
+  border-color: rgb(128 21 35 / 34%);
+  box-shadow: 0 .55rem 1.4rem rgb(68 40 35 / 14%);
+  transform: translateY(-1px) scale(1.015);
+}
+
+.searchSuggestion {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 1.25rem;
+  max-width: calc(100% - 5.75rem);
+  overflow: hidden;
+  color: #9a948d;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: .82rem;
+  pointer-events: none;
+  text-overflow: ellipsis;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  animation: searchSuggestionIn 360ms ease both;
+}
+
+.headerSearchForm input {
+  position: relative;
+  z-index: 1;
+}
+
+.searchClear {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: 2.25rem;
+  flex: 0 0 2.25rem;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #8b8179;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.searchClear:hover { color: #9f263d; }
+
+@keyframes searchSuggestionIn {
+  from { opacity: 0; transform: translate(-.4rem, -50%); }
+  to { opacity: 1; transform: translate(0, -50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .headerSearchForm,
+  .searchSuggestion { transition: none; animation: none; }
+}
+
+/* Keep the search field in the header at tablet widths as well. */
+@media (min-width: 64.0625rem) and (max-width: 74.9375rem) {
+  .catalogTopbar {
+    position: fixed;
+    z-index: 1000;
+    top: 18px;
+    left: 18px;
+    display: block;
+    width: calc(100% - 36px);
+    min-height: 0;
+    margin: 0;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 16px;
+    background: #e5ded4;
+    transform: none;
+  }
+
+  .headerTop {
+    display: grid;
+    height: 72px;
+    grid-template-columns: 180px minmax(260px, 1fr) auto;
+    gap: 18px;
+    align-items: center;
+  }
+
+  .catalogBrand { grid-column: auto; grid-row: auto; }
+  .catalogBrand small { display: block; }
+
+  .headerSearchForm {
+    display: flex;
+    grid-column: auto;
+    grid-row: auto;
+    width: 100%;
+    height: 48px;
+    justify-self: center;
+    border-radius: 999px;
+  }
+
+  .catalogTopbar .headerActions {
+    display: flex;
+    grid-column: auto;
+    grid-row: auto;
+    justify-self: end;
+    gap: 8px;
+  }
+
+  .headerActions .quoteButton,
+  .headerActions .headerLanguage { margin: 0; }
+
+  .catalogTopbar > nav {
+    display: flex;
+    width: 100%;
+    height: 64px;
+    align-items: center;
+    border-top: 1px solid rgb(44 38 33 / 15%);
+  }
+}
+
+/* Keep the rotating search field in the header's upper centre row. */
+@media (min-width: 75rem) {
+  .catalogTopbar .headerTop {
+    display: grid !important;
+    height: 82px !important;
+    grid-template-columns: 250px minmax(320px, 740px) minmax(180px, 1fr) !important;
+    align-items: center !important;
+  }
+
+  .catalogTopbar .headerTop .headerSearchForm {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    display: flex !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: min(100%, 740px) !important;
+    align-self: center !important;
+    justify-self: center !important;
+  }
+
+  .catalogTopbar > nav {
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+}
+
+/* Keep the language switcher circular even when a page resets link corners. */
+.catalogTopbar .headerLanguage {
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  aspect-ratio: 1;
+  padding: 0;
+  border-radius: 50% !important;
+}
+
+@media (min-width: 75rem) {
+  .catalogTopbar .headerLanguage {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+  }
+}
+
+/* Dark, warm glass treatment for the public hero navigation. This deliberately
+   changes surface styling only; the two-row desktop grid and its spacing stay
+   intact so the logo, search, actions and navigation retain their positions. */
+.catalogTopbar {
+  border: 1px solid rgb(222 226 224 / 24%);
+  background: linear-gradient(135deg, rgb(44 47 46 / 82%), rgb(35 37 37 / 74%));
+  color: #f7f7f4;
+  box-shadow:
+    0 1rem 2.75rem rgb(10 12 12 / 30%),
+    0 .2rem .7rem rgb(0 0 0 / 18%),
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    inset 0 -1px 0 rgb(0 0 0 / 16%);
+  backdrop-filter: blur(1.05rem) saturate(112%);
+  -webkit-backdrop-filter: blur(1.05rem) saturate(112%);
+}
+.catalogBrand strong, .catalogTopbar nav a, .catalogTopbar nav :global(a), .dark .navigation a, .dark a, .light .navigation a, .light a { color: rgb(249 250 248 / 94%); }
+.catalogBrand small { color: rgb(239 241 238 / 70%); }
+.catalogTopbar > nav, .mainNav { border-top-color: rgb(234 237 233 / 15%); }
+.headerSearchForm { border-color: rgb(245 247 244 / 22%); background: rgb(242 244 241 / 16%); box-shadow: 0 .35rem 1rem rgb(0 0 0 / 14%), inset 0 1px 0 rgb(255 255 255 / 18%); }
+.headerSearchForm input { color: #fafbf9; }
+.headerSearchForm input::placeholder, .searchSuggestion { color: rgb(244 246 242 / 66%); }
+.headerSearchForm button { border-left-color: rgb(245 247 244 / 16%); color: #f6f7f4; }
+.headerSearchForm button:hover { background: #861b33; }
+.headerSearchFormActive { border-color: rgb(255 255 255 / 38%); box-shadow: 0 .55rem 1.4rem rgb(0 0 0 / 22%), inset 0 1px 0 rgb(255 255 255 / 18%); }
+.quoteButton { border-color: rgb(255 255 255 / 18%); background: linear-gradient(135deg, #a72340, #741127); box-shadow: 0 .6rem 1.35rem rgb(41 3 12 / 32%), inset 0 1px 0 rgb(255 255 255 / 18%); }
+.quoteButton:hover { background: linear-gradient(135deg, #bd2d4d, #85162d); }
+.headerLanguage { border-color: rgb(245 247 244 / 36%); background: rgb(249 250 248 / 8%); color: #fbfcf9; box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%); }
+.mainNav .navItem { color: rgb(249 250 248 / 92%); }
+.mainNav .navItem:hover, .mainNav .navItem:focus-visible, .mainNav .navItem.active, .catalogTopbar > nav > ul > li > a:hover, .catalogTopbar > nav > ul > li > a:focus-visible, .catalogTopbar > nav > ul > li > a[aria-current="page"] { color: #dd3b5b; }
+.mainNav .navItem.active::after, .catalogTopbar > nav > ul > li > a[aria-current="page"]::after { background: #c92b49; }
+.mainNav .productsSubmenu { border-color: rgb(230 233 230 / 18%); background: rgb(42 44 43 / 94%); box-shadow: 0 .9rem 2.2rem rgb(0 0 0 / 30%), inset 0 1px 0 rgb(255 255 255 / 10%); backdrop-filter: blur(.8rem); }
+.mainNav .productsSubmenu a { color: rgb(250 251 249 / 90%); }
+.mainNav .productsSubmenu a:hover, .mainNav .productsSubmenu a:focus-visible { background: rgb(201 43 73 / 18%); color: #fff; }
+
+/* Preserve crisp navigation contrast on the dark glass surface. */
+.catalogTopbar .mainNav .navItem,
+.catalogTopbar > nav > ul > li > a,
+.catalogTopbar nav a,
+.catalogTopbar nav :global(a) {
+  color: rgb(255 255 255 / 96%) !important;
+}
+
+.catalogTopbar .mainNav .navItem:hover,
+.catalogTopbar .mainNav .navItem:focus-visible,
+.catalogTopbar .mainNav .navItem.active,
+.catalogTopbar > nav > ul > li > a[aria-current="page"] {
+  color: #e23b5d !important;
+}
+
+/* Give the hero copy a little more breathing room from the top edge. */
+.heroCopy {
+  transform: translateY(clamp(.85rem, 1.5vw, 1.35rem));
+}
+
+/* Keep the dark glass surface exclusive to the homepage hero. */
+.catalogTopbar:not(.homeTopbar) {
+  border-color: rgb(75 62 52 / 14%);
+  background: #e5ded4;
+  color: #282421;
+  box-shadow: 0 .8rem 2rem rgb(33 26 21 / 14%);
+  backdrop-filter: blur(.7rem) saturate(108%);
+  -webkit-backdrop-filter: blur(.7rem) saturate(108%);
+}
+
+.catalogTopbar:not(.homeTopbar) .catalogBrand strong,
+.catalogTopbar:not(.homeTopbar) nav a,
+.catalogTopbar:not(.homeTopbar) nav :global(a) { color: #302b28 !important; }
+.catalogTopbar:not(.homeTopbar) .catalogBrand small { color: #6c6761; }
+.catalogTopbar:not(.homeTopbar) > nav { border-top-color: rgb(44 38 33 / 15%); }
+.catalogTopbar:not(.homeTopbar) .headerSearchForm { border-color: rgb(35 28 23 / 10%); background: #fff; box-shadow: 0 .3rem .9rem rgb(39 29 23 / 7%); }
+.catalogTopbar:not(.homeTopbar) .headerSearchForm input { color: #292522; }
+.catalogTopbar:not(.homeTopbar) .headerSearchForm button { border-left-color: rgb(35 28 23 / 9%); color: #393431; }
+.catalogTopbar:not(.homeTopbar) .headerLanguage { border-color: rgb(35 28 23 / 23%); background: transparent; color: #302b28; box-shadow: none; }
+.catalogTopbar:not(.homeTopbar) .quoteButton { background: #801523; box-shadow: 0 .6rem 1.35rem rgb(57 0 14 / 22%), inset 0 1px 0 rgb(255 255 255 / 15%); }
+
+/* A translucent charcoal glass variant reserved for the showroom image. */
+.catalogTopbar.showroomTopbar {
+  border-color: rgb(255 255 255 / 25%);
+  background: linear-gradient(135deg, rgb(39 43 42 / 72%), rgb(27 30 30 / 64%));
+  color: #f8f9f7;
+  box-shadow:
+    0 1rem 2.7rem rgb(15 10 10 / 28%),
+    inset 0 1px 0 rgb(255 255 255 / 16%);
+  backdrop-filter: blur(1rem) saturate(112%);
+  -webkit-backdrop-filter: blur(1rem) saturate(112%);
+}
+.catalogTopbar.showroomTopbar .catalogBrand strong,
+.catalogTopbar.showroomTopbar nav a,
+.catalogTopbar.showroomTopbar nav :global(a) { color: rgb(255 255 255 / 95%) !important; }
+.catalogTopbar.showroomTopbar .catalogBrand small { color: rgb(255 255 255 / 70%); }
+.catalogTopbar.showroomTopbar > nav { border-top-color: rgb(255 255 255 / 16%); }
+.catalogTopbar.showroomTopbar .headerSearchForm { border-color: rgb(255 255 255 / 24%); background: rgb(255 255 255 / 14%); box-shadow: inset 0 1px 0 rgb(255 255 255 / 15%); }
+.catalogTopbar.showroomTopbar .headerSearchForm input { color: #fff; }
+.catalogTopbar.showroomTopbar .headerSearchForm button { border-left-color: rgb(255 255 255 / 18%); color: #fff; }
+.catalogTopbar.showroomTopbar .headerLanguage { border-color: rgb(255 255 255 / 38%); background: rgb(255 255 255 / 7%); color: #fff; box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%); }
+
+/* Light frosted-glass finish for the showroom hero. */
+.catalogTopbar.showroomTopbar {
+  border-color: rgb(255 255 255 / 58%);
+  background: linear-gradient(135deg, rgb(255 255 255 / 62%), rgb(248 246 242 / 46%));
+  color: #292724;
+  box-shadow:
+    0 1rem 2.7rem rgb(59 38 34 / 16%),
+    inset 0 1px 0 rgb(255 255 255 / 78%);
+  backdrop-filter: blur(1.1rem) saturate(108%);
+  -webkit-backdrop-filter: blur(1.1rem) saturate(108%);
+}
+.catalogTopbar.showroomTopbar .catalogBrand strong,
+.catalogTopbar.showroomTopbar nav a,
+.catalogTopbar.showroomTopbar nav :global(a) { color: #292724 !important; }
+.catalogTopbar.showroomTopbar .catalogBrand small { color: rgb(41 39 36 / 70%); }
+.catalogTopbar.showroomTopbar > nav { border-top-color: rgb(61 54 48 / 16%); }
+.catalogTopbar.showroomTopbar .headerSearchForm { border-color: rgb(255 255 255 / 64%); background: rgb(255 255 255 / 46%); box-shadow: inset 0 1px 0 rgb(255 255 255 / 78%); }
+.catalogTopbar.showroomTopbar .headerSearchForm input { color: #292724; }
+.catalogTopbar.showroomTopbar .headerSearchForm button { border-left-color: rgb(61 54 48 / 14%); color: #292724; }
+.catalogTopbar.showroomTopbar .headerLanguage { border-color: rgb(61 54 48 / 28%); background: rgb(255 255 255 / 24%); color: #292724; box-shadow: inset 0 1px 0 rgb(255 255 255 / 62%); }
+
+.catalogTopbar > nav > ul > li > a[aria-current="page"]::after {
+  display: none;
+}
+
+/* Non-home pages only: darken the search field surface without changing header layout. */
+.catalogTopbar:not(.homeTopbar) .headerSearchForm {
+  border-color: rgb(255 255 255 / 18%);
+  background: #171919;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 9%), 0 .3rem .9rem rgb(0 0 0 / 18%);
+}
+
+.catalogTopbar:not(.homeTopbar) .headerSearchForm input {
+  color: #f6f7f5;
+}
+
+.catalogTopbar:not(.homeTopbar) .headerSearchForm .searchSuggestion {
+  color: rgb(246 247 245 / 65%);
+}
+
+.catalogTopbar:not(.homeTopbar) .headerSearchForm button {
+  border-left-color: rgb(255 255 255 / 15%);
+  color: #f6f7f5;
+}
+/* Non-home pages: match the homepage's light search surface and subdued suggestion text. */
+.catalogTopbar:not(.homeTopbar) .headerSearchForm {
+  border-color: rgb(35 28 23 / 10%);
+  background: #fff;
+  box-shadow: 0 .3rem .9rem rgb(39 29 23 / 7%);
+}
+
+.catalogTopbar:not(.homeTopbar) .headerSearchForm input {
+  color: #292522;
+}
+
+.catalogTopbar:not(.homeTopbar) .headerSearchForm .searchSuggestion {
+  color: rgb(41 37 34 / 58%);
+}
+
+.catalogTopbar:not(.homeTopbar) .headerSearchForm button {
+  border-left-color: rgb(35 28 23 / 9%);
+  color: #393431;
+}
+/* Small mobile header: preserve the shared desktop header while preventing overlap. */
+@media (max-width: 40rem) {
+  .catalogTopbar {
+    position: fixed !important;
+    z-index: 100;
+    top: .5rem !important;
+    left: .5rem !important;
+    display: block !important;
+    width: calc(100% - 1rem) !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+    border-radius: 1rem !important;
+    transform: none !important;
+  }
+
+  .catalogTopbar .headerTop {
+    display: flex !important;
+    width: 100%;
+    height: 4.15rem !important;
+    min-height: 0 !important;
+    align-items: center;
+    padding: 0 .9rem !important;
+    grid-template-columns: none !important;
+    gap: 0 !important;
+  }
+
+  .catalogTopbar .catalogBrand {
+    width: auto !important;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .catalogTopbar .catalogBrand strong { font-size: 1.7rem !important; }
+  .catalogTopbar .catalogBrand small,
+  .catalogTopbar .headerSearchForm,
+  .catalogTopbar .headerActions { display: none !important; }
+
+  .catalogTopbar > nav {
+    display: block !important;
+    width: 100% !important;
+    height: 3.1rem !important;
+    min-height: 3.1rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    border-top: 1px solid rgb(44 38 33 / 14%) !important;
+    scrollbar-width: none;
+  }
+
+  .catalogTopbar > nav::-webkit-scrollbar { display: none; }
+
+  .catalogTopbar > nav > ul {
+    display: flex !important;
+    width: max-content !important;
+    min-width: 100% !important;
+    height: 3.1rem !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 1rem !important;
+    margin: 0 !important;
+    padding: 0 .9rem !important;
+    overflow: visible !important;
+  }
+
+  .catalogTopbar > nav > ul > li { height: 100% !important; }
+  .catalogTopbar > nav > ul > li > a,
+  .catalogTopbar > nav .navItem {
+    min-height: 3.1rem !important;
+    font-size: .7rem !important;
+    white-space: nowrap;
+  }
+}
+/* Lighten only the homepage glass surface; preserve its layout and contrast. */
+.catalogTopbar.homeTopbar {
+  background: linear-gradient(135deg, rgb(59 62 61 / 84%), rgb(46 49 48 / 77%));
+}
+/* Homepage uses the same light frosted-glass color treatment as the showroom header. */
+.catalogTopbar.homeTopbar {
+  border-color: rgb(255 255 255 / 58%);
+  background: linear-gradient(135deg, rgb(255 255 255 / 62%), rgb(248 246 242 / 46%));
+  color: #292724;
+  box-shadow: 0 1rem 2.7rem rgb(59 38 34 / 16%), inset 0 1px 0 rgb(255 255 255 / 78%);
+}
+.catalogTopbar.homeTopbar .catalogBrand strong,
+.catalogTopbar.homeTopbar nav a,
+.catalogTopbar.homeTopbar nav :global(a) { color: #292724 !important; }
+.catalogTopbar.homeTopbar .catalogBrand small { color: rgb(41 39 36 / 70%); }
+.catalogTopbar.homeTopbar > nav { border-top-color: rgb(61 54 48 / 16%); }
+.catalogTopbar.homeTopbar .headerSearchForm { border-color: rgb(255 255 255 / 64%); background: rgb(255 255 255 / 46%); box-shadow: inset 0 1px 0 rgb(255 255 255 / 78%); }
+.catalogTopbar.homeTopbar .headerSearchForm input { color: #292724; }
+.catalogTopbar.homeTopbar .headerSearchForm button { border-left-color: rgb(61 54 48 / 14%); color: #292724; }
+.catalogTopbar.homeTopbar .headerLanguage { border-color: rgb(61 54 48 / 28%); background: rgb(255 255 255 / 24%); color: #292724; box-shadow: inset 0 1px 0 rgb(255 255 255 / 62%); }
+/* Slightly deepen only the homepage frosted-glass surface. */
+.catalogTopbar.homeTopbar {
+  background: linear-gradient(135deg, rgb(236 235 231 / 70%), rgb(218 215 208 / 57%));
+}
+/* Slightly stronger elevation for the homepage navigation only. */
+.catalogTopbar.homeTopbar {
+  box-shadow: 0 1.2rem 3.1rem rgb(52 42 35 / 23%), 0 .35rem .9rem rgb(31 27 24 / 12%), inset 0 1px 0 rgb(255 255 255 / 78%);
+}
+/* Keep the homepage search suggestion readable on the light glass field. */
+.catalogTopbar.homeTopbar .searchSuggestion,
+.catalogTopbar.homeTopbar .headerSearchForm input {
+  color: #292724;
+}
+.catalogTopbar.homeTopbar .headerSearchForm input::placeholder { color: rgb(41 39 36 / 68%); }
+/* Softer search prompt on the homepage frosted header. */
+.catalogTopbar.homeTopbar .headerSearchForm input,
+.catalogTopbar.homeTopbar .headerSearchForm .searchSuggestion {
+  color: rgb(41 39 36 / 54%);
+}

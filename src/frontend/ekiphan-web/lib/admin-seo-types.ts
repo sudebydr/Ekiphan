@@ -1,0 +1,6 @@
+export type SeoContentType = "Product" | "Category" | "ContentPage" | "PressRelease";
+export type AdminSeoRow = { contentType: SeoContentType; contentId: string; contentName: string; language: "tr" | "en"; slug: string; metaTitle: string | null; score: number; noIndex: boolean; published: boolean; updatedAt: string; editUrl: string };
+export type AdminSeoPage = { items: AdminSeoRow[]; page: number; pageSize: number; totalCount: number };
+export type AdminSeoHealth = { totalIndexable: number; missingMetaTitle: number; missingMetaDescription: number; missingOpenGraphImage: number; duplicateSlugs: number; duplicateMetaTitles: number; noIndex: number; missingEnglish: number; recentlyUpdated: AdminSeoRow[] };
+export type AdminSeoTranslation = { language: "tr" | "en"; contentName: string; slug: string; metaTitle: string | null; metaDescription: string | null; canonicalUrl: string | null; openGraphTitle: string | null; openGraphDescription: string | null; openGraphImageMediaId: string | null; openGraphImageUrl: string | null; noIndex: boolean; noFollow: boolean };
+export type AdminSeoDetail = { contentType: SeoContentType; contentId: string; published: boolean; updatedAt: string; translations: AdminSeoTranslation[] };

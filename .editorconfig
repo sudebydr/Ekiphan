@@ -1,0 +1,19 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{cs,csproj,props}]
+indent_style = space
+indent_size = 4
+
+[*.{ts,tsx,js,json,css,md,yml,yaml}]
+indent_style = space
+indent_size = 2
+
+[**/Migrations/*.cs]
+# EF Core generates short-lived column-name arrays for migration operations.
+dotnet_diagnostic.CA1861.severity = none

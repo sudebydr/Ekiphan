@@ -1,0 +1,364 @@
+﻿:root {
+  --ek-background: #d8d2c8;
+  --ek-surface: #ece7df;
+  --ek-primary: #901f3b;
+  --ek-navy: #30465f;
+  --ek-bronze: #9c7750;
+  --ek-text: #1f1f1f;
+  --ek-secondary: #6f6b66;
+  --ek-border: #e2ded8;
+  --ek-off-white: #f5f2ec;
+  --ek-gold: #b99563;
+  --ek-copper: #b67d46;
+  --ek-sage: #7d877c;
+  color-scheme: light;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--ek-background);
+  color: var(--ek-text);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow-x: clip;
+  background: var(--ek-background);
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 1000;
+  top: 0.75rem;
+  left: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  color: #171a1d;
+  font-weight: 800;
+  text-decoration: none;
+  transform: translateY(-160%);
+  transition: transform 140ms ease;
+}
+
+.skip-link:focus {
+  outline: 3px solid #d4ae52;
+  outline-offset: 2px;
+  transform: translateY(0);
+}
+
+#main-content {
+  container-type: inline-size;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+main {
+  display: grid;
+  min-height: 100vh;
+  place-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  color: #80663f;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+h1 {
+  max-width: 18ch;
+  margin: 0;
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
+  line-height: 0.95;
+}
+
+p {
+  max-width: 55ch;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Public website design system — aligned with the approved Stitch direction. */
+main[data-public-page] {
+  --ek-burgundy: var(--ek-primary);
+  --ek-ink: var(--ek-text);
+  --ek-muted: var(--ek-secondary);
+  --ek-line: var(--ek-border);
+  --ek-paper: var(--ek-background);
+  --ek-white: var(--ek-off-white);
+  background: var(--ek-paper);
+  display: block;
+  gap: 0;
+  padding-top: 0;
+  place-content: initial;
+}
+
+main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) {
+  position: relative;
+  z-index: 20;
+  min-height: 5.5rem;
+  margin-inline: calc(50% - 50cqi);
+  padding-inline:
+    max(1rem, calc((100vw - min(100vw - 2rem, 86rem)) / 2));
+  border-bottom: 1px solid rgb(144 31 59 / 10%);
+  background: #f3efe9;
+  color: #252321;
+  box-shadow: 0 0.8rem 2.5rem rgb(58 48 40 / 8%);
+}
+
+main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) > a:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: #252321;
+  font-size: 1rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+
+main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) > a:first-child::before {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  background: #f8f5f1;
+  color: var(--ek-burgundy);
+  content: "E";
+  font-family: Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) nav {
+  color: #383532;
+}
+
+main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) nav a {
+  color: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.015em;
+}
+
+main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section {
+  position: relative;
+  margin-inline: calc(50% - 50cqi);
+  padding-inline:
+    max(1rem, calc((100vw - min(100vw - 2rem, 86rem)) / 2));
+  overflow: hidden;
+  border: 0;
+  background:
+    linear-gradient(90deg, rgb(9 12 15 / 94%), rgb(9 12 15 / 77%) 48%, rgb(9 12 15 / 38%)),
+    url("/images/ekiphan-kitchen-hero.png") center 47% / cover;
+  color: #fff;
+}
+
+main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section::after {
+  position: absolute;
+  right: -6rem;
+  bottom: -9rem;
+  width: 24rem;
+  height: 24rem;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 50%;
+  content: "";
+}
+
+main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section h1 {
+  position: relative;
+  z-index: 1;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 780;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+}
+
+main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section > p,
+main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section > span,
+main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section > div > p {
+  position: relative;
+  z-index: 1;
+}
+
+main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section > p:last-child,
+main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section > span {
+  color: rgb(255 255 255 / 72%);
+}
+
+main[data-public-page] :is(h1, h2, h3) {
+  letter-spacing: -0.035em;
+}
+
+main[data-public-page] :is(button, input, textarea, select, a) {
+  border-radius: 0;
+}
+
+main[data-public-page] :is(button, input, textarea, select):focus-visible,
+main[data-public-page] a:focus-visible {
+  outline-color: var(--ek-gold);
+}
+
+main[data-public-page] [class*="eyebrow"] {
+  color: var(--ek-primary);
+}
+
+main[data-public-page] :is(input, textarea, select) {
+  border-color: var(--ek-border);
+  background-color: var(--ek-off-white);
+  color: var(--ek-text);
+}
+
+main[data-public-page] :is([class*="panel"], [class*="card"], [class*="tile"]) {
+  border-color: var(--ek-border);
+}
+
+main[data-public-page] :is(button, [class*="primary"], [class*="submit"]) {
+  border-color: var(--ek-primary);
+}
+
+@media (max-width: 48rem) {
+  main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) {
+    min-height: 4.5rem;
+    align-items: center;
+    flex-direction: row;
+    padding-bottom: 0;
+  }
+
+  main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) nav {
+    display: block;
+    width: auto;
+  }
+
+  main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section {
+    min-height: 25rem;
+    align-content: end;
+    padding-top: 5rem;
+    padding-bottom: 3rem;
+  }
+}
+/* Shared public-nav CTA: keeps the quote action visually aligned across every page. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Admin surfaces use the same visual system without changing their workflows. */
+.admin-scope {
+  min-height: 100vh;
+  background: #f4f1ed;
+  color: #171a1d;
+}
+
+.admin-scope main {
+  color: #171a1d;
+  background-color: #f4f1ed;
+}
+
+.admin-scope [class*="eyebrow"] {
+  color: #88051f;
+}
+
+.admin-scope :is(h1, h2, h3) {
+  font-family: Arial, Helvetica, sans-serif;
+  letter-spacing: -.035em;
+}
+
+.admin-scope [class*="hero"] {
+  border-radius: 0;
+  background:
+    linear-gradient(90deg, rgb(9 12 15 / 93%), rgb(9 12 15 / 67%)),
+    url("/images/ekiphan-kitchen-hero.png") center / cover;
+  box-shadow: none;
+}
+
+.admin-scope :is(
+  [class*="panel"],
+  [class*="card"],
+  [class*="metric"],
+  [class*="editor"]
+) {
+  border-radius: 0;
+  border-color: #ddd8d2;
+  background-color: #fff;
+  box-shadow: none;
+}
+
+.admin-scope :is(input, textarea, select, button) {
+  border-radius: 0 !important;
+}
+
+.admin-scope button:not([class*="danger"]):not([class*="textButton"]) {
+  background-color: #88051f;
+}
+
+.admin-scope a {
+  color: #78051c;
+}
+
+.admin-scope [class*="nav"] a {
+  text-decoration-color: #b9828e;
+  text-underline-offset: .25rem;
+}
+
+.admin-scope :is(input, textarea, select):focus-visible,
+.admin-scope :is(button, a):focus-visible {
+  outline-color: #d4ae52 !important;
+}
+/* One consistent public-header quote action across every route. */
+main header a[href="/teklif-listem"]{display:inline-flex!important;min-height:2.75rem;align-items:center;justify-content:center;padding:0 1.3rem!important;border:1px solid rgb(255 255 255 / 24%)!important;border-radius:999px!important;background:rgb(143 29 52 / 92%)!important;box-shadow:0 .75rem 1.8rem rgb(57 0 14 / 22%),inset 0 1px 0 rgb(255 255 255 / 15%);color:#fff!important;font-size:.72rem!important;font-weight:850!important;letter-spacing:.045em;text-decoration:none!important;transition:background-color 180ms ease,transform 180ms ease}main header a[href="/teklif-listem"]:hover{background:#a52b47!important;transform:translateY(-.1rem)}main header a[href="/teklif-listem"]:focus-visible{outline:3px solid #d7b06e!important;outline-offset:3px}
+
+
+/* Keep the page canvas in the Ekiphan warm beige without white side fades. */
+html,
+body {
+  background-color: #d8d2c8;
+}
+
+/* Shared site typography: use the same clean sans-serif family across public pages. */
+body,
+button,
+input,
+textarea,
+select {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+main[data-public-page],
+main[data-public-page] :is(h1, h2, h3, h4, p, span, small, strong, em, b, a, label, button, input, textarea, select) {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Homepage only: use the entire viewport, not the shared main content width. */
+#main-content > main[class*="home-module__"][class*="__page"] {
+  width: 100vw !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding-inline: 0 !important;
+}
+
+#main-content > main[class*="home-module__"] > section:first-of-type {
+  width: 100vw !important;
+  margin-inline: 0 !important;
+}
+
+/* Remove the shared vertical main padding on the homepage so the hero video reaches the top edge. */
+#main-content > main[class*="home-module__"][class*="__page"] {
+  padding-block: 0 !important;
+}

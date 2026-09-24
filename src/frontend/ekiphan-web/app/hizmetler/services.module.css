@@ -1,0 +1,87 @@
+.page { min-height: 100vh; background: #f8f6f1; color: #18242d; overflow-x: clip; }
+.hero { position: relative; z-index: 0; width: 100%; background: #f8f6f1; padding: 7.5rem 0 3.5rem; }
+.heroInner { display: grid; width: min(calc(100% - 4rem), 112rem); grid-template-columns: minmax(0, 45fr) minmax(0, 55fr); align-items: center; gap: clamp(2rem, 4vw, 4.5rem); margin: 0 auto; }
+.heroCopy { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; justify-content: center; padding: 1rem 0; }
+.breadcrumb { display: flex; align-items: center; gap: .55rem; margin: 0 0 1.5rem; color: #526166; font-size: .78rem; }.breadcrumb a { color: inherit; text-decoration: none; }.breadcrumb strong { color: #88051f; font-weight: 800; }
+.hero h1 { max-width: 9.5ch; margin: 0; color: #18242d; font-family: Arial,Helvetica,sans-serif; font-size: clamp(3.25rem, 4.35vw, 5rem); font-weight: 700; letter-spacing: -.055em; line-height: .94; }
+.accent { display: block; width: 3.5rem; height: .2rem; margin: 1.5rem 0; background: #88051f; }.heroCopy > p { max-width: 33rem; margin: 0; color: #526166; font-size: 1.05rem; line-height: 1.75; }
+.heroVisual { display: block; min-width: 0; }.heroVisual img { display: block; width: 100%; height: clamp(30rem, 34vw, 35rem); border-radius: 1.75rem; object-fit: cover; object-position: center; box-shadow: 0 .75rem 2rem rgb(24 36 45 / 7%); }
+@media (max-width: 75rem) { .hero { padding-top: 6.5rem; }.heroInner { width: calc(100% - 3rem); gap: 2rem; }.heroVisual img { height: 29rem; }.hero h1 { font-size: clamp(3rem, 4.8vw, 4.25rem); } }
+@media (max-width: 56.25rem) { .hero { padding: 5.5rem 0 2.5rem; }.heroInner { width: calc(100% - 2rem); grid-template-columns: 1fr; gap: 2rem; }.heroCopy { padding: 0; }.heroVisual img { height: 22rem; border-radius: 1.25rem; }.hero h1 { max-width: 10ch; } }
+/* Services hero only: existing project image behind the copy. */
+.hero {
+  min-height: 41.25rem;
+  padding: 0;
+  overflow: hidden;
+  background: url("/images/feature-consultation.png") center / cover no-repeat;
+}
+
+.hero::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgb(15 20 24 / 34%), transparent 62%);
+  content: "";
+}
+
+.heroInner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: min(calc(100% - 6rem), 105rem);
+  min-height: 41.25rem;
+  align-items: center;
+  margin: 0 auto;
+}
+
+.heroCopy {
+  box-sizing: border-box;
+  width: min(35rem, 42vw);
+  min-width: 0;
+  padding: 2.75rem;
+  border: 1px solid rgb(255 255 255 / 44%);
+  border-radius: 1.75rem;
+  background: rgb(248 246 241 / 78%);
+  box-shadow: 0 1.25rem 3.125rem rgb(20 20 20 / 8%);
+  backdrop-filter: blur(1rem);
+  -webkit-backdrop-filter: blur(1rem);
+}
+
+.heroVisual { display: none; }
+
+@media (max-width: 75rem) {
+  .hero, .heroInner { min-height: 37rem; }
+  .heroInner { width: calc(100% - 4rem); }
+  .heroCopy { width: min(32.5rem, 50vw); padding: 2.25rem; }
+}
+
+@media (max-width: 56.25rem) {
+  .hero { min-height: 0; padding: 16rem 0 1rem; background-position: center top; }
+  .heroInner { display: block; width: calc(100% - 2rem); min-height: 0; }
+  .heroCopy { width: 100%; padding: 1.75rem; }
+}
+/* Let the services hero image reach the bottom of the opening viewport. */
+.hero,
+.heroInner {
+  min-height: 100svh;
+}
+
+@media (max-width: 56.25rem) {
+  .hero,
+  .heroInner { min-height: 0; }
+}
+/* Services hero only: center the existing glass copy panel. */
+@media (min-width: 56.3125rem) {
+  .heroInner {
+    justify-content: center;
+  }
+}
+/* Keep only the Services hero title inside its glass panel on wide screens. */
+@media (min-width: 56.3125rem) {
+  .heroCopy h1 {
+    max-width: 100%;
+    font-size: clamp(3rem, 3.6vw, 3.8rem);
+    line-height: .96;
+    overflow-wrap: normal;
+  }
+}

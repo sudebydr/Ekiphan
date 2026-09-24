@@ -1,0 +1,22 @@
+using Ekiphan.Domain.Identity;
+using FluentValidation;
+
+namespace Ekiphan.Application.Identity;
+
+public sealed record UserPermissionSummaryDto(IReadOnlyCollection<string> RolePermissions,IReadOnlyCollection<string> ExplicitAllows,IReadOnlyCollection<string> ExplicitDenies,IReadOnlyCollection<string> EffectivePermissions,IReadOnlyCollection<string> ActiveRoles);
+public sealed record PermissionDto(Guid Id,string Code,string Name,string Description,string Group);
+public sealed record PermissionGroupDto(string Group,IReadOnlyList<PermissionDto> Permissions);
+public sealed record RoleSummaryDto(Guid Id,string Name,string? Description,bool IsSystemRole,bool IsActive,int UserCount,int PermissionCount,DateTimeOffset CreatedAt,DateTimeOffset UpdatedAt,string RowVersion);
+public sealed record RoleDetailDto(RoleSummaryDto Role,IReadOnlyList<string> PermissionCodes);
+public sealed record CreateRoleCommand(string Name,string? Description,IReadOnlyList<string> PermissionCodes,Guid ActorUserId);
+public sealed record UpdateRoleCommand(Guid RoleId,string Name,string? Description,bool IsActive,IReadOnlyList<string> PermissionCodes,string RowVersion,Guid ActorUserId);
+public sealed record AssignUserRolesCommand(Guid UserId,IReadOnlyList<Guid> RoleIds,string Reason,Guid ActorUserId);
+public sealed record AddUserPermissionOverrideCommand(Guid UserId,string PermissionCode,PermissionOverrideType OverrideType,DateTimeOffset? ExpiresAt,string Reason,Guid ActorUserId);
+
+public interface IUserPermissionService{Task<bool> HasPermissionAsync(Guid userId,string permission,CancellationToken cancellationToken=default);Task<IReadOnlyCollection<string>> GetEffectivePermissionsAsync(Guid userId,CancellationToken cancellationToken=default);Task<UserPermissionSummaryDto> GetPermissionSummaryAsync(Guid userId,CancellationToken cancellationToken=default);void Invalidate(Guid userId);}
+public interface IRolePermissionManagementService{Task<IReadOnlyList<RoleSummaryDto>> GetRolesAsync(CancellationToken cancellationToken);Task<RoleDetailDto?> GetRoleAsync(Guid id,CancellationToken cancellationToken);Task<RoleDetailDto> CreateRoleAsync(CreateRoleCommand command,CancellationToken cancellationToken);Task<RoleDetailDto> UpdateRoleAsync(UpdateRoleCommand command,CancellationToken cancellationToken);Task<bool> ArchiveRoleAsync(Guid roleId,Guid actor,string reason,CancellationToken cancellationToken);Task<IReadOnlyList<RoleSummaryDto>> GetUserRolesAsync(Guid userId,CancellationToken cancellationToken);Task AssignRolesAsync(AssignUserRolesCommand command,CancellationToken cancellationToken);Task RemoveRoleAsync(Guid userId,Guid roleId,Guid actor,string reason,CancellationToken cancellationToken);Task<UserPermissionSummaryDto> AddOverrideAsync(AddUserPermissionOverrideCommand command,CancellationToken cancellationToken);Task RemoveOverrideAsync(Guid userId,Guid overrideId,Guid actor,CancellationToken cancellationToken);Task<IReadOnlyList<PermissionGroupDto>> GetPermissionCatalogAsync(CancellationToken cancellationToken);}
+
+public sealed class CreateRoleCommandValidator:AbstractValidator<CreateRoleCommand>{public CreateRoleCommandValidator(){RuleFor(x=>x.Name).NotEmpty().MaximumLength(100);RuleFor(x=>x.PermissionCodes).NotNull().Must(x=>x.Distinct(StringComparer.OrdinalIgnoreCase).Count()==x.Count).WithMessage("Permission codes must be unique.");}}
+public sealed class UpdateRoleCommandValidator:AbstractValidator<UpdateRoleCommand>{public UpdateRoleCommandValidator(){RuleFor(x=>x.Name).NotEmpty().MaximumLength(100);RuleFor(x=>x.RowVersion).NotEmpty();RuleFor(x=>x.PermissionCodes).NotNull().Must(x=>x.Distinct(StringComparer.OrdinalIgnoreCase).Count()==x.Count);}}
+public sealed class AssignUserRolesCommandValidator:AbstractValidator<AssignUserRolesCommand>{public AssignUserRolesCommandValidator(){RuleFor(x=>x.RoleIds).NotEmpty().Must(x=>x.Distinct().Count()==x.Count);RuleFor(x=>x.Reason).NotEmpty().MaximumLength(1000);}}
+public sealed class AddUserPermissionOverrideCommandValidator:AbstractValidator<AddUserPermissionOverrideCommand>{public AddUserPermissionOverrideCommandValidator(TimeProvider clock){RuleFor(x=>x.PermissionCode).Must(AdminPermissionCode.Granular.Contains);RuleFor(x=>x.OverrideType).IsInEnum();RuleFor(x=>x.Reason).NotEmpty().MaximumLength(1000);RuleFor(x=>x.ExpiresAt).Must(x=>!x.HasValue||x>clock.GetUtcNow()).WithMessage("Expiration must be in the future.");}}

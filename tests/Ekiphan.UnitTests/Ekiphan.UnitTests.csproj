@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.29" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <!-- These tests target the retired Phase-10 Settings API, replaced by Advanced CMS settings. -->
+  <ItemGroup>
+    <Compile Remove="Api\AdminSettingsEndpointTests.cs" />
+    <Compile Remove="Settings\SiteSettingsServiceTests.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\backend\Ekiphan.Application\Ekiphan.Application.csproj" />
+    <ProjectReference Include="..\..\src\backend\Ekiphan.Api\Ekiphan.Api.csproj" />
+    <ProjectReference Include="..\..\src\backend\Ekiphan.Domain\Ekiphan.Domain.csproj" />
+    <ProjectReference Include="..\..\src\backend\Ekiphan.Infrastructure\Ekiphan.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

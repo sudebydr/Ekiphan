@@ -1,0 +1,343 @@
+.detailPage { min-height: 100vh; background: #f5f3ef; color: #191919; }
+.pageShell,.contentShell{width:min(calc(100% - 4rem),92rem);margin-inline:auto}.pageShell{padding-top:clamp(7.5rem,9vw,9rem)}
+.breadcrumb{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center;padding-block:1.4rem;border-bottom:1px solid #e1ddd6;color:#8a8580;font-size:.72rem;line-height:1.5}.breadcrumb a{color:inherit;text-decoration:none}.breadcrumb a:hover{color:#9f1539}.breadcrumb strong{max-width:30rem;overflow:hidden;color:#393633;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
+.productHero{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(24rem,.82fr);gap:clamp(3rem,6vw,7rem);align-items:start;padding:clamp(2.25rem,4vw,4.5rem) 0 clamp(4rem,7vw,7rem)}
+.galleryColumn{min-width:0}.galleryColumn :global(.productGallery){display:grid;grid-template-columns:5rem minmax(0,1fr);gap:1rem;min-height:clamp(35rem,52vw,49rem)}.galleryColumn :global(.productGalleryMain){position:relative;display:grid;min-width:0;min-height:35rem;place-items:center;overflow:hidden;background:#ece9e3}.galleryColumn :global(.productGalleryMainButton){display:grid;width:100%;height:100%;place-items:center;padding:clamp(2rem,6vw,5rem);border:0;background:transparent;cursor:zoom-in}.galleryColumn :global(.productGalleryMain img){width:100%;height:100%;max-height:39rem;object-fit:contain;mix-blend-mode:multiply;transition:transform 380ms ease}.galleryColumn :global(.productGalleryMainButton:hover img){transform:scale(1.025)}.galleryColumn :global(.productGalleryFallback){color:#9f1539;font-size:clamp(3rem,8vw,7rem);font-weight:800;letter-spacing:-.06em}
+.galleryColumn :global(.productGalleryThumbnails){display:flex;grid-column:1;grid-row:1;flex-direction:column;gap:.65rem;order:-1}.galleryColumn :global(.productGalleryThumb){position:relative;display:grid;width:5rem;height:5.5rem;place-items:center;padding:.45rem;overflow:hidden;border:1px solid #d8d4cd;border-radius:.35rem;background:#f8f6f2;cursor:pointer}.galleryColumn :global(.productGalleryThumb)::after{position:absolute;right:0;bottom:0;left:0;height:2px;background:transparent;content:""}.galleryColumn :global(.productGalleryThumbSelected){border-color:#3d3935}.galleryColumn :global(.productGalleryThumbSelected)::after{background:#a5163d}.galleryColumn :global(.productGalleryThumb img){width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply}.galleryColumn :global(.productGalleryCounter){position:absolute;right:1.25rem;bottom:1.1rem;color:#706b66;font-size:.68rem;letter-spacing:.12em}
+.galleryColumn :global(.productGalleryLightbox){position:fixed;z-index:100;inset:0;display:grid;place-items:center;padding:clamp(1rem,4vw,4rem);border:0;background:rgb(24 23 22 / 94%)}.galleryColumn :global(.productGalleryLightbox img){width:min(90vw,70rem);max-height:86vh;object-fit:contain}.galleryColumn :global(.productGalleryLightboxClose){position:fixed;top:1.5rem;right:1.5rem;width:3rem;height:3rem;border:1px solid rgb(255 255 255 / 30%);border-radius:50%;background:transparent;color:#fff;font-size:1.5rem;cursor:pointer}
+.productInfo{position:sticky;top:7rem;padding-top:.35rem}.categoryLabel,.sectionEyebrow{margin:0;color:#a5163d;font-size:.7rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase}.brandLine{display:flex;justify-content:space-between;gap:1rem;align-items:center;margin-top:1.15rem}.brandLine strong{font-size:.92rem;letter-spacing:.06em;text-transform:uppercase}.brandLine a{color:#726d68;font-size:.72rem;text-decoration:none}.brandLine a:hover{color:#a5163d}
+.productInfo h1{max-width:13ch;margin:1rem 0 1.35rem;color:#1d1b1a;font-size:clamp(2.8rem,4.1vw,4.5rem);font-weight:560;letter-spacing:-.055em;line-height:1.02}.modelLine{display:flex;flex-wrap:wrap;gap:.55rem 1.4rem;margin:0;color:#7a756f;font-size:.78rem}.lead{max-width:34rem;margin:1.65rem 0 0;color:#66615c;font-size:clamp(1rem,1.2vw,1.12rem);line-height:1.75}
+.quickSpecs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:2rem 0 0;border-top:1px solid #dedad3;border-left:1px solid #dedad3}.quickSpecs div{min-width:0;padding:1.1rem 1.2rem;border-right:1px solid #dedad3;border-bottom:1px solid #dedad3}.quickSpecs dt{color:#8a847e;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase}.quickSpecs dd{margin:.4rem 0 0;overflow-wrap:anywhere;color:#272421;font-size:.98rem;font-weight:700}
+.statusList{display:flex;flex-wrap:wrap;gap:.55rem 1rem;margin-top:1.3rem}.statusList span{display:inline-flex;gap:.45rem;align-items:center;color:#716b66;font-size:.72rem}.statusList span::before{width:.36rem;height:.36rem;border-radius:50%;background:#a5163d;content:""}
+.primaryAction{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem;max-width:32rem;margin-top:1.8rem}.primaryAction>div{display:flex;min-width:0;width:100%}.quoteButton,.mobileQuoteButton{min-height:3.5rem;padding:0 1.4rem;border:1px solid #a5163d;border-radius:999px;background:#a5163d;color:#fff;font:inherit;font-size:.78rem;font-weight:800;letter-spacing:.025em;cursor:pointer;transition:background-color 360ms cubic-bezier(.22,1,.36,1),border-color 360ms cubic-bezier(.22,1,.36,1),box-shadow 360ms cubic-bezier(.22,1,.36,1)}.quoteButton{width:100%}.quoteButton:hover,.mobileQuoteButton:hover{border-color:#941438;background:#941438;box-shadow:0 .45rem 1.2rem rgb(165 22 61 / 14%)}.primaryAction>a{display:inline-flex;min-height:3.5rem;align-items:center;justify-content:center;gap:.55rem;padding-inline:1.4rem;border:1px solid #b6506d;border-radius:999px;background:rgb(255 255 255 / 28%);color:#8f1235;font-size:.76rem;font-weight:800;text-decoration:none;white-space:nowrap;transition:background-color 360ms cubic-bezier(.22,1,.36,1),border-color 360ms cubic-bezier(.22,1,.36,1),color 360ms cubic-bezier(.22,1,.36,1),box-shadow 360ms cubic-bezier(.22,1,.36,1)}.primaryAction>a:hover{border-color:#a5163d;background:#f4e5e9;color:#7e102f;box-shadow:0 .4rem 1rem rgb(165 22 61 / 9%)}
+.quantityControl{display:inline-flex;min-height:3.6rem;align-items:center;justify-content:center;gap:.3rem;padding:.35rem;border:1px solid #d7d2cb;border-radius:.65rem;background:#fff}.quantityControl button{display:grid;width:2.7rem;height:2.7rem;place-items:center;border:0;border-radius:.4rem;background:#f2eee9;color:#9f1539;font-size:1.35rem;cursor:pointer}.quantityControl output{min-width:2.3rem;text-align:center;font-weight:800}.secondaryActions{display:flex;flex-wrap:wrap;gap:.7rem 1.25rem;margin-top:1.15rem}.secondaryActions a{color:#625d58;font-size:.72rem;font-weight:650;text-decoration:none}.secondaryActions a:hover{color:#a5163d}
+.serviceStrip{display:grid;width:100%;grid-template-columns:repeat(4,minmax(0,1fr));padding:0 max(2rem,calc((100vw - 92rem)/2));border-block:1px solid #dedad3;background:#ebe8e2}.serviceStrip div{display:grid;grid-template-columns:auto 1fr;gap:.2rem .85rem;padding:1.6rem clamp(1rem,2vw,2rem);border-right:1px solid #d8d3cc}.serviceStrip div:first-child{border-left:1px solid #d8d3cc}.serviceStrip span{grid-row:1/span 2;color:#a5163d;font-size:.66rem;font-weight:800}.serviceStrip strong{font-size:.76rem;letter-spacing:.08em;text-transform:uppercase}.serviceStrip p{margin:0;color:#77716b;font-size:.72rem;line-height:1.45}
+.contentShell{padding-bottom:7rem}.detailNav{position:sticky;z-index:5;top:0;display:flex;gap:clamp(1.2rem,3vw,3rem);overflow-x:auto;border-bottom:1px solid #dedad3;background:rgb(245 243 239 / 96%)}.detailNav a{position:relative;flex:0 0 auto;padding:1.35rem 0 1.1rem;color:#76706a;font-size:.7rem;font-weight:800;letter-spacing:.08em;text-decoration:none;text-transform:uppercase}.detailNav a:first-child{color:#211f1d}.detailNav a:first-child::after{position:absolute;right:0;bottom:-1px;left:0;height:2px;background:#a5163d;content:""}
+.overview{display:grid;grid-template-columns:minmax(0,.9fr) minmax(22rem,1.1fr);gap:clamp(3rem,8vw,9rem);padding:clamp(5rem,9vw,9rem) 0}.overview h2,.sectionHeading h2{margin:.9rem 0 0;color:#211f1d;font-size:clamp(2.2rem,4vw,4rem);font-weight:560;letter-spacing:-.045em;line-height:1.04}.overview>div>p:last-child{max-width:38rem;margin:1.5rem 0 0;color:#6e6862;font-size:1.05rem;line-height:1.8}.overview ol{margin:0;padding:0;list-style:none}.overview li{display:grid;grid-template-columns:4.5rem 1fr;align-items:center;min-height:5.5rem;border-top:1px solid #dedad3}.overview li:last-child{border-bottom:1px solid #dedad3}.overview li span{color:#c5c0b9;font-size:1.55rem;font-weight:500}.overview li strong{font-size:1rem;font-weight:650}
+.editorialImage{height:clamp(24rem,50vw,45rem);margin:0 0 clamp(5rem,9vw,9rem);overflow:hidden;background:#e8e4de}.editorialImage img{width:100%;height:100%;object-fit:cover}
+.specifications,.documents,.applications,.relatedSection{padding:clamp(4.5rem,8vw,8rem) 0;border-top:1px solid #dedad3;scroll-margin-top:4rem}.sectionHeading{display:flex;justify-content:space-between;gap:2rem;align-items:end;margin-bottom:3rem}.sectionHeading>p{max-width:28rem;margin:0;color:#77716b;line-height:1.65}.sectionHeading>a{color:#9f1539;font-size:.78rem;font-weight:750;text-decoration:none;white-space:nowrap}
+.specGroups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(2rem,5vw,5rem)}.specGroups section{min-width:0}.specGroups h3{margin:0 0 1.25rem;color:#9f1539;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase}.specGroups dl{margin:0}.specGroups dl div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;padding:.9rem 0;border-top:1px solid #dedad3}.specGroups dt{color:#77716b;font-size:.8rem}.specGroups dd{margin:0;text-align:right;font-size:.82rem;font-weight:700}.emptyData{padding:2rem 0;color:#77716b;border-top:1px solid #dedad3}
+.documentGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}.documentGrid a{display:grid;grid-template-columns:auto 1fr auto;gap:.3rem 1rem;align-items:center;min-height:8rem;padding:1.35rem;border:1px solid #dedad3;background:#faf9f6;color:#2c2926;text-decoration:none;transition:border-color 220ms ease,background-color 220ms ease}.documentGrid a:hover{border-color:#a5163d;background:#fff}.documentGrid span{grid-row:1/span 2;display:grid;width:2.7rem;height:3.3rem;place-items:center;background:#eeeae4;color:#9f1539;font-size:.62rem;font-weight:850}.documentGrid strong{align-self:end;font-size:.9rem}.documentGrid small{align-self:start;color:#817b75}.documentGrid b{grid-column:3;grid-row:1/span 2;color:#9f1539;font-size:1.1rem}
+.applications>div:last-child{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid #dedad3;border-left:1px solid #dedad3}.applications article{display:grid;gap:2rem;min-height:10rem;padding:1.35rem;border-right:1px solid #dedad3;border-bottom:1px solid #dedad3}.applications article span{color:#b5afa8;font-size:.72rem}.applications article strong{align-self:end;font-size:1rem;font-weight:650}
+.relatedGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(1rem,2vw,1.5rem)}.relatedCard{min-width:0;color:inherit;text-decoration:none}.relatedVisual{display:grid;aspect-ratio:4/3;place-items:center;overflow:hidden;background:#ebe8e2;color:#9f1539;font-size:2.5rem;font-weight:800}.relatedVisual img{width:100%;height:100%;padding:1.1rem;object-fit:contain;mix-blend-mode:multiply;transition:transform 320ms ease}.relatedCard:hover .relatedVisual img{transform:scale(1.035)}.relatedCopy{display:grid;gap:.35rem;padding-top:1rem}.relatedCopy small{color:#9f1539;font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.relatedCopy>span{color:#77716b;font-size:.7rem}.relatedCopy strong{margin-top:.2rem;font-size:1rem;font-weight:650;line-height:1.3}.relatedCopy em{color:#8a847e;font-size:.68rem;font-style:normal}.relatedCopy b{margin-top:.55rem;color:#393532;font-size:.72rem}.relatedCopy b i{display:inline-block;color:#a5163d;font-style:normal;transition:transform 220ms ease}.relatedCard:hover .relatedCopy b i{transform:translateX(.25rem)}.mobileQuoteBar{display:none}
+@media(max-width:68rem){.pageShell,.contentShell{width:min(calc(100% - 3rem),92rem)}.productHero{grid-template-columns:minmax(0,1fr) minmax(20rem,.9fr);gap:2.5rem}.galleryColumn :global(.productGallery){grid-template-columns:1fr;min-height:34rem}.galleryColumn :global(.productGalleryThumbnails){grid-column:1;grid-row:2;flex-direction:row}.serviceStrip{padding-inline:1.5rem}.serviceStrip div{padding-inline:1rem}.relatedGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:48rem){.detailPage{padding-bottom:5.5rem}.pageShell{padding-top:6.2rem}.pageShell,.contentShell{width:min(calc(100% - 2rem),92rem)}.breadcrumb{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap}.productHero{grid-template-columns:1fr;gap:2.25rem;padding-top:1.25rem}.galleryColumn{order:1}.productInfo{position:static;order:2}.galleryColumn :global(.productGallery){min-height:0}.galleryColumn :global(.productGalleryMain){min-height:27rem}.galleryColumn :global(.productGalleryMainButton){padding:2rem}.galleryColumn :global(.productGalleryThumbnails){overflow-x:auto;padding-bottom:.25rem;scroll-snap-type:x mandatory}.galleryColumn :global(.productGalleryThumb){flex:0 0 4.6rem;height:4.9rem;scroll-snap-align:start}.productInfo h1{font-size:clamp(2.5rem,11vw,3.7rem)}.serviceStrip{grid-template-columns:repeat(2,minmax(0,1fr));padding-inline:1rem}.serviceStrip div:nth-child(3){border-left:1px solid #d8d3cc}.overview{grid-template-columns:1fr;gap:3rem;padding-block:5rem}.specGroups{grid-template-columns:1fr}.documentGrid{grid-template-columns:1fr}.applications>div:last-child{grid-template-columns:repeat(2,minmax(0,1fr))}.sectionHeading{align-items:start;flex-direction:column}.mobileQuoteBar{position:fixed;z-index:30;right:0;bottom:0;left:0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:center;padding:.7rem max(1rem,env(safe-area-inset-right)) calc(.7rem + env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-left));border-top:1px solid #ddd8d1;background:rgb(250 249 246 / 96%);box-shadow:0 -.5rem 1.5rem rgb(38 32 27 / 8%);backdrop-filter:blur(.7rem)}.mobileQuoteBar>span{display:grid;min-width:0;gap:.2rem}.mobileQuoteBar small{color:#817b75;font-size:.62rem}.mobileQuoteBar strong{overflow:hidden;font-size:.78rem;text-overflow:ellipsis;white-space:nowrap}.mobileQuoteButton{min-height:3rem;padding-inline:1rem;font-size:.7rem}}
+@media(max-width:32rem){.quickSpecs{grid-template-columns:1fr}.primaryAction{grid-template-columns:1fr}.primaryAction>a{justify-content:center}.serviceStrip{grid-template-columns:1fr}.serviceStrip div{border-left:1px solid #d8d3cc}.applications>div:last-child,.relatedGrid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.galleryColumn :global(.productGalleryMain img),.relatedVisual img,.relatedCopy b i{transition:none}}
+
+/* Gallery placement fix: the main image always occupies the large canvas. */
+.galleryColumn :global(.productGalleryMain) {
+  grid-column: 2;
+  grid-row: 1;
+  background: #eeeae4;
+}
+
+.galleryColumn :global(.productGalleryMainButton) {
+  padding: clamp(1.25rem, 3vw, 2.75rem);
+}
+
+.galleryColumn :global(.productGallerySingle) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.galleryColumn :global(.productGallerySingle .productGalleryMain) {
+  grid-column: 1;
+}
+
+.galleryColumn :global(.productGalleryMain img) {
+  width: 100%;
+  max-width: 46rem;
+  filter: none;
+  mix-blend-mode: multiply;
+}
+
+@media (max-width: 68rem) {
+  .galleryColumn :global(.productGalleryMain) { grid-column: 1; }
+}
+
+/* Softer product-detail actions; override the shared public-page square controls. */
+.detailPage .primaryAction .quoteButton,
+.detailPage .mobileQuoteButton {
+  border-color: #ae3153;
+  border-radius: 1rem;
+  background: #ae3153;
+  box-shadow: 0 0.5rem 1.4rem rgb(135 18 50 / 10%);
+}
+
+.detailPage .primaryAction .quoteButton:hover,
+.detailPage .mobileQuoteButton:hover {
+  border-color: #9e2949;
+  background: #9e2949;
+  box-shadow: 0 0.7rem 1.7rem rgb(135 18 50 / 14%);
+}
+
+.detailPage .primaryAction > a {
+  border-color: rgb(174 49 83 / 42%);
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 24%);
+  color: #8d2743;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 22%);
+}
+
+.detailPage .primaryAction > a:hover {
+  border-color: rgb(174 49 83 / 55%);
+  background: #eee0e3;
+  color: #7f203a;
+  box-shadow: 0 0.5rem 1.3rem rgb(135 18 50 / 8%);
+}
+/* Match the gallery frame to the active image ratio. */
+.galleryColumn :global(.productGallery) {
+  min-height: 0;
+  align-items: start;
+}
+
+.galleryColumn :global(.productGalleryMain) {
+  min-height: 0;
+  aspect-ratio: 1;
+}
+
+.galleryColumn :global(.productGalleryMainButton) {
+  min-height: 0;
+}
+
+@media (max-width: 48rem) {
+  .galleryColumn :global(.productGalleryMain) { min-height: 0; }
+}
+/* Product visual presentation: enlarged, stable catalogue canvas. */
+.productHero{grid-template-columns:minmax(0,1.1fr) minmax(23rem,.9fr);gap:clamp(2.5rem,5vw,5.5rem)}
+.galleryColumn :global(.productGalleryMain){background:#f8f6f2;aspect-ratio:1/1;min-height:clamp(34rem,52vw,46rem)}
+.galleryColumn :global(.productGalleryMainButton){padding:clamp(2rem,5vw,4.5rem)}
+.galleryColumn :global(.productGalleryMain img){max-width:100%;max-height:100%;transform-origin:var(--zoom-origin,50% 50%);transition:transform 420ms cubic-bezier(.22,1,.36,1);will-change:transform}
+.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:scale(2)}
+.galleryColumn :global(.productGalleryMainButton){cursor:zoom-in}.galleryColumn :global(.productGalleryMainButton:focus-visible){outline:2px solid #a5163d;outline-offset:-5px}
+.galleryColumn :global(.productGalleryThumb){border-radius:0;background:#f8f6f2}.galleryColumn :global(.productGalleryCounter){right:1.5rem;bottom:1.35rem;padding:.35rem .5rem;background:rgb(248 246 242 / 82%);color:#4d4843}
+@media(max-width:48rem){.productHero{grid-template-columns:1fr}.galleryColumn :global(.productGalleryMain){min-height:0;aspect-ratio:1/1}.galleryColumn :global(.productGalleryMainButton){cursor:pointer}.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:none}}
+@media(prefers-reduced-motion:reduce){.galleryColumn :global(.productGalleryMain img){transition:none}}
+
+/* Keep the image canvas inside its grid track; never overlap product information. */
+.productHero{grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);column-gap:clamp(2rem,4vw,4.5rem)}
+.galleryColumn,.productInfo{min-width:0}
+.galleryColumn :global(.productGallery){width:100%;min-width:0;grid-template-columns:4.5rem minmax(0,1fr)}
+.galleryColumn :global(.productGalleryMain){grid-column:2;width:100%;min-width:0;min-height:0!important;aspect-ratio:1/1!important;max-height:min(46rem,calc(100vw - 10rem))}
+.galleryColumn :global(.productGalleryMainButton){width:100%;min-width:0;min-height:0;overflow:hidden}
+.galleryColumn :global(.productGalleryMain img){display:block;max-width:100%;max-height:100%;object-fit:contain}
+@media(max-width:68rem){.galleryColumn :global(.productGallery){grid-template-columns:1fr}.galleryColumn :global(.productGalleryMain){grid-column:1;max-height:none}}
+@media(max-width:48rem){.productHero{grid-template-columns:1fr}.galleryColumn :global(.productGalleryMain){aspect-ratio:1/1!important}}
+
+/* Stable product-media reset: restore centred, fully visible product imagery. */
+.galleryColumn :global(.productGallery){display:grid;grid-template-columns:4.75rem minmax(0,1fr);gap:1rem;min-height:0;align-items:start}
+.galleryColumn :global(.productGalleryMain),.galleryColumn :global(.productGallerySingle .productGalleryMain){grid-column:2;grid-row:1;display:grid;width:100%;height:auto;min-height:0!important;aspect-ratio:1/1!important;max-height:none;place-items:center;overflow:hidden;background:#f8f6f2}
+.galleryColumn :global(.productGalleryMainButton){display:grid;width:100%;height:100%;min-height:0;place-items:center;overflow:hidden;padding:clamp(2rem,5vw,4rem);border:0;background:transparent}
+.galleryColumn :global(.productGalleryMain img){display:block!important;width:auto!important;height:auto!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;mix-blend-mode:multiply}
+.galleryColumn :global(.productGallerySingle){grid-template-columns:minmax(0,1fr)}.galleryColumn :global(.productGallerySingle .productGalleryMain){grid-column:1}
+.relatedVisual{display:grid!important;aspect-ratio:4/3!important;place-items:center!important;overflow:hidden!important;background:#f8f6f2!important}.relatedVisual img{display:block!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;padding:clamp(1.25rem,3vw,2.5rem)!important;object-fit:contain!important;object-position:center!important;mix-blend-mode:multiply}
+@media(max-width:68rem){.galleryColumn :global(.productGallery){grid-template-columns:1fr}.galleryColumn :global(.productGalleryMain),.galleryColumn :global(.productGallerySingle .productGalleryMain){grid-column:1}.galleryColumn :global(.productGalleryThumbnails){grid-column:1;grid-row:2}}
+@media(max-width:48rem){.galleryColumn :global(.productGalleryMain),.galleryColumn :global(.productGallerySingle .productGalleryMain){aspect-ratio:1/1!important}.relatedGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Product image only: remove the white canvas and give the source more visual presence. */
+.galleryColumn :global(.productGalleryMain){background:transparent!important}
+.galleryColumn :global(.productGalleryMainButton){padding:0!important}
+.galleryColumn :global(.productGalleryMain img){max-width:94%!important;max-height:94%!important;transform:scale(1.16);transition:transform 420ms cubic-bezier(.22,1,.36,1)}
+.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:scale(2)}
+
+/* Product-detail visual composition: left-aligned thumbnails with a larger, calm main canvas. */
+.productHero{grid-template-columns:minmax(0,1.14fr) minmax(22rem,.86fr);gap:clamp(2.5rem,5vw,5.5rem)}
+.galleryColumn{min-width:0}.galleryColumn :global(.productGallery){display:grid;grid-template-columns:4.35rem minmax(0,1fr);gap:1.15rem;align-items:start;width:100%}
+.galleryColumn :global(.productGalleryMain),.galleryColumn :global(.productGallerySingle .productGalleryMain){grid-column:2;grid-row:1;width:100%;min-height:clamp(32rem,48vw,44rem)!important;aspect-ratio:1/1!important;max-height:none;background:#f8f6f2!important}
+.galleryColumn :global(.productGalleryMainButton){padding:clamp(1.5rem,3.2vw,3.25rem)!important}.galleryColumn :global(.productGalleryMain img){max-width:100%!important;max-height:100%!important;transform:scale(1.08)}.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:scale(2)}
+.galleryColumn :global(.productGalleryThumbnails){grid-column:1;grid-row:1;display:flex;flex-direction:column;gap:.7rem;margin:0;padding:0}.galleryColumn :global(.productGalleryThumb){width:4.35rem;height:4.8rem;padding:.35rem;border:1px solid #d8d2ca;border-radius:0;background:#faf9f6}.galleryColumn :global(.productGalleryThumbSelected){border-color:#a71930;box-shadow:inset 0 0 0 1px #a71930}.galleryColumn :global(.productGalleryThumb img){width:100%;height:100%;padding:0;object-fit:contain}.galleryColumn :global(.productGalleryCounter){right:1.25rem;bottom:1.25rem;background:rgb(248 246 242 / 88%)}
+@media(max-width:68rem){.productHero{grid-template-columns:minmax(0,1.08fr) minmax(20rem,.92fr)}.galleryColumn :global(.productGalleryMain){min-height:clamp(28rem,52vw,38rem)!important}}
+@media(max-width:48rem){.productHero{grid-template-columns:1fr}.galleryColumn :global(.productGallery){grid-template-columns:1fr}.galleryColumn :global(.productGalleryMain),.galleryColumn :global(.productGallerySingle .productGalleryMain){grid-column:1;min-height:0!important;aspect-ratio:1/1!important}.galleryColumn :global(.productGalleryThumbnails){grid-column:1;grid-row:2;flex-direction:row}.galleryColumn :global(.productGalleryThumb){flex:0 0 4.35rem}}
+
+/* No image canvas: show only the product image on the page background. */
+.galleryColumn :global(.productGalleryMain),.galleryColumn :global(.productGallerySingle .productGalleryMain){background:transparent!important}
+.galleryColumn :global(.productGalleryMainButton){background:transparent!important}
+
+/* Related product carousel. */
+.relatedCarousel{position:relative}.relatedViewport{overflow:hidden}.relatedTrack{display:flex;gap:.875rem;transition:transform .45s cubic-bezier(.22,1,.36,1)}.relatedTrack .relatedCard{flex:0 0 calc((100% - 2.625rem)/4)}.relatedArrow{position:absolute;z-index:2;top:34%;display:grid;width:2.8rem;height:2.8rem;place-items:center;border:1px solid #ded8d0;border-radius:50%;background:#faf9f6;color:#a71930;font-size:1.2rem;cursor:pointer;transform:translateY(-50%)}.relatedArrow:disabled{opacity:.35;cursor:default}.relatedPrev{left:-1.4rem}.relatedNext{right:-1.4rem}.relatedVisual{background:#f8f6f2!important}@media(max-width:68rem){.relatedTrack .relatedCard{flex-basis:calc((100% - .875rem)/2)}.relatedPrev{left:-.7rem}.relatedNext{right:-.7rem}}@media(max-width:48rem){.relatedTrack .relatedCard{flex-basis:100%}.relatedArrow{top:31%;width:2.5rem;height:2.5rem}.relatedPrev{left:.5rem}.relatedNext{right:.5rem}}
+
+/* Give the thumbnail rail a little more breathing room on the left. */
+@media(min-width:48.0625rem){.galleryColumn :global(.productGalleryThumbnails){transform:translateX(-1rem)}}
+
+/* Raise and enlarge the isolated product image while keeping the page background visible. */
+.galleryColumn :global(.productGalleryMainButton){align-content:start;padding-top:clamp(.5rem,2vw,1.75rem)!important}
+.galleryColumn :global(.productGalleryMain img){max-width:100%!important;max-height:100%!important;transform:translateY(-8%) scale(1.24);transform-origin:center top}
+.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:translateY(-8%) scale(2)}
+@media(max-width:48rem){.galleryColumn :global(.productGalleryMain img){transform:scale(1.12)}.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:none}}
+
+/* Stronger desktop magnification while preserving cursor-based zoom origin. */
+@media(min-width:48.0625rem){.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:translateY(-8%) scale(2.45)}}
+
+/* Product recommendations — responsive, one-step carousel. */
+.relatedSection{position:relative;overflow:hidden;padding:clamp(4rem,7vw,6rem) 0!important}.relatedSection .sectionHeading{margin-bottom:clamp(3rem,4vw,3.5rem)}.relatedCarousel{position:relative;width:100%;padding:0 1.25rem 2.2rem}.relatedViewport{width:100%;overflow:hidden;touch-action:pan-y}.relatedTrack{display:flex;gap:24px;transition:transform 450ms ease}.relatedTrack .relatedCard{display:flex;flex:0 0 calc((100% - 48px)/3);min-width:0;flex-direction:column;height:100%;border:0!important;background:transparent!important;box-shadow:none!important;transform:none!important}.relatedVisual{display:flex!important;width:100%;aspect-ratio:1/1!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;background:#f8f6f2!important}.relatedVisual img{display:block!important;width:82%!important;height:82%!important;max-width:82%!important;max-height:82%!important;padding:0!important;object-fit:contain!important;object-position:center!important;mix-blend-mode:multiply;transition:transform 400ms ease}.relatedCard:hover .relatedVisual img{transform:scale(1.04)!important}.relatedCopy{display:flex!important;min-height:12.5rem;flex-direction:column;align-items:flex-start;gap:.34rem;padding:1rem 0 0!important}.relatedCopy small{color:#a71930!important;font-size:.7rem!important;font-weight:800!important;letter-spacing:.08em!important}.relatedCopy>span,.relatedCopy em{color:#77716b!important;font-size:.8rem!important}.relatedCopy strong{display:-webkit-box;min-height:3.3rem;overflow:hidden;color:#1f1f1f;font-size:clamp(1.2rem,1.6vw,1.4rem)!important;font-weight:700!important;line-height:1.28!important;-webkit-box-orient:vertical;-webkit-line-clamp:2}.relatedCopy b{margin-top:auto!important;color:#292622!important;font-size:.76rem!important}.relatedCopy b i{color:#a71930}.relatedCard:hover .relatedCopy b{color:#a71930}.relatedCard:hover .relatedCopy b i{transform:translateX(4px)!important}.relatedArrow{position:absolute!important;z-index:2;top:calc((100% - 2.2rem)/2 - 6.25rem);display:grid;width:3rem!important;height:3rem!important;place-items:center;border:1px solid #a71930!important;border-radius:0!important;background:#faf9f6!important;color:#a71930!important;font-size:1.25rem!important;box-shadow:0 .2rem .7rem rgb(45 35 28 / 7%);transition:background-color 200ms,color 200ms}.relatedArrow:hover:not(:disabled){background:#a71930!important;color:#fff!important}.relatedArrow:disabled{opacity:.3}.relatedPrev{left:-.15rem!important}.relatedNext{right:-.15rem!important}.relatedDots{display:flex;justify-content:center;gap:.5rem;padding-top:1.15rem}.relatedDots button{width:.45rem;height:.45rem;border:0;border-radius:50%;background:#cbc5bd;padding:0;cursor:pointer}.relatedDots .relatedDotActive{background:#a71930}
+@media(max-width:1199px){.relatedTrack .relatedCard{flex-basis:calc((100% - 24px)/2)}.relatedCarousel{padding-inline:1rem}.relatedArrow{top:calc((100% - 2.2rem)/2 - 6.25rem)}.relatedPrev{left:-.1rem!important}.relatedNext{right:-.1rem!important}}
+@media(max-width:767px){.relatedSection .sectionHeading{align-items:start;margin-bottom:2.5rem}.relatedCarousel{padding-left:0;padding-right:0}.relatedViewport{padding-right:13vw}.relatedTrack .relatedCard{flex-basis:85vw}.relatedArrow{top:calc((100% - 2.2rem)/2 - 6.25rem);width:2.5rem!important;height:2.5rem!important}.relatedPrev{left:.45rem!important}.relatedNext{right:.45rem!important}.relatedCopy{min-height:11.5rem}.relatedDots{padding-top:.8rem}}
+@media(prefers-reduced-motion:reduce){.relatedTrack,.relatedVisual img{transition:none!important}}
+
+/* During zoom, follow the pointer position instead of applying a fixed vertical offset. */
+@media(min-width:48.0625rem){.galleryColumn :global(.productGalleryMain img){transform-origin:var(--zoom-origin,50% 50%)}.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:scale(2.45)}}
+
+/* Tighter vertical rhythm in the product information column. */
+.productInfo h1{margin:.65rem 0 .8rem}.productInfo .lead{margin-top:1rem;line-height:1.6}.productInfo .quickSpecs{margin-top:1.35rem}.productInfo .statusList{margin-top:1rem}.productInfo .primaryAction{margin-top:1.25rem}.brandLine{margin-top:.75rem}.modelLine{margin-top:0}
+
+/* Restrained product-detail composition: a single, centred product visual on the left. */
+.productHero{grid-template-columns:minmax(0,1.08fr) minmax(25rem,.92fr);gap:clamp(3rem,7vw,7rem);align-items:center;padding-top:clamp(4rem,7vw,7rem)}
+.galleryColumn :global(.productGallery){display:block;min-height:0}.galleryColumn :global(.productGalleryThumbnails){display:none}.galleryColumn :global(.productGalleryMain),.galleryColumn :global(.productGallerySingle .productGalleryMain){display:grid;min-height:clamp(21rem,32vw,29rem)!important;place-items:center;overflow:visible}.galleryColumn :global(.productGalleryMainButton){width:min(100%,23rem);height:auto;min-height:0;aspect-ratio:4/3;justify-self:center;align-self:center;padding:0!important}.galleryColumn :global(.productGalleryMain img){width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;transform:scale(1)!important}.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:scale(2.1)!important}.productInfo{padding-top:0}
+@media(max-width:48rem){.productHero{grid-template-columns:1fr;gap:2.5rem;padding-top:2rem}.galleryColumn :global(.productGalleryMain){min-height:17rem!important}.galleryColumn :global(.productGalleryMainButton){width:min(100%,19rem)}.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:scale(1)!important}}
+
+/* Larger mobile product canvas with a fully contained image. */
+@media(max-width:48rem){.galleryColumn :global(.productGalleryMain),.galleryColumn :global(.productGallerySingle .productGalleryMain){min-height:24rem!important;aspect-ratio:4/5!important}.galleryColumn :global(.productGalleryMainButton){width:100%;height:100%;max-width:none;aspect-ratio:auto}.galleryColumn :global(.productGalleryMain img){width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;transform:scale(1.12)!important}.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:scale(2.1)!important}}
+
+/* Align the desktop product visual with the information column instead of the lower edge. */
+@media(min-width:48.0625rem){.galleryColumn{transform:translateY(-7rem)}.galleryColumn :global(.productGalleryMain img){transform:scale(1.08)!important}.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:scale(2.25)!important}}
+
+/* Compensate for source-image whitespace so the product itself sits visibly higher. */
+@media(min-width:48.0625rem){.galleryColumn :global(.productGalleryMain img){transform:translateY(-32%) scale(1.3)!important;transform-origin:center center}.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:translateY(-32%) scale(2.45)!important}}
+
+/* Final product-media fit reset: every product stays fully visible inside its own viewport. */
+.productHero{align-items:start}.galleryColumn{transform:none!important;padding-top:1.5rem}.galleryColumn :global(.productGalleryMain),.galleryColumn :global(.productGallerySingle .productGalleryMain){min-height:clamp(22rem,32vw,31rem)!important;aspect-ratio:4/3!important;overflow:hidden!important;place-items:center!important}.galleryColumn :global(.productGalleryMainButton){display:grid!important;width:100%!important;height:100%!important;min-height:0!important;max-width:none!important;aspect-ratio:auto!important;place-items:center!important;align-content:normal!important;padding:0!important}.galleryColumn :global(.productGalleryMain img){display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center center!important;transform:none!important}.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:scale(2.2)!important}
+@media(max-width:48rem){.galleryColumn{padding-top:0}.galleryColumn :global(.productGalleryMain),.galleryColumn :global(.productGallerySingle .productGalleryMain){min-height:22rem!important;aspect-ratio:4/5!important}.galleryColumn :global(.productGalleryMain img),.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:none!important}}
+
+/* Raise only the desktop media block; preserve its fitted product image. */
+@media(min-width:48.0625rem){.galleryColumn{margin-top:-2.75rem}}
+
+@media(min-width:48.0625rem){.galleryColumn{margin-top:-5rem}}
+
+/* Bring the product information block closer to the breadcrumb divider. */
+@media(min-width:48.0625rem){.productInfo{margin-top:-3rem}}
+
+/* Larger, still fully-contained desktop product presentation. */
+@media(min-width:48.0625rem){.productHero{grid-template-columns:minmax(0,1.22fr) minmax(25rem,.78fr);gap:clamp(2.5rem,4vw,4.5rem)}.galleryColumn :global(.productGalleryMain),.galleryColumn :global(.productGallerySingle .productGalleryMain){min-height:clamp(27rem,36vw,36rem)!important;aspect-ratio:4/3!important}.galleryColumn :global(.productGalleryMainButton){width:100%!important}.galleryColumn :global(.productGalleryMain img){width:100%!important;height:100%!important;object-fit:contain!important;transform:none!important}}
+
+@media(min-width:48.0625rem){.galleryColumn{margin-top:-6.5rem}}
+
+@media(min-width:48.0625rem){.galleryColumn{margin-top:-8rem}}
+
+/* Move the complete product-detail composition closer to the breadcrumb divider. */
+@media(min-width:48.0625rem){.productHero{margin-top:-3.25rem}}
+
+/* Lift only the breadcrumb row and its divider on desktop. */
+@media(min-width:48.0625rem){.breadcrumb{transform:translateY(-1.25rem)}}
+
+/* Use one continuous background tone across the full product-detail viewport. */
+.detailPage{width:100%!important;max-width:none!important;margin:0!important;background:#f5f3ef!important}
+
+/* Match the product-detail background to the provided Ekiphan warm beige reference. */
+.detailPage{background:#d8d2c8!important}
+
+/* Slightly reduce only the primary product visual and its adjacent information scale. */
+@media(min-width:48.0625rem){.galleryColumn :global(.productGalleryMain),.galleryColumn :global(.productGallerySingle .productGalleryMain){min-height:clamp(24rem,32vw,32rem)!important}.productInfo h1{font-size:clamp(3.2rem,3.8vw,4rem)}.productInfo .lead{font-size:1rem}.productInfo .quickSpecs{margin-top:1.15rem}.productInfo .quickSpecs div{padding:.95rem 1rem}}
+
+/* Fit product media within the actual available canvas, including its internal spacing. */
+.galleryColumn :global(.productGalleryMainButton){box-sizing:border-box!important;padding:clamp(1rem,2.5vw,2rem)!important}
+.galleryColumn :global(.productGalleryMain img){width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center center!important;transform:none!important}
+@media(min-width:48.0625rem){.galleryColumn :global(.productGalleryMain),.galleryColumn :global(.productGallerySingle .productGalleryMain){min-height:clamp(25rem,33vw,33rem)!important;aspect-ratio:4/3!important}.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:scale(2.2)!important}}
+@media(max-width:48rem){.galleryColumn :global(.productGalleryMainButton){padding:1rem!important}.galleryColumn :global(.productGalleryMain img),.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:none!important}}
+
+/* Safe full-product viewport: no cropping even for tall source imagery. */
+.galleryColumn :global(.productGalleryMain),.galleryColumn :global(.productGallerySingle .productGalleryMain){height:clamp(30rem,40vw,38rem)!important;min-height:clamp(30rem,40vw,38rem)!important;aspect-ratio:1/1!important;overflow:hidden!important}
+.galleryColumn :global(.productGalleryMainButton){width:100%!important;height:100%!important;padding:clamp(1.5rem,3vw,2.5rem)!important;overflow:hidden!important}
+.galleryColumn :global(.productGalleryMain img){display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center center!important;transform:none!important}
+@media(max-width:48rem){.galleryColumn :global(.productGalleryMain),.galleryColumn :global(.productGallerySingle .productGalleryMain){height:26rem!important;min-height:26rem!important;aspect-ratio:1/1!important}.galleryColumn :global(.productGalleryMainButton){padding:1.25rem!important}}
+
+@media(min-width:48.0625rem){.galleryColumn{margin-top:-9.5rem}}
+
+@media(min-width:48.0625rem){.galleryColumn{margin-top:-11rem}}
+
+@media(min-width:48.0625rem){.galleryColumn{margin-top:-12.5rem}}
+
+@media(min-width:48.0625rem){.galleryColumn{margin-top:-14rem}}
+
+/* Restore pointer-led zoom: the enlarged area follows the cursor position. */
+@media(min-width:48.0625rem){.galleryColumn :global(.productGalleryMain img){transform-origin:var(--zoom-origin,50% 50%)!important;transition:transform 300ms ease-out}.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:scale(2.2)!important}}
+
+/* Compact, balanced typography for the related-products carousel only. */
+.relatedSection {
+  padding-block: clamp(3rem, 5vw, 4.5rem) !important;
+}
+
+.relatedSection .sectionHeading {
+  margin-bottom: clamp(1.75rem, 3vw, 2.4rem);
+}
+
+.relatedSection .sectionHeading h2 {
+  font-size: clamp(2.35rem, 3.35vw, 3.75rem);
+  line-height: 1;
+}
+
+.relatedSection .sectionEyebrow {
+  font-size: .72rem;
+  letter-spacing: .13em;
+}
+
+.relatedCarousel {
+  padding-bottom: 1.35rem;
+}
+
+.relatedVisual {
+  aspect-ratio: 1.12 / 1 !important;
+}
+
+.relatedCopy {
+  min-height: 10.25rem;
+  gap: .28rem;
+  padding-top: .8rem !important;
+}
+
+.relatedCopy small {
+  font-size: .72rem !important;
+}
+
+.relatedCopy > span,
+.relatedCopy em {
+  font-size: .86rem !important;
+}
+
+.relatedCopy strong {
+  min-height: 2.9rem;
+  font-size: clamp(1.15rem, 1.35vw, 1.3rem) !important;
+  line-height: 1.2 !important;
+}
+
+.relatedCopy b {
+  font-size: .82rem !important;
+}
+
+/* Denser recommendation cards: less empty image canvas, larger products. */
+.relatedTrack {
+  gap: 1rem;
+}
+
+.relatedTrack .relatedCard {
+  flex-basis: calc((100% - 2rem) / 3);
+}
+
+.relatedVisual {
+  aspect-ratio: 1.28 / 1 !important;
+}
+
+.relatedVisual img {
+  width: 92% !important;
+  height: 92% !important;
+  max-width: 92% !important;
+  max-height: 92% !important;
+}
+
+.relatedCopy {
+  min-height: 9.4rem;
+}
+
+@media (max-width: 1199px) {
+  .relatedTrack .relatedCard { flex-basis: calc((100% - 1rem) / 2); }
+}
+
+@media (max-width: 767px) {
+  .relatedTrack .relatedCard { flex-basis: 85vw; }
+}
+
+/* Give the recommendation area a calm, separate transition from the content above. */
+.relatedSection {
+  margin-top: clamp(1.5rem, 3vw, 2.5rem);
+  background: #f5f2ec;
+  border-top-color: #e2ddd5 !important;
+}

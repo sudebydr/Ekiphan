@@ -1,0 +1,83 @@
+.page { min-height: 100vh; background: #f8f4ef; color: #2d2926; }
+.hero { position: relative; display: grid; min-height: min(44rem, calc(100vh - 1rem)); place-items: center; overflow: hidden; isolation: isolate; }
+.backdrop { position: absolute; z-index: -2; inset: 0; background: url("/images/404-tabletop.png") center / cover no-repeat; }
+.backdrop::after { position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgb(255 246 236 / 70%) 0%, rgb(255 244 232 / 27%) 35%, rgb(24 14 10 / 16%) 100%); content: ""; }
+.content { display: grid; width: min(calc(100% - 2rem), 48rem); justify-items: center; padding: 9.5rem 1rem 4rem; text-align: center; }
+.code { color: #f8eee5; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(8rem, 19vw, 15rem); font-weight: 500; letter-spacing: -.1em; line-height: .68; text-shadow: 0 .35rem .8rem rgb(53 31 18 / 22%); }
+.content h1 { margin: .7rem 0 0; color: #2e2824; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(2.4rem, 4vw, 4.2rem); font-weight: 500; letter-spacing: -.055em; line-height: 1; }.content p { margin: .65rem 0 0; color: #544944; font-size: clamp(.9rem, 1.3vw, 1.08rem); }
+.actions, .quickLinks { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem; }.actions { margin-top: 1.45rem; }.actions a { display: inline-flex; min-width: 12rem; min-height: 3.1rem; align-items: center; justify-content: center; gap: .65rem; border-radius: .55rem; font-size: .78rem; font-weight: 800; text-decoration: none; }.primaryAction { background: #9c1234; box-shadow: 0 .65rem 1.5rem rgb(107 6 30 / 24%); color: #fff; }.secondaryAction { border: 1px solid #a56458; background: rgb(255 249 242 / 47%); color: #6d292c; }.quickLinks { margin-top: 1.5rem; }.quickLinks a { display: inline-flex; min-width: 8.4rem; min-height: 2.55rem; align-items: center; justify-content: center; gap: .8rem; border: 1px solid rgb(79 52 39 / 40%); border-radius: 999px; background: rgb(255 248 240 / 34%); color: #3f342f; font-size: .7rem; font-weight: 750; text-decoration: none; }.quickLinks span { font-size: 1.2rem; }
+.assurances { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; padding: 1.2rem max(2rem, calc((100% - 76rem) / 2)); border-top: 1px solid rgb(76 53 39 / 12%); background: #fffdfa; }.assurances div { display: flex; justify-content: center; gap: .75rem; align-items: center; }.assurances i { display: grid; width: 2.25rem; height: 2.25rem; place-items: center; border-radius: 50%; background: #f8ece7; color: #a1183a; font-style: normal; }.assurances span { display: grid; gap: .2rem; }.assurances strong { font-size: .72rem; }.assurances small { color: #776d66; font-size: .64rem; }
+@media (max-width: 48rem) { .hero { min-height: 42rem; }.content { padding-top: 8rem; }.actions a { min-width: min(100%, 16rem); }.assurances { grid-template-columns: repeat(2, 1fr); padding: 1rem; }.assurances div { justify-content: flex-start; } }
+/* The 404 tabletop is a full-bleed scene, independent from the global content width. */
+.page {
+  width: 100vw;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+/* The 404 assurance strip is the final section; remove the empty shared footer beneath it. */
+.page + :global(footer) {
+  display: none;
+}
+/* Softer, more tactile 404 actions. */
+.actions a {
+  border-radius: .9rem;
+  transition: transform 200ms ease, box-shadow 200ms ease, background-color 200ms ease, border-color 200ms ease;
+}
+
+.primaryAction {
+  box-shadow: 0 .45rem 1.15rem rgb(107 6 30 / 18%);
+}
+
+.secondaryAction {
+  border-color: rgb(165 100 88 / 72%);
+  background: rgb(255 249 242 / 58%);
+  box-shadow: 0 .3rem .9rem rgb(61 43 34 / 8%);
+}
+
+.actions a:hover {
+  transform: translateY(-.12rem);
+}
+
+.primaryAction:hover {
+  background: #ad1e42;
+  box-shadow: 0 .65rem 1.45rem rgb(107 6 30 / 24%);
+}
+
+.secondaryAction:hover {
+  border-color: #9c1234;
+  background: rgb(255 249 242 / 82%);
+  box-shadow: 0 .55rem 1.2rem rgb(61 43 34 / 12%);
+}
+
+.quickLinks a {
+  border-color: rgb(79 52 39 / 25%);
+  background: rgb(255 248 240 / 48%);
+  transition: transform 200ms ease, background-color 200ms ease, border-color 200ms ease;
+}
+
+.quickLinks a:hover {
+  border-color: rgb(156 18 52 / 55%);
+  background: rgb(255 250 245 / 78%);
+  transform: translateY(-.1rem);
+}
+
+/* Reliable CSS chevron instead of an encoded text glyph. */
+.quickLinks .quickArrow {
+  display: inline-block;
+  width: .42rem;
+  height: .42rem;
+  border-top: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  transform: rotate(45deg);
+}
+
+/* Remove the thin outline line from the secondary 404 action. */
+.secondaryAction,
+.secondaryAction:hover {
+  border-color: transparent;
+}
+
+/* Place only the 404 content slightly lower after removing quick links. */
+.content { padding-top: 11rem; }
+@media (max-width: 48rem) { .content { padding-top: 9rem; } }

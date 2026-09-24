@@ -1,0 +1,72 @@
+[
+  {
+    "id": "1",
+    "slug": "3532-rub-ex-pt500",
+    "name": "RUBİKAP EXCLUSIVE PRISMA BARDAK 500+ MLPC ŞEFFAF",
+    "code": "3532.RUB.EX.PT500",
+    "summary": "POLİKARBON BARDAK ",
+    "coverImageUrl": null,
+    "section": "katalog",
+    "brand": "RUBİKAP",
+    "categories": [
+      "RESTAURANT MALZEMELERİ, BAR MALZEMELERİ",
+      "Bardaklar Ve Kadehler, Çok Kullanımlık Ürünler, Exclusive Serisi, Kırılmaz Bardak, Kokteyl Bardağı"
+    ]
+  },
+  {
+    "id": "2",
+    "slug": "3211-grn-snbzkv106",
+    "name": "GÜREN BUZ KOVASI TERMOSLU KAPAKLI - ÜÇGEN -",
+    "code": "3211.GRN.SNBZKV106",
+    "summary": "BUZ KOVASI",
+    "coverImageUrl": null,
+    "section": "katalog",
+    "brand": "GÜREN METAL",
+    "categories": [
+      "RESTAURANT MALZEMELERİ, BAR MALZEMELERİ",
+      "MASAÜSTÜ SUNUM "
+    ]
+  },
+  {
+    "id": "3",
+    "slug": "3311-cmb-1600ct-02",
+    "name": "CAMBRO CAMTREAD TEPSİ Q:40.5 CM SİYAH",
+    "code": "3311.CMB.1600CT.02",
+    "summary": "SERVİS TEPSİ",
+    "coverImageUrl": null,
+    "section": "katalog",
+    "brand": "CAMBRO",
+    "categories": [
+      "RESTAURANT MALZEMELERİ, BAR MALZEMELERİ",
+      "SERVİS EKİPMANLARI"
+    ]
+  },
+  {
+    "id": "4",
+    "slug": "3511-brd-grv30",
+    "name": "BİRADLI 2'Lİ ÇELİK ÇEREZLİK 18/10CR.Nİ",
+    "code": "3511.BRD.GRV30",
+    "summary": "ÇEREZLİK",
+    "coverImageUrl": null,
+    "section": "katalog",
+    "brand": "BİRADLI",
+    "categories": [
+      "RESTAURANT MALZEMELERİ, BAR MALZEMELERİ",
+      "MASAÜSTÜ SUNUM "
+    ]
+  },
+  {
+    "id": "5",
+    "slug": "3291-sln-sxpn065-1",
+    "name": "SELENE TERMOS İÇ DIŞ 304K PASLANMAZ 1 LİTRE",
+    "code": "3291.SLN.SXPN065.1",
+    "summary": "TERMOS",
+    "coverImageUrl": null,
+    "section": "katalog",
+    "brand": "SELENE",
+    "categories": [
+      "RESTAURANT MALZEMELERİ, BAR MALZEMELERİ",
+      "SERVİS EKİPMANLARI"
+    ]
+  }
+]

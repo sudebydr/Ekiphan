@@ -1,0 +1,797 @@
+.page {
+  display: block;
+  width: min(100% - 2rem, 76rem);
+  max-width: none;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 8.5rem;
+}
+
+.topbar,
+.hero,
+.itemHeader,
+.itemActions,
+.formActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.topbar {
+  min-height: 4.5rem;
+  border-bottom: 1px solid #d8d2c7;
+}
+
+.brand,
+.topbar a,
+.backLink,
+.itemName {
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand {
+  font-weight: 850;
+  letter-spacing: 0.16em;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.topbar nav a,
+.backLink,
+.itemName {
+  color: #25543a;
+  font-weight: 750;
+}
+
+.hero {
+  align-items: flex-end;
+  padding: 4rem 0 2.5rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.75rem;
+  color: #8b6327;
+  font-size: 0.75rem;
+  font-weight: 850;
+  letter-spacing: 0.18em;
+}
+
+.hero h1 {
+  max-width: 14ch;
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3rem, 7vw, 6rem);
+  font-weight: 500;
+  line-height: 0.9;
+}
+
+.hero p {
+  max-width: 34rem;
+  color: #536159;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.panel {
+  padding: 1.5rem;
+  border: 1px solid #d8d2c7;
+  border-radius: 1rem;
+  background: #fffdf8;
+  box-shadow: 0 1rem 3rem rgb(34 53 42 / 5%);
+}
+
+.panel h2 {
+  margin-top: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+.itemList {
+  display: grid;
+  gap: 1rem;
+}
+
+.item {
+  padding: 1rem;
+  border: 1px solid #ded9cf;
+  border-radius: 0.75rem;
+}
+
+.itemHeader {
+  align-items: flex-start;
+}
+
+.itemHeader h3,
+.itemHeader p {
+  margin: 0;
+}
+
+.itemMeta {
+  color: #6a756e;
+  font-size: 0.8rem;
+}
+
+.itemFields {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.field label {
+  color: #45534b;
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #aeb5af;
+  border-radius: 0.55rem;
+  background: white;
+  color: #17211b;
+  font: inherit;
+}
+
+.field textarea {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+.itemActions {
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+
+.textButton {
+  min-height: 2.5rem;
+  padding: 0.4rem 0.7rem;
+  border: 0;
+  background: transparent;
+  color: #8a3027;
+  font: inherit;
+  font-weight: 750;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.checkbox {
+  display: grid;
+  grid-template-columns: 1.2rem 1fr;
+  gap: 0.65rem;
+  align-items: start;
+}
+
+.checkbox input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.15rem;
+}
+
+.checkbox a {
+  color: #25543a;
+  font-weight: 750;
+}
+
+.legalNotice,
+.empty,
+.error,
+.success {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: 0.65rem;
+}
+
+.legalNotice,
+.empty {
+  border: 1px solid #d7c48f;
+  background: #fff8df;
+  color: #654d0e;
+}
+
+.error {
+  border: 1px solid #c98078;
+  background: #fff3f0;
+  color: #792820;
+}
+
+.success {
+  border: 1px solid #6c9c7c;
+  background: #edf8f0;
+  color: #1e5d33;
+}
+
+.formActions {
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}
+
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  min-height: 2.8rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1rem;
+  border-radius: 0.55rem;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.primaryButton {
+  border: 0;
+  background: #235b3d;
+  color: white;
+}
+
+.secondaryButton {
+  border: 1px solid #b8beb9;
+  background: transparent;
+  color: #254d37;
+}
+
+.primaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.page a:focus-visible,
+.page button:focus-visible,
+.page input:focus-visible,
+.page textarea:focus-visible,
+.page select:focus-visible {
+  outline: 3px solid #d18b29;
+  outline-offset: 3px;
+}
+
+.honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 60rem) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 40rem) {
+  .page {
+    width: min(100% - 1rem, 76rem);
+  }
+
+  .hero,
+  .itemHeader {
+    display: grid;
+  }
+
+  .formGrid,
+  .itemFields {
+    grid-template-columns: 1fr;
+  }
+
+  .wide {
+    grid-column: 1;
+  }
+}
+
+.hero {
+  min-height: 19rem;
+  align-items: center;
+  gap: clamp(2.5rem, 7vw, 7rem);
+  padding: 3.25rem 0;
+  border-bottom: 1px solid rgb(136 5 31 / 14%);
+}
+
+.hero > div {
+  flex: 1 1 auto;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  color: #88051f;
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+}
+
+.hero h1 {
+  max-width: 16ch;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(2.75rem, 5vw, 4.65rem);
+  font-weight: 720;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+}
+
+.hero > p {
+  max-width: 29rem;
+  margin: 2.5rem 0 0;
+  padding-left: 1.75rem;
+  border-left: 2px solid rgb(136 5 31 / 28%);
+  color: #625f5a;
+  font-size: 0.94rem;
+  line-height: 1.75;
+}
+
+.panel h2 {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 760;
+  letter-spacing: -0.05em;
+}
+
+.panel,
+.item,
+.field input,
+.field textarea,
+.field select,
+.legalNotice,
+.empty,
+.error,
+.success,
+.primaryButton,
+.secondaryButton {
+  border-radius: 0;
+}
+
+.panel {
+  border-top: 3px solid #88051f;
+  background: #fff;
+  box-shadow: 0 1.2rem 3rem rgb(23 26 29 / 8%);
+}
+
+.primaryButton {
+  background: #88051f;
+}
+
+.secondaryButton,
+.backLink,
+.itemName,
+.checkbox a {
+  color: #88051f;
+}
+
+@media (max-width: 48rem) {
+  .hero {
+    min-height: auto;
+    gap: 1.75rem;
+    padding: 2.5rem 0;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.45rem, 11vw, 3.6rem);
+  }
+
+  .hero > p {
+    margin-top: 0;
+    padding-left: 1rem;
+    font-size: 0.88rem;
+  }
+}
+/* Product imagery in quote list */
+.item {
+  display: grid;
+  grid-template-columns: 7.25rem minmax(0, 1fr);
+  gap: 1rem 1.25rem;
+  align-items: start;
+  padding: 1.15rem;
+  border-color: #ded8cf;
+  border-radius: 0.9rem;
+  background: #fff;
+}
+
+.itemVisual {
+  grid-row: 1 / span 3;
+  display: grid;
+  width: 100%;
+  aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #e4dfd7;
+  border-radius: 0.65rem;
+  background: #f3f0eb;
+  color: #88051f;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  text-decoration: none;
+}
+
+.itemVisual img {
+  width: 100%;
+  height: 100%;
+  padding: 0.55rem;
+  object-fit: contain;
+  transition: transform 320ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.itemVisual:hover img {
+  transform: scale(1.04);
+}
+
+.itemHeader,
+.itemFields,
+.itemActions {
+  grid-column: 2;
+}
+
+.itemFields {
+  margin-top: 0.15rem;
+}
+
+.itemActions {
+  margin-top: 0;
+}
+
+@media (max-width: 40rem) {
+  .item {
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: 0.9rem 1rem;
+  }
+
+  .itemVisual {
+    grid-row: 1;
+  }
+
+  .itemFields,
+  .itemActions {
+    grid-column: 1 / -1;
+  }
+}
+/* Quote item fields: note first and full-width, quantity below. */
+.item .itemFields {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.9rem;
+}
+
+.item .itemFields .field:first-child {
+  order: 2;
+  width: min(100%, 10rem);
+}
+
+.item .itemFields .field:nth-child(2) {
+  order: 1;
+  width: 100%;
+}
+
+.item .itemFields textarea {
+  min-height: 6.5rem;
+  line-height: 1.5;
+}
+.quantityStepper {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(3.5rem, 1fr) 2.75rem;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid #d8d2c9;
+  border-radius: 0.75rem;
+  background: #f7f4ef;
+}
+
+.quantityStepper input {
+  min-width: 0;
+  border: 0;
+  border-inline: 1px solid #ded8cf;
+  border-radius: 0;
+  background: #fff;
+  text-align: center;
+  appearance: textfield;
+}
+
+.quantityStepper input::-webkit-inner-spin-button,
+.quantityStepper input::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.quantityStepper button {
+  border: 0;
+  background: transparent;
+  color: #8f1738;
+  font: inherit;
+  font-size: 1.15rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.quantityStepper button:hover:not(:disabled) {
+  background: #efe0e4;
+}
+
+.quantityStepper button:disabled {
+  color: #bdb6af;
+  cursor: default;
+}
+/* Keep the quote-request heading clear of the two-row public header. */
+@media (min-width: 75rem) {
+  .page[data-public-page] {
+    padding-top: 12.75rem;
+  }
+}
+
+/* Give the selected-products list more horizontal room on desktop. */
+@media (min-width: 60.0625rem) {
+  .layout {
+    grid-template-columns: minmax(0, 1.45fr) minmax(18rem, .7fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Balanced quote form: wider product list, compact horizontal items, sticky form. */
+@media (min-width: 60.0625rem) {
+  .page {
+    width: min(calc(100% - 4rem), 97.5rem);
+    padding-inline: 0;
+  }
+
+  .layout {
+    grid-template-columns: minmax(0, 1.35fr) minmax(20rem, .95fr);
+    gap: 2.25rem;
+  }
+
+  .contactPanel {
+    position: sticky;
+    top: 7.5rem;
+  }
+
+  .item {
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: .8rem 1.25rem;
+    padding: 1.35rem;
+    border-color: rgb(33 29 26 / 10%);
+    border-radius: 1.25rem;
+    background: #faf8f4;
+  }
+
+  .itemVisual {
+    width: 7.5rem;
+    height: 7.5rem;
+  }
+
+  .item .itemFields {
+    grid-template-columns: 8rem minmax(0, 1fr);
+    gap: 1rem;
+    margin-top: .55rem;
+  }
+
+  .item .itemFields .field:first-child,
+  .item .itemFields .field:nth-child(2) {
+    width: auto;
+    order: initial;
+  }
+
+  .item .itemFields textarea {
+    min-height: 6rem;
+  }
+
+  .itemActions {
+    margin-top: .25rem;
+  }
+
+  .panel {
+    padding: 1.75rem;
+  }
+
+  .field input,
+  .field select {
+    min-height: 3rem;
+  }
+}
+
+/* Tighter selected-product cards while retaining the horizontal layout. */
+@media (min-width: 60.0625rem) {
+  .itemList {
+    gap: 1rem;
+  }
+
+  .item {
+    gap: .55rem 1rem;
+    padding: 1rem 1.15rem;
+  }
+
+  .itemVisual {
+    width: 6.5rem;
+    height: 6.5rem;
+  }
+
+  .item .itemFields {
+    gap: .7rem;
+    margin-top: .3rem;
+  }
+
+  .item .itemFields textarea {
+    min-height: 4.6rem;
+  }
+
+  .itemActions {
+    margin-top: 0;
+  }
+}
+
+/* Quote list: compact basket layout inspired by the supplied reference. */
+@media (min-width: 60.0625rem) {
+  .page[data-public-page] {
+    padding-top: 9.75rem;
+  }
+
+  .hero {
+    min-height: 0;
+    align-items: flex-end;
+    padding: 0 0 1.75rem;
+    border-bottom: 1px solid rgb(33 29 26 / 12%);
+  }
+
+  .hero h1 {
+    max-width: none;
+    font-size: clamp(2rem, 2.8vw, 2.75rem);
+    letter-spacing: -.045em;
+  }
+
+  .hero > p {
+    max-width: 25rem;
+    margin: 0;
+    padding-left: 1.25rem;
+    font-size: .84rem;
+    line-height: 1.6;
+  }
+
+  .layout {
+    gap: 1.75rem;
+    margin-top: 1.75rem;
+  }
+
+  .panel {
+    padding: 1.4rem;
+    border-top-width: 1px;
+    border-radius: .75rem;
+    box-shadow: none;
+  }
+
+  .panel h2 {
+    margin-bottom: 1.25rem;
+    font-size: 1.65rem;
+  }
+
+  .item {
+    grid-template-columns: 7rem minmax(0, 1fr);
+    gap: .85rem 1.25rem;
+    padding: 1.15rem;
+    border-radius: .5rem;
+    background: #fff;
+    box-shadow: none;
+  }
+
+  .itemVisual {
+    width: 7rem;
+    height: 7rem;
+    border-radius: .4rem;
+    background: #f7f4ee;
+  }
+
+  .itemVisual img {
+    padding: .35rem;
+  }
+
+  .itemHeader {
+    min-height: 4rem;
+    padding-right: 0;
+  }
+
+  .itemHeader h3 {
+    font-size: 1.1rem;
+  }
+
+  .item .itemFields {
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: .8rem;
+    padding-top: .8rem;
+    border-top: 1px solid rgb(33 29 26 / 10%);
+  }
+
+  .item .itemFields textarea {
+    min-height: 3.25rem;
+  }
+
+  .quantityStepper {
+    min-height: 2.8rem;
+    border-radius: 999px;
+  }
+
+  .quantityStepper button {
+    font-size: 1.25rem;
+  }
+
+  .itemActions {
+    margin-top: .15rem;
+  }
+}
+
+/* Quote item: keep the note first and use a compact soft quantity control. */
+@media (min-width: 60.0625rem) {
+  .item .itemFields {
+    grid-template-columns: minmax(0, 1fr) 6.5rem;
+    align-items: end;
+  }
+
+  .item .itemFields .field:first-child {
+    grid-column: 2;
+    order: 2;
+    width: 6.5rem;
+  }
+
+  .item .itemFields .field:nth-child(2) {
+    grid-column: 1;
+    order: 1;
+    width: auto;
+  }
+
+  .item .itemFields .field:first-child label {
+    text-align: center;
+  }
+
+  .quantityStepper {
+    min-height: 2.35rem;
+    grid-template-columns: 1.85rem minmax(0, 1fr) 1.85rem;
+    border: 0;
+    border-radius: 999px;
+    background: #f1e8e9;
+    box-shadow: inset 0 0 0 1px rgb(136 5 31 / 12%);
+  }
+
+  .quantityStepper input {
+    min-height: 2.35rem;
+    padding: 0;
+    border-inline: 1px solid rgb(136 5 31 / 10%);
+    background: transparent;
+    color: #7f1732;
+    font-size: .82rem;
+    font-weight: 800;
+  }
+
+  .quantityStepper button {
+    color: #8b1232;
+    font-size: 1rem;
+  }
+
+  .quantityStepper button:hover:not(:disabled) {
+    background: rgb(136 5 31 / 10%);
+  }
+}

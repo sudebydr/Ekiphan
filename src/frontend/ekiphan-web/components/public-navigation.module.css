@@ -1,0 +1,257 @@
+.mainNav {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  height: 64px !important;
+  min-height: 64px !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 28px;
+  overflow-x: auto;
+  border-top: 1px solid rgb(0 0 0 / 10%);
+  background: transparent;
+  scrollbar-width: none;
+  white-space: nowrap;
+}
+
+.mainNav::-webkit-scrollbar {
+  display: none;
+}
+
+.mainNav .navItem {
+  position: relative;
+  display: flex;
+  height: 100%;
+  min-height: 0 !important;
+  flex: 0 0 auto;
+  align-items: center;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #302d2b;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .015em;
+  line-height: 1;
+  text-decoration: none;
+  transition: color .2s ease;
+}
+
+.mainNav .navItem:hover,
+.mainNav .navItem:focus-visible {
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #a52940;
+  outline: 0;
+  transform: none;
+}
+
+.mainNav .navItem.active {
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #a52940;
+}
+
+.mainNav .navItem.active::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: #a52940;
+  content: "";
+}
+
+@media (max-width: 74.9375rem) {
+  .mainNav {
+    justify-content: flex-start;
+    gap: 24px;
+  }
+}
+/* The parent header already has 28px inner padding; extend only the nav surface
+   so its own 28px padding lands on the exact same logo start line. */
+@media (min-width: 75rem) {
+  .mainNav {
+    width: calc(100% + 56px) !important;
+    margin-left: -28px !important;
+  }
+}
+/* Products submenu restores catalogue, showroom and related destination links. */
+.mainNav .productsMenu {
+  position: relative;
+  display: flex;
+  height: 100%;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.mainNav .productsSubmenu {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% - .15rem);
+  left: -.85rem;
+  display: none;
+  min-width: 13.5rem;
+  padding: .5rem;
+  border: 1px solid rgb(82 49 39 / 16%);
+  border-radius: .7rem;
+  background: #fffdf9;
+  box-shadow: 0 .9rem 2.2rem rgb(48 37 29 / 14%);
+}
+
+.mainNav .productsMenu:hover .productsSubmenu,
+.mainNav .productsMenu:focus-within .productsSubmenu {
+  display: grid;
+  content-visibility: visible;
+  gap: .1rem;
+}
+
+.mainNav .productsSubmenu a {
+  display: flex;
+  min-height: 2.35rem;
+  align-items: center;
+  padding: .35rem .6rem;
+  border-radius: .4rem;
+  background: transparent;
+  color: #423a35;
+  font-size: .75rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.mainNav .productsSubmenu a:hover,
+.mainNav .productsSubmenu a:focus-visible { background: rgb(144 31 59 / 7%); color: #901f3b; }
+
+@media (max-width: 74.9375rem) { .mainNav .productsSubmenu { left: 0; } }
+/* Products is click-expandable and may extend beyond the rounded header panel. */
+@media (min-width: 75rem) {
+  .productsMenu { list-style: none; }
+  .productsMenu > summary { cursor: pointer; list-style: none; }
+  .productsMenu > summary::-webkit-details-marker { display: none; }
+  .productsMenu[open] .productsSubmenu { display: grid; gap: .1rem; }
+  .productsMenu > summary::before { display: none; }
+  .productsMenu > summary::after { width: .38rem; height: .38rem; margin-left: .45rem; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; background: transparent; content: ""; transform: rotate(45deg) translateY(-.12rem); }
+  .productsMenu[open] > summary::after { transform: rotate(225deg) translateY(-.02rem); }
+  .catalogTopbar { overflow: visible !important; }
+}
+/* The opened products submenu must be visible at every responsive width. */
+.mainNav {
+  overflow: visible;
+}
+
+.mainNav .productsMenu[open] .productsSubmenu {
+  display: grid;
+  gap: .1rem;
+}
+
+.mainNav .productsMenu {
+  z-index: 45;
+}
+/* Keep the Products dropdown above page controls and content. */
+.mainNav,
+.mainNav .productsMenu {
+  isolation: isolate;
+}
+
+.mainNav .productsSubmenu {
+  z-index: 1000;
+}
+
+/* Match the expanded products menu to the dark glass navigation. */
+.mainNav .productsMenu > .navItem,
+.mainNav .productsMenu[open] > .navItem,
+.mainNav .productsMenu > .navItem:hover,
+.mainNav .productsMenu > .navItem:focus-visible {
+  color: rgb(255 255 255 / 96%) !important;
+}
+
+.mainNav .productsSubmenu {
+  border-color: rgb(235 239 235 / 22%);
+  background: rgb(39 42 41 / 78%);
+  box-shadow:
+    0 .9rem 2.2rem rgb(0 0 0 / 30%),
+    inset 0 1px 0 rgb(255 255 255 / 14%);
+  backdrop-filter: blur(1rem) saturate(112%);
+  -webkit-backdrop-filter: blur(1rem) saturate(112%);
+}
+
+.mainNav .productsSubmenu a {
+  color: rgb(255 255 255 / 92%);
+}
+
+.mainNav .productsSubmenu a:hover,
+.mainNav .productsSubmenu a:focus-visible {
+  background: rgb(201 43 73 / 22%);
+  color: #fff;
+}
+
+/* Restore the original light dropdown outside the homepage hero. */
+:global(header:not([class*="homeTopbar"]):not([class*="showroomTopbar"])) .mainNav .productsMenu > .navItem,
+:global(header:not([class*="homeTopbar"]):not([class*="showroomTopbar"])) .mainNav .productsMenu[open] > .navItem { color: #302d2b !important; }
+:global(header:not([class*="homeTopbar"]):not([class*="showroomTopbar"])) .mainNav .productsSubmenu { border-color: rgb(82 49 39 / 16%); background: #fffdf9; box-shadow: 0 .9rem 2.2rem rgb(48 37 29 / 14%); backdrop-filter: none; -webkit-backdrop-filter: none; }
+:global(header:not([class*="homeTopbar"]):not([class*="showroomTopbar"])) .mainNav .productsSubmenu a { color: #423a35; }
+:global(header:not([class*="homeTopbar"]):not([class*="showroomTopbar"])) .mainNav .productsSubmenu a:hover,
+:global(header:not([class*="homeTopbar"]):not([class*="showroomTopbar"])) .mainNav .productsSubmenu a:focus-visible { background: rgb(144 31 59 / 7%); color: #901f3b; }
+
+/* The Products caret owns its own pseudo-element instead of the active underline. */
+.mainNav .productsMenu > summary.navItem::after,
+.mainNav .productsMenu > summary.navItem.active::after {
+  position: static;
+  display: block;
+  width: .4rem;
+  height: .4rem;
+  flex: 0 0 .4rem;
+  margin-left: .5rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  border-radius: 0;
+  background: transparent;
+  content: "";
+  transform: rotate(45deg) translateY(-.12rem);
+}
+
+.mainNav .productsMenu[open] > summary.navItem::after,
+.mainNav .productsMenu[open] > summary.navItem.active::after {
+  transform: rotate(225deg) translateY(-.02rem);
+}
+
+/* Keep the Products trigger legible on the showroom's light glass surface. */
+:global(header[class*="showroomTopbar"]) .mainNav .productsMenu > .navItem,
+:global(header[class*="showroomTopbar"]) .mainNav .productsMenu[open] > .navItem { color: #292724 !important; }
+:global(header[class*="showroomTopbar"]) .mainNav .productsSubmenu { border-color: rgb(255 255 255 / 58%); background: rgb(255 255 255 / 64%); box-shadow: 0 .9rem 2.2rem rgb(59 38 34 / 16%), inset 0 1px 0 rgb(255 255 255 / 76%); backdrop-filter: blur(1rem) saturate(108%); -webkit-backdrop-filter: blur(1rem) saturate(108%); }
+:global(header[class*="showroomTopbar"]) .mainNav .productsSubmenu a { color: #292724; }
+
+/* Remove the active navigation underline while retaining active text color. */
+.mainNav .navItem.active::after {
+  display: none;
+}
+
+/* Homepage product dropdown: light glass surface for readable menu items. */
+:global(header[class*="homeTopbar"]) .mainNav .productsSubmenu {
+  border-color: rgb(255 255 255 / 58%);
+  background: rgb(250 248 244 / 88%);
+  box-shadow: 0 .9rem 2.2rem rgb(30 24 20 / 18%), inset 0 1px 0 rgb(255 255 255 / 82%);
+  backdrop-filter: blur(1rem) saturate(108%);
+  -webkit-backdrop-filter: blur(1rem) saturate(108%);
+}
+
+:global(header[class*="homeTopbar"]) .mainNav .productsSubmenu a {
+  color: #302b28 !important;
+}
+
+:global(header[class*="homeTopbar"]) .mainNav .productsSubmenu a:hover,
+:global(header[class*="homeTopbar"]) .mainNav .productsSubmenu a:focus-visible {
+  background: rgb(144 31 59 / 8%);
+  color: #901f3b !important;
+}
+/* Keep the homepage Products trigger readable on the light header glass. */
+:global(header[class*="homeTopbar"]) .mainNav .productsMenu > summary.navItem,
+:global(header[class*="homeTopbar"]) .mainNav .productsMenu[open] > summary.navItem {
+  color: #302b28 !important;
+}

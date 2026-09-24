@@ -1,0 +1,60 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E42F637D-E621-49C4-BD33-D73658DA0EB2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{AB75CA1B-88CE-4CAE-95BE-04F27E9EF7FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ekiphan.Api", "src\backend\Ekiphan.Api\Ekiphan.Api.csproj", "{C15C4DC3-C647-4F3F-91F7-5377B54A8970}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ekiphan.Application", "src\backend\Ekiphan.Application\Ekiphan.Application.csproj", "{A8F998B8-2A60-452D-BCB4-1FC4BFD8C5E3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ekiphan.Domain", "src\backend\Ekiphan.Domain\Ekiphan.Domain.csproj", "{CC46252D-3BBA-4E0E-8FE2-C5B2AE962C61}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ekiphan.Infrastructure", "src\backend\Ekiphan.Infrastructure\Ekiphan.Infrastructure.csproj", "{3FF34758-FF78-47C0-B893-618C1C19BAB3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1E38EC33-EC22-439C-846F-DD3218581114}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ekiphan.UnitTests", "tests\Ekiphan.UnitTests\Ekiphan.UnitTests.csproj", "{7EFF0765-520A-4976-BF67-8D17D5AAAA3B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C15C4DC3-C647-4F3F-91F7-5377B54A8970}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C15C4DC3-C647-4F3F-91F7-5377B54A8970}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C15C4DC3-C647-4F3F-91F7-5377B54A8970}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C15C4DC3-C647-4F3F-91F7-5377B54A8970}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8F998B8-2A60-452D-BCB4-1FC4BFD8C5E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8F998B8-2A60-452D-BCB4-1FC4BFD8C5E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8F998B8-2A60-452D-BCB4-1FC4BFD8C5E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8F998B8-2A60-452D-BCB4-1FC4BFD8C5E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC46252D-3BBA-4E0E-8FE2-C5B2AE962C61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC46252D-3BBA-4E0E-8FE2-C5B2AE962C61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC46252D-3BBA-4E0E-8FE2-C5B2AE962C61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC46252D-3BBA-4E0E-8FE2-C5B2AE962C61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FF34758-FF78-47C0-B893-618C1C19BAB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FF34758-FF78-47C0-B893-618C1C19BAB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FF34758-FF78-47C0-B893-618C1C19BAB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FF34758-FF78-47C0-B893-618C1C19BAB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7EFF0765-520A-4976-BF67-8D17D5AAAA3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EFF0765-520A-4976-BF67-8D17D5AAAA3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EFF0765-520A-4976-BF67-8D17D5AAAA3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EFF0765-520A-4976-BF67-8D17D5AAAA3B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AB75CA1B-88CE-4CAE-95BE-04F27E9EF7FD} = {E42F637D-E621-49C4-BD33-D73658DA0EB2}
+		{C15C4DC3-C647-4F3F-91F7-5377B54A8970} = {AB75CA1B-88CE-4CAE-95BE-04F27E9EF7FD}
+		{A8F998B8-2A60-452D-BCB4-1FC4BFD8C5E3} = {AB75CA1B-88CE-4CAE-95BE-04F27E9EF7FD}
+		{CC46252D-3BBA-4E0E-8FE2-C5B2AE962C61} = {AB75CA1B-88CE-4CAE-95BE-04F27E9EF7FD}
+		{3FF34758-FF78-47C0-B893-618C1C19BAB3} = {AB75CA1B-88CE-4CAE-95BE-04F27E9EF7FD}
+		{7EFF0765-520A-4976-BF67-8D17D5AAAA3B} = {1E38EC33-EC22-439C-846F-DD3218581114}
+	EndGlobalSection
+EndGlobal

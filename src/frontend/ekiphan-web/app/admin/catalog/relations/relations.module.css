@@ -1,0 +1,267 @@
+.page {
+  width: min(100% - 2rem, 90rem);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 3rem 0 6rem;
+}
+
+.header,
+.sectionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.header {
+  margin-bottom: 2.5rem;
+}
+
+.header h1 {
+  max-width: none;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+}
+
+.eyebrow,
+.sectionIndex {
+  color: #8b6327;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+.lead {
+  max-width: 50rem;
+  color: #4a574f;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.nav a {
+  color: #214c35;
+  font-weight: 700;
+}
+
+.panel {
+  display: grid;
+  grid-template-columns: minmax(13rem, 0.25fr) minmax(0, 1fr);
+  gap: 2rem;
+  margin-top: 1rem;
+  padding: 2rem;
+  border: 1px solid #d6d0c3;
+  border-radius: 1rem;
+  background: #fffdf8;
+}
+
+.panel h2 {
+  margin: 0.25rem 0;
+}
+
+.sectionHeader {
+  grid-column: 1 / -1;
+}
+
+.searchForm,
+.relationForm,
+.targetSearch,
+.relationForm label {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.searchForm > div,
+.targetSearch > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+}
+
+.page input,
+.page select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #aeb5af;
+  border-radius: 0.55rem;
+  background: white;
+  color: #17211b;
+  font: inherit;
+}
+
+.page button {
+  min-height: 2.75rem;
+  padding: 0.65rem 1rem;
+  border: 0;
+  border-radius: 0.55rem;
+  background: #214c35;
+  color: white;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.page button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.page button:focus-visible,
+.page a:focus-visible,
+.page input:focus-visible,
+.page select:focus-visible {
+  outline: 3px solid #d89632;
+  outline-offset: 3px;
+}
+
+.productList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.productButton,
+.selectedProduct {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+  text-align: left;
+}
+
+.productButton {
+  border: 1px solid #d4d9d5 !important;
+  background: #f3f1eb !important;
+  color: #17211b !important;
+}
+
+.selectedProduct {
+  outline: 3px solid #d89632;
+  outline-offset: 2px;
+}
+
+.productButton span,
+.selectedProduct span {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.tableWrap {
+  grid-column: 1 / -1;
+  overflow-x: auto;
+}
+
+.tableWrap table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableWrap th,
+.tableWrap td {
+  padding: 0.8rem 0.65rem;
+  border-bottom: 1px solid #e3ded3;
+  text-align: left;
+  vertical-align: top;
+}
+
+.tableWrap th {
+  color: #526158;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.relationForm {
+  max-width: 40rem;
+}
+
+.targetSearch {
+  margin-bottom: 0.5rem;
+}
+
+.checkbox {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+
+.checkbox input {
+  width: 1.15rem;
+  min-height: auto;
+  height: 1.15rem;
+}
+
+.textButton {
+  min-height: auto !important;
+  padding: 0.25rem !important;
+  background: transparent !important;
+  color: #7f201b !important;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+.error,
+.success {
+  margin-bottom: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.65rem;
+}
+
+.error {
+  border: 1px solid #bf5b55;
+  background: #fff0ee;
+  color: #7f201b;
+}
+
+.success {
+  border: 1px solid #669879;
+  background: #edf8f0;
+  color: #174f2b;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 56rem) {
+  .header,
+  .panel {
+    grid-template-columns: 1fr;
+  }
+
+  .header {
+    display: grid;
+  }
+
+  .nav {
+    justify-content: flex-start;
+  }
+
+  .productList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 34rem) {
+  .page {
+    width: min(100% - 1rem, 90rem);
+    padding-top: 1.5rem;
+  }
+
+  .panel {
+    padding: 1rem;
+  }
+
+  .searchForm > div,
+  .targetSearch > div {
+    grid-template-columns: 1fr;
+  }
+}
