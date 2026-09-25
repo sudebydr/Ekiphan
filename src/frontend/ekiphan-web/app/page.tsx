@@ -220,7 +220,7 @@ export default async function HomePage() {
             Deneyim, seçkin markalar ve projeye özel yaklaşımımızla otel,
             restoran ve endüstriyel mutfaklara kalıcı değer katıyoruz.
           </p>
-          <Link href="/showroom">Showroom Turu</Link>
+          <Link href="/galeri?category=Showroom">Showroom Turu</Link>
         </div>
       </section>
     </main>

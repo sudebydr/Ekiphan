@@ -96,6 +96,11 @@ internal sealed class ContactRequestService(
             query = query.Where(item =>
                 item.AssignedToUserId == request.AssignedUserId.Value);
         }
+        if (request.ContactReasonId.HasValue)
+        {
+            query = query.Where(item =>
+                item.ContactReasonId == request.ContactReasonId.Value);
+        }
         if (search is not null)
         {
             query = query.Where(item =>
@@ -123,6 +128,12 @@ internal sealed class ContactRequestService(
                 item.Subject,
                 item.Message,
                 item.Status,
+                ReasonName = dbContext.ContactReasons
+                    .Where(value => value.Id == item.ContactReasonId)
+                    .Select(value => value.Name).FirstOrDefault(),
+                ComplaintCategoryName = dbContext.ComplaintCategories
+                    .Where(value => value.Id == item.ComplaintCategoryId)
+                    .Select(value => value.Name).FirstOrDefault(),
                 item.AssignedToUserId,
                 AssignedToDisplayName = dbContext.AdminUsers
                     .Where(user => user.Id == item.AssignedToUserId)
@@ -143,6 +154,8 @@ internal sealed class ContactRequestService(
                 item.Subject,
                 Preview(item.Message),
                 item.Status,
+                item.ReasonName,
+                item.ComplaintCategoryName,
                 item.AssignedToUserId,
                 item.AssignedToDisplayName,
                 item.UpdatedAt,

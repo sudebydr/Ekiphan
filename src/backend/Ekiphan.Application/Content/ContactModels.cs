@@ -33,6 +33,7 @@ public sealed record AdminContactListQuery(
     Guid? AssignedUserId = null,
     bool UnassignedOnly = false,
     bool NewOnly = false,
+    Guid? ContactReasonId = null,
     AdminContactSortOrder SortOrder = AdminContactSortOrder.Newest);
 
 public sealed record AdminContactPage(
@@ -50,6 +51,8 @@ public sealed record AdminContactSummary(
     string Subject,
     string MessagePreview,
     ContactRequestStatus Status,
+    string? ReasonName,
+    string? ComplaintCategoryName,
     Guid? AssignedToUserId,
     string? AssignedToDisplayName,
     DateTimeOffset UpdatedAt,

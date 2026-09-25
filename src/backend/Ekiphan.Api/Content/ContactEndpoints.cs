@@ -37,8 +37,10 @@ internal static class ContactEndpoints
             admin.MapGet("/taxonomy", Unavailable);
             admin.MapPost("/reasons", Unavailable);
             admin.MapPut("/reasons/{id:guid}", UnavailableForRequest);
+            admin.MapDelete("/reasons/{id:guid}", UnavailableForRequest);
             admin.MapPost("/complaint-categories", Unavailable);
             admin.MapPut("/complaint-categories/{id:guid}", UnavailableForRequest);
+            admin.MapDelete("/complaint-categories/{id:guid}", UnavailableForRequest);
             return;
         }
 
@@ -53,8 +55,11 @@ internal static class ContactEndpoints
         MapWrite(admin, "/{requestId:guid}/notes", AddNoteAsync);
         MapWrite(admin, "/reasons", CreateReasonAsync);
         MapWritePut(admin, "/reasons/{id:guid}", UpdateReasonAsync);
+        MapWriteDelete(admin, "/reasons/{id:guid}", DeleteReasonAsync);
         MapWrite(admin, "/complaint-categories", CreateComplaintCategoryAsync);
         MapWritePut(admin, "/complaint-categories/{id:guid}", UpdateComplaintCategoryAsync);
+        MapWriteDelete(
+            admin, "/complaint-categories/{id:guid}", DeleteComplaintCategoryAsync);
     }
 
     private static void MapWrite(
@@ -74,6 +79,14 @@ internal static class ContactEndpoints
             .RequireAuthorization("ContactManage")
             .RequireRateLimiting("quote-admin-write")
             .WithMetadata(new RequestSizeLimitAttribute(16 * 1024));
+
+    private static void MapWriteDelete(
+        RouteGroupBuilder group,
+        string pattern,
+        Delegate handler) =>
+        group.MapDelete(pattern, handler)
+            .RequireAuthorization("ContactManage")
+            .RequireRateLimiting("quote-admin-write");
 
     private static async Task<IResult> GetTaxonomyAsync(
         HttpResponse response,
@@ -167,6 +180,29 @@ internal static class ContactEndpoints
             var value = await service.UpdateComplaintCategoryAsync(
                 id, request.ToCommand(), cancellationToken);
             return value is null ? Results.NotFound() : Results.Ok(value);
+        });
+
+    private static Task<IResult> DeleteReasonAsync(
+        Guid id,
+        HttpResponse response,
+        IContactTaxonomyService service,
+        CancellationToken cancellationToken) =>
+        ExecuteTaxonomyAsync(response, async () =>
+        {
+            var deleted = await service.DeleteReasonAsync(id, cancellationToken);
+            return deleted ? Results.NoContent() : Results.NotFound();
+        });
+
+    private static Task<IResult> DeleteComplaintCategoryAsync(
+        Guid id,
+        HttpResponse response,
+        IContactTaxonomyService service,
+        CancellationToken cancellationToken) =>
+        ExecuteTaxonomyAsync(response, async () =>
+        {
+            var deleted = await service.DeleteComplaintCategoryAsync(
+                id, cancellationToken);
+            return deleted ? Results.NoContent() : Results.NotFound();
         });
 
     private static async Task<IResult> ExecuteTaxonomyAsync(
@@ -365,9 +401,16 @@ internal static class ContactEndpoints
             if (!Guid.TryParse(assigned, out var parsed)) return false;
             assignedUserId = parsed;
         }
+        var reason = Value(request, "contactReasonId");
+        Guid? contactReasonId = null;
+        if (reason is not null)
+        {
+            if (!Guid.TryParse(reason, out var parsedReason)) return false;
+            contactReasonId = parsedReason;
+        }
         result = new AdminContactListQuery(
             page, pageSize, status, search, dateFrom, dateTo,
-            assignedUserId, unassigned, newOnly,
+            assignedUserId, unassigned, newOnly, contactReasonId,
             sort ?? AdminContactSortOrder.Newest);
         return true;
     }

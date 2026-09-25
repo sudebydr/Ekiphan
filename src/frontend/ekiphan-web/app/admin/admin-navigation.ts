@@ -158,12 +158,6 @@ const navigation: AdminNavigationGroup[] = [
         anyPermission: ["contacts.read", "contacts.manage"]
       },
       {
-        label: "Müşteri Şikâyetleri",
-        href: "/admin/contact/complaints",
-        description: "Müşteri şikâyeti kayıtları",
-        anyPermission: ["contacts.read", "contacts.manage"]
-      },
-      {
         label: "Kullanıcılar ve Yetkiler",
         href: "/admin/users",
         description: "Admin hesabı ve izinleri",

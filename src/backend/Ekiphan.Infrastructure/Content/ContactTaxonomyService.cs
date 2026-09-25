@@ -162,6 +162,53 @@ internal sealed class ContactTaxonomyService(EkiphanDbContext dbContext)
         }
     }
 
+    public async Task<bool> DeleteReasonAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var reason = await dbContext.ContactReasons.SingleOrDefaultAsync(
+            item => item.Id == id, cancellationToken);
+        if (reason is null) return false;
+        if (await dbContext.ComplaintCategories.AnyAsync(
+            item => item.ContactReasonId == id, cancellationToken))
+        {
+            throw new ContactTaxonomyConflictException(
+                "This reason still has complaint categories attached. " +
+                "Delete those categories first.");
+        }
+
+        dbContext.ContactReasons.Remove(reason);
+        await DeleteAsync(cancellationToken);
+        return true;
+    }
+
+    public async Task<bool> DeleteComplaintCategoryAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var category = await dbContext.ComplaintCategories.SingleOrDefaultAsync(
+            item => item.Id == id, cancellationToken);
+        if (category is null) return false;
+
+        dbContext.ComplaintCategories.Remove(category);
+        await DeleteAsync(cancellationToken);
+        return true;
+    }
+
+    private async Task DeleteAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            throw new ContactTaxonomyConflictException(
+                "This item is used by existing contact requests and cannot " +
+                "be deleted. Deactivate it instead.");
+        }
+    }
+
     private static AdminContactReason ToReason(ContactReason item) =>
         new(item.Id, item.Name, item.SortOrder, item.IsActive,
             item.IsComplaintReason);

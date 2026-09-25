@@ -32,6 +32,8 @@ export type AdminContactSummary = {
   subject: string;
   messagePreview: string;
   status: ContactStatus;
+  reasonName: string | null;
+  complaintCategoryName: string | null;
   assignedToUserId: string | null;
   assignedToDisplayName: string | null;
   updatedAt: string;

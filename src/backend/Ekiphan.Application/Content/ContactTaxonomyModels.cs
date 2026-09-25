@@ -59,6 +59,14 @@ public interface IContactTaxonomyService
         Guid id,
         SaveComplaintCategoryCommand command,
         CancellationToken cancellationToken = default);
+
+    Task<bool> DeleteReasonAsync(
+        Guid id,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> DeleteComplaintCategoryAsync(
+        Guid id,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed class ContactTaxonomyConflictException(string message)
