@@ -17,6 +17,8 @@ using Ekiphan.Application.Seo;
 using Ekiphan.Application.MediaImport;
 using Ekiphan.Infrastructure.Seo;
 using Ekiphan.Infrastructure.MediaImport;
+using Ekiphan.Infrastructure.CatalogPdfImport;
+using Ekiphan.Application.CatalogPdfImport;
 using Ekiphan.Domain.Identity;
 using Microsoft.AspNetCore.Identity;
 using Ekiphan.Infrastructure.Persistence;
@@ -215,6 +217,7 @@ public static class DependencyInjection
         services.AddScoped<IProductMediaImportValidationService, ProductMediaImportValidationService>();
         services.AddScoped<IProductMediaImportExecutionService, ProductMediaImportExecutionService>();
         services.AddScoped<IProductMediaImportRollbackService, ProductMediaImportRollbackService>();
+        services.AddScoped<ICatalogPdfImportService, CatalogPdfImportService>();
         services.AddSingleton<IValidator<ProductMediaImportPreviewRequest>, ProductMediaImportPreviewRequestValidator>();
         services.AddSingleton<IValidator<ProductMediaImportValidateCommand>, ProductMediaImportValidateCommandValidator>();
         services.AddSingleton<IValidator<ProductMediaImportExecuteCommand>, ProductMediaImportExecuteCommandValidator>();

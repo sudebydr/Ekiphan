@@ -1,64 +1,377 @@
-.page { min-height: 100vh; background: #f7f3ed; color: #2d2926; font-family: Arial, Helvetica, sans-serif; }
-.references { width: min(calc(100% - 4rem), 84rem); margin: 0 auto; padding: clamp(10rem, 14vw, 12.5rem) 0 clamp(4rem, 8vw, 7rem); }
-.heading { margin-bottom: clamp(2rem, 4vw, 3.25rem); }
-.heading h1 { margin: 0; color: #312d2a; font-size: clamp(2.2rem, 4vw, 3.45rem); font-weight: 760; letter-spacing: -.05em; line-height: 1; }
-.heading i { display: block; width: 2rem; height: 2px; margin-top: 1rem; background: #a7193c; }
-.brandGrid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(.7rem, 1.25vw, 1.15rem); }
-.brandCard { display: grid; min-height: clamp(7.8rem, 11vw, 10.25rem); place-items: center; padding: 1rem; border: 1px solid rgb(91 76 65 / 10%); border-radius: .7rem; background: rgb(255 253 249 / 78%); box-shadow: 0 .45rem 1.35rem rgb(65 50 39 / 6%); transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease; }
-.brandMark { display: grid; max-width: 100%; place-items: center; color: rgb(48 45 42 / 70%); font-size: clamp(1.05rem, 1.65vw, 1.7rem); font-weight: 760; letter-spacing: -.045em; line-height: .95; text-align: center; filter: grayscale(1); opacity: .78; transition: opacity 180ms ease, filter 180ms ease, color 180ms ease; }
-.brandMark small { display: block; margin-top: .3rem; font-size: .36em; font-weight: 750; letter-spacing: .15em; line-height: 1; }
-.brandMark.accent { color: #b51e39; font-weight: 850; }
-.brandCard:hover { background: #fffefa; box-shadow: 0 .8rem 1.7rem rgb(65 50 39 / 11%); transform: translateY(-.2rem); }
-.brandCard:hover .brandMark { color: #292623; filter: grayscale(0); opacity: 1; }
-.brandCard:hover .accent { color: #bc1736; }
-@media (max-width: 64rem) { .brandGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .references { padding-top: 9rem; } }
-@media (max-width: 48rem) { .references { width: min(calc(100% - 2rem), 84rem); padding-top: 7.5rem; } .brandGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; } .brandCard { min-height: 7rem; } }
-/* Keep reference marks fully visible without requiring hover. */
-.brandMark {
-  color: #292623;
-  filter: none;
-  opacity: 1;
-}
-
-.brandMark.accent { color: #bc1736; }
-
-/* Only the references page: remove the shared narrow content rail. */
 .page {
+  min-height: 100vh;
+  background: #f5f0e8;
+  color: #25211f;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 44%) minmax(0, 56%);
+  min-height: 29rem;
+  background: #f5f0e8;
+}
+
+.heroCopy {
+  min-width: 0;
+  padding: clamp(3.5rem, 6vw, 5.5rem) clamp(2rem, 4.2vw, 5.2rem) clamp(3.5rem, 5vw, 4.5rem) clamp(2rem, 4.5vw, 4.4rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.4rem;
+  color: #92253d;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.eyebrow i {
+  width: 2.5rem;
+  height: 1px;
+  background: rgba(42, 36, 32, 0.38);
+}
+
+.eyebrow strong {
+  font-weight: 700;
+}
+
+.hero h1 {
+  margin: 0;
+  max-width: 11ch;
+  color: #25211f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3.8rem, 5.1vw, 6rem);
+  font-weight: 400;
+  letter-spacing: -0.055em;
+  line-height: 0.91;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.hero h1 em {
   display: block;
-  width: 100vw;
-  max-width: none;
-  margin: 0;
-  padding: 0;
+  color: #92253d;
+  font-style: italic;
+  font-weight: 400;
 }
 
-.references {
-  box-sizing: border-box;
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  padding-inline: clamp(1.5rem, 2.5vw, 3rem);
+.heroLead {
+  max-width: 31rem;
+  margin: 1.6rem 0 0;
+  color: #6c645e;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(0.95rem, 1.15vw, 1.08rem);
+  line-height: 1.65;
 }
 
-@media (max-width: 48rem) {
-  .references {
-    padding-inline: 1rem;
+.heroMeta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  width: fit-content;
+  margin-top: 2rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(42, 36, 32, 0.22);
+}
+
+.heroMetaNumber {
+  color: #92253d;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.6rem;
+}
+
+.heroMetaLabel {
+  color: #413b37;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.heroVisual {
+  position: relative;
+  min-height: 29rem;
+  overflow: hidden;
+  border-bottom-left-radius: 8rem;
+}
+
+.heroVisual img {
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(0.85) contrast(1.02);
+}
+
+.heroVisualShade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(22, 18, 15, 0.2));
+}
+
+.heroVisualLabel {
+  position: absolute;
+  right: 1.7rem;
+  bottom: 1.4rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.brandSection {
+  padding: clamp(3.5rem, 5vw, 5.5rem) clamp(2rem, 4.5vw, 4.5rem) clamp(4.5rem, 7vw, 7rem);
+}
+
+.brandTopline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.brandEyebrow {
+  display: flex;
+  gap: 0.8rem;
+  color: #92253d;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.17em;
+}
+
+.partnerCount {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  color: #665e58;
+}
+
+.partnerCount strong {
+  color: #92253d;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+.partnerCount span {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.sectionIntro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 22rem);
+  gap: 3rem;
+  align-items: end;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(43, 36, 31, 0.17);
+}
+
+.sectionIntro h2 {
+  margin: 0;
+  max-width: 12ch;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3rem, 5vw, 5.5rem);
+  font-weight: 400;
+  letter-spacing: -0.055em;
+  line-height: 0.94;
+}
+
+.sectionIntro h2 em {
+  display: block;
+  color: #92253d;
+  font-style: italic;
+}
+
+.sectionIntro > p {
+  margin: 0;
+  color: #6b635c;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.94rem;
+  line-height: 1.7;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 1.4rem 0 1.5rem;
+}
+
+.filters button {
+  min-height: 2.35rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid rgba(46, 39, 34, 0.15);
+  border-radius: 999px;
+  background: transparent;
+  color: #4e4843;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.73rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.filters .filterActive {
+  border-color: #92253d;
+  background: #92253d;
+  color: #fff;
+}
+
+.brandGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.brandCard {
+  position: relative;
+  min-height: 7.6rem;
+  display: grid;
+  place-items: center;
+  padding: 1.15rem;
+  border: 1px solid rgba(46, 39, 34, 0.11);
+  border-radius: 0.7rem;
+  background: rgba(255, 253, 249, 0.6);
+  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.brandCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(146, 37, 61, 0.28);
+  background: #fffdf9;
+}
+
+.brandNumber {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.95rem;
+  color: rgba(146, 37, 61, 0.78);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+}
+
+.brandMark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.18rem;
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(1.05rem, 1.55vw, 1.45rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.brandMark small {
+  font-size: 0.36em;
+  letter-spacing: 0.16em;
+}
+
+.brand_red .brandMark { color: #cb243d; }
+.brand_dark .brandMark { color: #322d29; }
+.brand_burgundy .brandMark { color: #8e1e3c; }
+.brand_gray .brandMark { color: #636765; }
+.brand_teal .brandMark { color: #1b8790; }
+.brand_blue .brandMark { color: #1762a5; }
+.brand_gold .brandMark { color: #b88a2e; }
+.brand_orange .brandMark { color: #e24c34; }
+
+.statement {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: 1rem;
+  margin: 0 clamp(2rem, 4.5vw, 4.5rem);
+  padding: 2rem 0 4.5rem;
+  border-top: 1px solid rgba(43, 36, 31, 0.16);
+}
+
+.statement > span {
+  color: #92253d;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.statement p {
+  max-width: 40rem;
+  margin: 0;
+  color: #5c554e;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.35rem, 2vw, 2rem);
+  line-height: 1.1;
+}
+
+@media (max-width: 72rem) {
+  .hero {
+    grid-template-columns: minmax(0, 48%) minmax(0, 52%);
+  }
+
+  .hero h1 {
+    font-size: clamp(3.2rem, 5vw, 5rem);
+  }
+
+  .brandGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
-/* Brand-specific reference colors. */
-.brandGrid > .brandCard:nth-child(1) .brandMark { color: #d61f36; } /* Arçelik */
-.brandGrid > .brandCard:nth-child(2) .brandMark { color: #cf1f3a; } /* Vestel */
-.brandGrid > .brandCard:nth-child(3) .brandMark { color: #433d39; } /* Divan */
-.brandGrid > .brandCard:nth-child(4) .brandMark { color: #8a1f3a; } /* Ramada */
-.brandGrid > .brandCard:nth-child(5) .brandMark { color: #5e6260; } /* Meda */
-.brandGrid > .brandCard:nth-child(6) .brandMark { color: #007e8b; } /* Medicana */
-.brandGrid > .brandCard:nth-child(7) .brandMark { color: #005a9c; } /* Doğuş */
-.brandGrid > .brandCard:nth-child(8) .brandMark { color: #255c9f; } /* Taha Kargo */
-.brandGrid > .brandCard:nth-child(9) .brandMark { color: #b78a34; } /* Ege Yapı */
-.brandGrid > .brandCard:nth-child(10) .brandMark { color: #005d9e; } /* Radisson */
-.brandGrid > .brandCard:nth-child(11) .brandMark { color: #51555a; } /* Polimeks */
-.brandGrid > .brandCard:nth-child(12) .brandMark { color: #b18237; } /* Atasay */
-.brandGrid > .brandCard:nth-child(13) .brandMark { color: #385b62; } /* Ferko */
-.brandGrid > .brandCard:nth-child(14) .brandMark { color: #d24932; } /* Akasya */
-.brandGrid > .brandCard:nth-child(15) .brandMark { color: #5f676b; } /* İskele Yapı */
 
-.brandCard:hover .brandMark { opacity: 1; }
+@media (max-width: 56rem) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .heroCopy {
+    padding: 3.5rem 1.5rem 3.25rem;
+  }
+
+  .heroVisual {
+    min-height: 22rem;
+    border-bottom-left-radius: 4rem;
+  }
+
+  .sectionIntro {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .brandGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 40rem) {
+  .brandSection {
+    padding-inline: 1rem;
+  }
+
+  .brandTopline {
+    align-items: flex-start;
+  }
+
+  .brandGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .brandCard {
+    min-height: 7.2rem;
+  }
+
+  .statement {
+    grid-template-columns: 2rem 1fr;
+    margin-inline: 1rem;
+  }
+}

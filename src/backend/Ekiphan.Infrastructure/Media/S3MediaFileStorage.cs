@@ -113,13 +113,30 @@ public sealed class S3MediaFileStorage : IMediaFileStorage, IDisposable
         Stream content,
         CancellationToken cancellationToken = default)
     {
+        var contentLength = content.CanSeek ? content.Length - content.Position : -1;
+        await SaveAsync(storageKey, content, contentLength, cancellationToken);
+    }
+
+    public async Task SaveAsync(
+        string storageKey,
+        Stream content,
+        long contentLength,
+        CancellationToken cancellationToken = default)
+    {
         ArgumentNullException.ThrowIfNull(content);
+        if (contentLength < 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(contentLength),
+                "S3 uploads from non-seekable streams require a content length.");
+        }
         await client.PutObjectAsync(
             new PutObjectRequest
             {
                 BucketName = bucket,
                 Key = ResolveObjectKey(storageKey),
                 InputStream = content,
+                Headers = { ContentLength = contentLength },
                 AutoCloseStream = false,
             },
             cancellationToken);
@@ -141,15 +158,29 @@ public sealed class S3MediaFileStorage : IMediaFileStorage, IDisposable
     public async Task<Stream?> OpenReadAsync(
         string storageKey,
         CancellationToken cancellationToken = default)
+        => await OpenReadAsync(storageKey, null, cancellationToken);
+
+    public async Task<Stream?> OpenReadAsync(
+        string storageKey,
+        string? byteRange,
+        CancellationToken cancellationToken = default)
     {
         try
         {
+            var request = new GetObjectRequest
+            {
+                BucketName = bucket,
+                Key = ResolveObjectKey(storageKey),
+            };
+            if (!string.IsNullOrWhiteSpace(byteRange))
+            {
+                var bounds = byteRange[6..].Split('-', StringSplitOptions.TrimEntries);
+                request.ByteRange = new ByteRange(
+                    long.Parse(bounds[0], System.Globalization.CultureInfo.InvariantCulture),
+                    long.Parse(bounds[1], System.Globalization.CultureInfo.InvariantCulture));
+            }
             var response = await client.GetObjectAsync(
-                new GetObjectRequest
-                {
-                    BucketName = bucket,
-                    Key = ResolveObjectKey(storageKey),
-                },
+                request,
                 cancellationToken);
             return new S3ResponseStream(response);
         }

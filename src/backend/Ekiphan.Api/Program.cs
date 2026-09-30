@@ -495,6 +495,7 @@ app.MapAdminDictionaryEndpoints(jwtSettings.IsConfigured);
 app.MapAdminMediaEndpoints(jwtSettings.IsConfigured);
 app.MapMediaProcessingEndpoints(jwtSettings.IsConfigured);
 app.MapProductMediaImportEndpoints(jwtSettings.IsConfigured);
+app.MapCatalogPdfImportEndpoints(jwtSettings.IsConfigured);
 app.MapQuoteSubmission(quoteConsentSettings);
 app.MapAdminQuoteEndpoints(jwtSettings.IsConfigured);
 app.MapContactEndpoints(quoteConsentSettings, jwtSettings.IsConfigured);

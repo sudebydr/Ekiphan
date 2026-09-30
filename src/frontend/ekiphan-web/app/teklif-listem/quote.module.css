@@ -287,6 +287,12 @@
 }
 
 @media (max-width: 60rem) {
+  .page {
+    box-sizing: border-box;
+    width: min(calc(100% - 2rem), 76rem);
+    padding: 8.5rem 0 4rem;
+  }
+
   .layout {
     grid-template-columns: 1fr;
   }

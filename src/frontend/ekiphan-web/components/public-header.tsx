@@ -1,6 +1,9 @@
 import Link from "next/link";
+
 import { HeaderSearch } from "./header-search";
+import MobileNavToggle from "./mobile-nav-toggle";
 import { PublicNavigation } from "./public-navigation";
+import { ScrollNavbar } from "./scroll-navbar";
 import styles from "./public-header.module.css";
 
 type PublicHeaderProps = {
@@ -19,23 +22,70 @@ const fallbackNavigation = [
   { label: "İletişim", url: "/iletisim" }
 ];
 
-export function PublicHeader({ currentPath, tone = "light" }: PublicHeaderProps) {
+export function PublicHeader({
+  currentPath,
+  tone = "light"
+}: PublicHeaderProps) {
   const isEnglish = currentPath?.startsWith("/en") ?? false;
 
   return (
-    <header className={`${styles.catalogTopbar}${(currentPath === "/" || currentPath === "/en") ? ` ${styles.homeTopbar}` : currentPath === "/showroom" ? ` ${styles.showroomTopbar}` : ""}`}>
+    <header
+      data-sticky-nav="true"
+      className={`${styles.catalogTopbar}${
+        currentPath === "/" || currentPath === "/en"
+          ? ` ${styles.homeTopbar}`
+          : currentPath === "/showroom"
+            ? ` ${styles.showroomTopbar}`
+            : ""
+      }`}
+    >
+      <ScrollNavbar />
       <div className={styles.headerTop}>
-        <Link className={styles.catalogBrand} href="/" aria-label="Ekiphan ana sayfa">
-          <strong>ekiphan<span aria-hidden="true" /></strong>
-          <small>PROFESYONEL MUTFAK ÇÖZÜMLERİ</small>
+        <Link
+          className={styles.catalogBrand}
+          href="/"
+          aria-label="Ekiphan ana sayfa"
+        >
+          <strong>
+            ekiphan<span aria-hidden="true" />
+          </strong>
+
+          <small>
+            PROFESYONEL MUTFAK ÇÖZÜMLERİ
+          </small>
         </Link>
+
         <HeaderSearch />
+
         <div className={styles.headerActions}>
-          <Link className={styles.quoteButton} href="/teklif-listem">Teklif Al</Link>
-          <Link className={styles.headerLanguage} href={isEnglish ? "/" : "/en"} aria-label={isEnglish ? "Türkçeye geç" : "Switch to English"}>{isEnglish ? "TR" : "EN"}</Link>
+          <Link
+            className={styles.quoteButton}
+            href="/teklif-listem"
+          >
+            Teklif Al
+          </Link>
+
+          <Link
+            className={styles.headerLanguage}
+            href={isEnglish ? "/" : "/en"}
+            aria-label={
+              isEnglish
+                ? "Türkçeye geç"
+                : "Switch to English"
+            }
+          >
+            {isEnglish ? "TR" : "EN"}
+          </Link>
         </div>
+
+        <MobileNavToggle />
       </div>
-      <PublicNavigation currentPath={currentPath} tone={tone} fallback={fallbackNavigation} />
+
+      <PublicNavigation
+        currentPath={currentPath}
+        tone={tone}
+        fallback={fallbackNavigation}
+      />
     </header>
   );
 }

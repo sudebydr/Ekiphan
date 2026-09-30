@@ -86,9 +86,12 @@ public sealed class MediaAsset : Entity
             normalizedMime,
             safeOriginalName);
 
-        var maximumSize = assetType == MediaAssetType.Image
-            ? 25L * 1024 * 1024
-            : 50L * 1024 * 1024;
+        var maximumSize = assetType switch
+        {
+            MediaAssetType.Image => 25L * 1024 * 1024,
+            MediaAssetType.Pdf => 300L * 1024 * 1024,
+            _ => 50L * 1024 * 1024,
+        };
 
         if (fileSizeBytes <= 0 || fileSizeBytes > maximumSize)
         {

@@ -88,6 +88,20 @@ export function getBrands(): Promise<CatalogBrandListItem[]> {
   return getJson("/api/catalog/tr/brands");
 }
 
+export type CatalogPdfDocument = { slug: string; url: string };
+
+export async function getCatalogPdfDocuments(): Promise<CatalogPdfDocument[]> {
+  try {
+    const documents = await getJson<CatalogPdfDocument[]>("/api/catalogs/documents");
+    return documents.map((document) => ({
+      ...document,
+      url: document.url.startsWith("/") ? `${apiBaseUrl()}${document.url}` : document.url
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export function getBrand(slug: string): Promise<CatalogBrandDetail> {
   return getJson(`/api/catalog/tr/brands/${encodeURIComponent(slug)}`);
 }

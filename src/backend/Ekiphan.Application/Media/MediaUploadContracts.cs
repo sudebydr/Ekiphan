@@ -54,12 +54,25 @@ public interface IMediaFileStorage
         Stream content,
         CancellationToken cancellationToken = default);
 
+    Task SaveAsync(
+        string storageKey,
+        Stream content,
+        long contentLength,
+        CancellationToken cancellationToken = default) =>
+        SaveAsync(storageKey, content, cancellationToken);
+
     Task DeleteAsync(
         string storageKey,
         CancellationToken cancellationToken = default);
 
     Task<Stream?> OpenReadAsync(string storageKey, CancellationToken cancellationToken = default) =>
         Task.FromResult<Stream?>(null);
+
+    Task<Stream?> OpenReadAsync(
+        string storageKey,
+        string? byteRange,
+        CancellationToken cancellationToken = default) =>
+        OpenReadAsync(storageKey, cancellationToken);
 
     Task MoveAsync(string sourceKey, string destinationKey, CancellationToken cancellationToken = default) =>
         throw new NotSupportedException();

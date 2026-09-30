@@ -281,6 +281,11 @@ public sealed class AdminProductRelationEndpointTests
             CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<AdminProductRelation>>([]);
 
+        public Task<IReadOnlyList<Guid>> SelectUnpublishedProductIdsAsync(
+            AdminProductBulkSelectionQuery query,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<Guid>>([]);
+
         public Task<AdminProductRelation> CreateAsync(
             CreateAdminProductRelationCommand command,
             string languageCode,

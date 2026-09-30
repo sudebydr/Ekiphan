@@ -1,121 +1,337 @@
-.page { min-height: 100vh; background: #f4f1ec; color: #24211f; }
-.hero { width: min(100% - 3rem, 82rem); margin: 0 auto; padding: clamp(8.5rem, 14vw, 12rem) 0 clamp(3.5rem, 7vw, 6rem); }
-.eyebrow, .sectionIntro p, .modalMeta p { color: #a3153c; font-size: .76rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
-.hero h1 { max-width: 13ch; margin: 1rem 0 1.4rem; font-family: Georgia, "Times New Roman", serif; font-size: clamp(3.1rem, 7vw, 7.3rem); font-weight: 500; letter-spacing: -.075em; line-height: .86; }
-.hero > p:last-child { max-width: 37rem; color: #68645e; font-size: clamp(1rem, 1.6vw, 1.22rem); line-height: 1.6; }
-.catalogSection { width: min(100% - 3rem, 82rem); margin: 0 auto; padding-bottom: clamp(5rem, 10vw, 9rem); }
-.sectionIntro { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 1rem 0; border-top: 1px solid #d2cbc0; }
-.sectionIntro p { margin: 0; }
-.sectionIntro span { color: #69645d; font-size: .94rem; }
-.catalogGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-top: 1.2rem; }
-.catalogCard { position: relative; display: flex; min-height: clamp(25rem, 42vw, 35rem); flex-direction: column; justify-content: flex-end; overflow: hidden; padding: 1.5rem; border: 0; border-radius: .9rem; background: #1b2327; color: #fff; cursor: pointer; text-align: left; }
-.cover, .cardOverlay { position: absolute; inset: 0; }
-.cover { background-position: center; background-size: cover; transition: transform 750ms cubic-bezier(.2,.7,.2,1), filter 750ms ease; }
-.cardOverlay { background: linear-gradient(180deg, rgba(5, 9, 11, .04) 20%, rgba(5, 9, 11, .94) 100%); transition: background 350ms ease; }
-.cardContent, .index { position: relative; z-index: 1; }
-.cardContent { display: grid; align-items: start; justify-items: start; }
-.cardContent small { margin-bottom: .8rem; color: #f5c2cc; font-size: .68rem; font-weight: 800; letter-spacing: .13em; }
-.cardContent strong { max-width: 11ch; font-family: Georgia, "Times New Roman", serif; font-size: clamp(2rem, 3.4vw, 3.3rem); font-weight: 500; letter-spacing: -.06em; line-height: .94; transition: transform 260ms ease; }
-.cardContent em { min-height: 0; max-width: 23ch; margin-top: .9rem; color: rgba(255,255,255,.78); font-size: .92rem; font-style: normal; line-height: 1.45; opacity: .82; transition: opacity 260ms ease, transform 260ms ease; }
-.cardContent b { margin-top: 1.4rem; padding-bottom: .3rem; border-bottom: 2px solid #b42345; color: #fff; font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; transition: transform 260ms ease, border-color 260ms ease; }
-.cardContent b i { margin-left: .3rem; font-size: 1rem; font-style: normal; }
-.index { position: absolute; top: 1.35rem; right: 1.4rem; color: rgba(255,255,255,.76); font-family: Georgia, "Times New Roman", serif; font-size: 1.1rem; }
-.catalogCard:hover .cover, .catalogCard:focus-visible .cover { filter: saturate(1.15) brightness(1.08); transform: scale(1.09); }
-.catalogCard:hover .cardOverlay, .catalogCard:focus-visible .cardOverlay { background: linear-gradient(180deg, rgba(127, 20, 49, .08), rgba(5, 9, 11, .85) 100%); }
-.catalogCard:hover strong, .catalogCard:focus-visible strong, .catalogCard:hover em, .catalogCard:focus-visible em, .catalogCard:hover b, .catalogCard:focus-visible b { transform: translateX(.35rem); }
-.catalogCard:hover em, .catalogCard:focus-visible em { opacity: 1; }
-.catalogCard:hover b, .catalogCard:focus-visible b { border-color: #fff; }
-.catalogCard:focus-visible { outline: 3px solid #a3153c; outline-offset: 4px; }
-.modal { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; padding: 1.25rem; background: rgba(10, 13, 15, .82); backdrop-filter: blur(12px); }
-.modalPanel { position: relative; width: min(100%, 70rem); max-height: calc(100vh - 2.5rem); overflow: auto; border-radius: .8rem; background: #f4f1ec; box-shadow: 0 2rem 6rem rgba(0,0,0,.45); }
-.modalPanel img { display: block; width: 100%; max-height: 72vh; object-fit: cover; }
-.modalMeta { padding: 1.5rem 1.5rem 1rem; }
-.modalMeta p { margin: 0 0 .55rem; }
-.modalMeta h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(2rem, 4vw, 3.6rem); font-weight: 500; letter-spacing: -.06em; }
-.close { position: absolute; z-index: 1; top: 1rem; right: 1rem; display: inline-flex; align-items: center; gap: .6rem; padding: .65rem .85rem; border: 0; border-radius: 999px; background: #fff; color: #231f20; cursor: pointer; font-size: .75rem; font-weight: 800; text-transform: uppercase; }
-.close span { font-size: 1.25rem; font-weight: 400; line-height: .7; }
-@media (max-width: 800px) { .catalogGrid { grid-template-columns: 1fr; } .catalogCard { min-height: 28rem; } }
-@media (max-width: 640px) { .hero, .catalogSection { width: min(100% - 2rem, 82rem); } .sectionIntro { align-items: start; flex-direction: column; } .hero { padding-top: 7rem; } }
-/* Modern catalog archive hero refinement */
 .page {
-  background:
-    radial-gradient(circle at 82% 0%, rgb(169 22 59 / 7%), transparent 24rem),
-    #f4f1ec;
+  min-height: 100vh;
+  background: #f4efe8;
+  color: #26221f;
 }
 
+/* HERO */
 .hero {
   position: relative;
-  padding: clamp(7rem, 10vw, 9rem) 0 clamp(2.75rem, 5vw, 4.5rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.34fr);
+  width: min(100% - 5rem, 98rem);
+  min-height: clamp(27rem, 43vw, 38rem);
+  margin: 0 auto;
+  padding: clamp(5rem, 8vw, 8rem) 0 clamp(4rem, 7vw, 6.5rem);
+  border-bottom: 1px solid rgba(38, 34, 31, 0.16);
 }
 
-.hero::after {
+.heroIndex {
+  position: absolute;
+  top: clamp(3rem, 5vw, 4.5rem);
+  left: 0;
+  color: #92253d;
+  font: 700 0.68rem/1 Arial, Helvetica, sans-serif;
+  letter-spacing: 0.16em;
+}
+
+.heroCopy {
+  max-width: 56rem;
+  padding-left: clamp(3rem, 7vw, 7rem);
+}
+
+.heroEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  color: #92253d;
+  font: 700 0.68rem/1 Arial, Helvetica, sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.heroEyebrow i {
+  width: 3rem;
+  height: 1px;
+  background: rgba(38, 34, 31, 0.3);
+}
+
+.hero h1 {
+  max-width: 8.5ch;
+  margin: 1.3rem 0 1.6rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(4.6rem, 8vw, 8.8rem);
+  font-weight: 400;
+  letter-spacing: -0.075em;
+  line-height: 0.84;
+}
+
+.hero h1 em {
+  display: block;
+  color: #92253d;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.heroCopy > p {
+  max-width: 37rem;
+  margin: 0;
+  color: #675f58;
+  font: 400 clamp(1rem, 1.35vw, 1.18rem)/1.7 Arial, Helvetica, sans-serif;
+}
+
+.heroSide {
+  align-self: end;
+  justify-self: end;
+  width: min(100%, 18rem);
+  padding: 1.25rem 0 0;
+  border-top: 1px solid rgba(38, 34, 31, 0.16);
+}
+
+.heroSide strong {
+  display: block;
+  color: #92253d;
+  font: 400 clamp(3.2rem, 5vw, 5rem)/0.95 Georgia, "Times New Roman", serif;
+  letter-spacing: -0.06em;
+}
+
+.heroSide > span {
+  display: block;
+  margin-top: 0.35rem;
+  color: #423b36;
+  font: 700 0.67rem/1 Arial, Helvetica, sans-serif;
+  letter-spacing: 0.18em;
+}
+
+.heroLine {
+  width: 100%;
+  height: 1px;
+  margin: 2rem 0 1rem;
+  background: rgba(38, 34, 31, 0.14);
+}
+
+.heroSide p {
+  margin: 0;
+  color: #706860;
+  font: 400 0.86rem/1.6 Arial, Helvetica, sans-serif;
+}
+
+/* CATALOG ARCHIVE */
+.catalogSection {
+  width: min(100% - 5rem, 98rem);
+  margin: 0 auto;
+  padding: clamp(2rem, 3vw, 3rem) 0 clamp(5rem, 8vw, 8rem);
+}
+
+.sectionIntro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 0 0 1rem;
+  border-bottom: 1px solid rgba(38, 34, 31, 0.16);
+}
+
+.sectionIntro p {
+  margin: 0;
+  color: #92253d;
+  font: 700 0.68rem/1 Arial, Helvetica, sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.sectionIntro span {
+  color: #756d66;
+  font: 400 0.82rem/1.5 Arial, Helvetica, sans-serif;
+}
+
+.catalogGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.15rem;
+  margin-top: 1.15rem;
+}
+
+.catalogCard {
+  position: relative;
+  display: block;
+  min-width: 0;
+  aspect-ratio: 0.8 / 1;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid rgba(38, 34, 31, 0.14);
+  border-radius: 0.9rem;
+  background: #ebe4da;
+  color: #26221f;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: 0 1rem 2.4rem rgba(44, 34, 28, 0.06);
+  transition: transform 280ms ease, box-shadow 280ms ease, border-color 280ms ease;
+}
+
+.catalogCard:hover,
+.catalogCard:focus-visible {
+  transform: translateY(-4px);
+  border-color: rgba(146, 37, 61, 0.34);
+  box-shadow: 0 1.5rem 3.4rem rgba(44, 34, 28, 0.11);
+}
+
+.cover {
+  position: absolute;
+  inset: 0 0 37% 0;
+  display: block;
+  background-position: center;
+  background-size: cover;
+  filter: saturate(0.88) contrast(1.02);
+  transform: scale(1.001);
+  transition: transform 700ms cubic-bezier(.2,.7,.2,1), filter 500ms ease;
+}
+
+.cardOverlay {
+  position: absolute;
+  inset: 0 0 37% 0;
+  display: block;
+  background: linear-gradient(180deg, rgba(14, 12, 11, 0.04) 45%, rgba(14, 12, 11, 0.58) 100%);
+}
+
+.catalogCard:hover .cover,
+.catalogCard:focus-visible .cover {
+  filter: saturate(1) contrast(1.03);
+  transform: scale(1.055);
+}
+
+.cardContent {
   position: absolute;
   right: 0;
   bottom: 0;
   left: 0;
-  height: 1px;
-  background: linear-gradient(90deg, #a3153c, rgb(163 21 60 / 12%) 54%, transparent);
-  content: "";
+  z-index: 2;
+  display: grid;
+  align-content: start;
+  min-height: 37%;
+  padding: 1rem 1.1rem 1.15rem;
+  background: #f8f4ed;
 }
 
-.hero h1 {
-  max-width: 16ch;
-  margin: .85rem 0 1.15rem;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: clamp(2.65rem, 4.35vw, 4.85rem);
-  font-weight: 780;
-  letter-spacing: -0.07em;
-  line-height: .91;
+.cardContent small {
+  margin: 0 0 0.65rem;
+  color: #92253d;
+  font: 700 0.6rem/1.15 Arial, Helvetica, sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
-.hero > p:last-child {
-  max-width: 42rem;
-  color: #615d57;
-  font-size: clamp(.98rem, 1.25vw, 1.12rem);
+.cardContent strong {
+  color: #292521;
+  font: 400 clamp(1.55rem, 2vw, 2.1rem)/0.97 Georgia, "Times New Roman", serif;
+  letter-spacing: -0.05em;
 }
 
-.catalogSection {
-  padding-top: clamp(2.5rem, 5vw, 4.25rem);
+.cardContent em {
+  display: block;
+  max-width: 28ch;
+  margin-top: 0.55rem;
+  color: #716960;
+  font: 400 0.8rem/1.5 Arial, Helvetica, sans-serif;
+  font-style: normal;
 }
 
-.sectionIntro {
-  padding-bottom: 1.2rem;
+.cardContent b {
+  display: inline-flex;
+  width: max-content;
+  margin-top: 0.85rem;
+  padding-bottom: 0.22rem;
+  border-bottom: 1px solid #92253d;
+  color: #92253d;
+  font: 700 0.66rem/1.1 Arial, Helvetica, sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
-/* Catalog PDF grouping and viewer */
-.catalogGroup { margin-top: clamp(2.75rem, 6vw, 5rem); }
-.catalogGroup h2 { margin: 0 0 1.15rem; color: #2a2724; font-size: clamp(1.3rem, 2vw, 1.85rem); letter-spacing: -.04em; }
-.pdfFrame { display: block; width: 100%; height: min(72vh, 58rem); border: 0; background: #fff; }
-@media (max-width: 640px) { .pdfFrame { height: 64vh; } }
-/* Premium single-page PDF viewer */
+
+.index {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  z-index: 3;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,0.45);
+  border-radius: 50%;
+  background: rgba(22, 18, 16, 0.2);
+  color: #fff;
+  font: 400 0.7rem/1 Arial, Helvetica, sans-serif;
+  backdrop-filter: blur(3px);
+}
+
+.catalogCard:focus-visible {
+  outline: 3px solid #92253d;
+  outline-offset: 4px;
+}
+
+/* PAGINATION */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 2.4rem;
+}
+
+.pagination button {
+  display: grid;
+  width: 2.7rem;
+  height: 2.7rem;
+  place-items: center;
+  border: 1px solid rgba(38,34,31,0.15);
+  border-radius: 50%;
+  background: transparent;
+  color: #332e2a;
+  cursor: pointer;
+  font: 600 0.78rem/1 Arial, Helvetica, sans-serif;
+}
+
+.pagination button:hover:not(:disabled) {
+  border-color: #92253d;
+  color: #92253d;
+}
+
+.pagination button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.pagination .activePage {
+  border-color: #92253d;
+  background: #92253d;
+  color: #fff;
+}
+
+/* PDF VIEWER */
 .modal {
+  position: fixed;
   z-index: 120;
-  padding: clamp(.4rem, 1vw, 1rem);
-  background: rgb(13 17 20 / 88%);
-  backdrop-filter: blur(18px) saturate(110%);
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(16, 14, 12, 0.86);
+  backdrop-filter: blur(14px);
 }
 
 .modalPanel {
   display: flex;
-  width: min(100%, 120rem);
-  height: calc(100dvh - clamp(.8rem, 2vw, 2rem));
+  width: min(100%, 110rem);
+  height: calc(100dvh - 2rem);
   max-height: none;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 14%);
-  border-radius: 1.15rem;
-  background: #f7f4ee;
-  box-shadow: 0 2rem 6rem rgb(0 0 0 / 45%);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 1rem;
+  background: #f7f3ed;
+  box-shadow: 0 2rem 6rem rgba(0,0,0,.45);
 }
 
 .viewerHeader {
   display: flex;
-  min-height: 3.5rem;
+  min-height: 4rem;
   align-items: center;
   justify-content: space-between;
-  gap: 1.25rem;
-  padding: .38rem 1.35rem;
-  border-bottom: 1px solid rgb(39 35 31 / 10%);
-  background: linear-gradient(120deg, #fffdfa, #f5f0e9);
+  gap: 1rem;
+  padding: 0.65rem 1.25rem;
+  border-bottom: 1px solid rgba(38,34,31,0.1);
+  background: #f7f3ed;
 }
 
 .viewerHeader .modalMeta {
@@ -124,142 +340,60 @@
 }
 
 .viewerHeader .modalMeta p {
-  margin: 0 0 .38rem;
-  color: #a3153c;
-  font-size: .67rem;
-  letter-spacing: .13em;
+  margin: 0 0 0.28rem;
+  color: #92253d;
+  font: 700 0.6rem/1 Arial, Helvetica, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .viewerHeader .modalMeta h2 {
   overflow: hidden;
   margin: 0;
-  color: #25211f;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: clamp(1.25rem, 2.2vw, 1.85rem);
-  font-weight: 760;
-  letter-spacing: -.045em;
-  line-height: 1.05;
+  color: #292521;
+  font: 400 clamp(1.4rem, 2.3vw, 2rem)/1 Georgia, "Times New Roman", serif;
+  letter-spacing: -0.04em;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .close {
-  position: static;
+  display: inline-flex;
   flex: 0 0 auto;
-  padding: .6rem .8rem;
-  border: 1px solid rgb(39 35 31 / 14%);
-  background: #fff;
-  color: #292522;
-  box-shadow: none;
-  font-size: .68rem;
-}
-
-.close:hover { border-color: #a3153c; color: #951334; }
-
-.viewerToolbar {
-  display: flex;
-  min-height: 2.75rem;
   align-items: center;
-  gap: .85rem;
-  padding: .38rem 1.35rem;
-  background: #20282d;
-  color: #f7f2eb;
-}
-
-.pageControls,
-.zoomControls,
-.viewerActions {
-  display: inline-flex;
-  align-items: center;
-  gap: .28rem;
-}
-
-.pageControls,
-.zoomControls { padding-right: .85rem; border-right: 1px solid rgb(255 255 255 / 14%); }
-
-.viewerToolbar button,
-.viewerToolbar a {
-  display: inline-flex;
-  min-width: 2rem;
-  min-height: 2rem;
-  align-items: center;
-  justify-content: center;
-  padding: .35rem .55rem;
-  border: 1px solid transparent;
-  border-radius: .45rem;
+  gap: 0.55rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(38,34,31,0.16);
+  border-radius: 999px;
   background: transparent;
-  color: inherit;
+  color: #2a2623;
   cursor: pointer;
-  font: inherit;
-  font-size: .75rem;
-  font-weight: 700;
-  text-decoration: none;
+  font: 700 0.66rem/1 Arial, Helvetica, sans-serif;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 
-.viewerToolbar button:hover:not(:disabled),
-.viewerToolbar a:hover { border-color: rgb(255 255 255 / 20%); background: rgb(255 255 255 / 10%); }
-.viewerToolbar button:disabled { cursor: not-allowed; opacity: .35; }
-.pageControls span,
-.zoomControls span { min-width: 3.75rem; color: rgb(255 255 255 / 76%); font-size: .72rem; text-align: center; }
-.viewerActions { margin-left: auto; }
-.viewerActions a,
-.viewerActions button { min-width: auto; }
+.close:hover {
+  border-color: #92253d;
+  color: #92253d;
+}
+
+.close span {
+  font-size: 1.2rem;
+  font-weight: 400;
+  line-height: .7;
+}
 
 .viewerSurface {
   position: relative;
   display: flex;
   min-height: 0;
   flex: 1;
-  align-items: flex-start;
+  align-items: stretch;
   justify-content: center;
-  overflow: auto;
-  padding: clamp(1rem, 2vw, 2rem);
-  background:
-    linear-gradient(45deg, rgb(255 255 255 / 3%) 25%, transparent 25%) 0 0 / 1.2rem 1.2rem,
-    linear-gradient(-45deg, rgb(255 255 255 / 3%) 25%, transparent 25%) 0 0 / 1.2rem 1.2rem,
-    #313a3f;
-}
-
-.pdfCanvas {
-  display: block;
-  max-width: none;
-  background: #fff;
-  box-shadow: 0 .8rem 2.6rem rgb(0 0 0 / 30%);
-}
-
-.viewerStatus,
-.viewerError {
-  align-self: center;
-  margin: auto;
-  padding: 1rem 1.2rem;
-  border: 1px solid rgb(255 255 255 / 15%);
-  border-radius: .65rem;
-  background: rgb(18 23 26 / 78%);
-  color: #fff;
-  font-size: .86rem;
-}
-
-.viewerError { display: grid; gap: .75rem; text-align: center; }
-.viewerError a { color: #f5b5c4; font-weight: 700; }
-
-@media (max-width: 640px) {
-  .modal { padding: 0; }
-  .modalPanel { width: 100%; height: 100dvh; border: 0; border-radius: 0; }
-  .viewerHeader { min-height: 4.8rem; padding: .8rem 1rem; }
-  .viewerHeader .modalMeta h2 { font-size: 1.1rem; }
-  .viewerHeader .modalMeta p { font-size: .58rem; }
-  .close { padding: .5rem .6rem; }
-  .viewerToolbar { flex-wrap: wrap; gap: .45rem; padding: .55rem .75rem; }
-  .pageControls, .zoomControls { padding-right: .45rem; }
-  .viewerActions { margin-left: 0; }
-  .viewerActions a, .viewerActions button { padding-inline: .4rem; }
-  .viewerSurface { padding: .75rem; }
-}
-/* Native PDF reading surface: the browser handles reliable, continuous page rendering. */
-.viewerSurface {
   overflow: hidden;
-  padding: clamp(.4rem, .75vw, .75rem);
-  background: #1f282d;
+  padding: 0.65rem;
+  background: #272d30;
 }
 
 .pdfFrame {
@@ -268,290 +402,36 @@
   height: 100%;
   min-height: 0;
   border: 0;
-  border-radius: .4rem;
+  border-radius: 0.35rem;
   background: #fff;
 }
 
-.pageReadout {
-  display: inline-grid;
-  grid-template-columns: 1fr;
-  gap: .04rem;
-  min-width: 12rem;
-  padding-right: .9rem;
-  border-right: 1px solid rgb(255 255 255 / 14%);
-}
-
-.pageReadout span { color: rgb(255 255 255 / 58%); font-size: .66rem; text-transform: uppercase; letter-spacing: .08em; }
-.pageReadout strong { color: #fff; font-size: .82rem; }
-.pageReadout small { display: none; }
-
-@media (max-width: 640px) {
-  .pageReadout { min-width: 0; padding-right: .55rem; }
-  .pageReadout small { display: none; }
-}
-/* Compact four-column catalog archive: keeps the existing editorial card language. */
-@media (min-width: 80rem) {
+@media (max-width: 76rem) {
   .hero,
-  .catalogSection {
-    width: min(calc(100% - 4rem), 97.5rem);
-  }
-
-  .hero {
-    padding-bottom: clamp(1.75rem, 2.5vw, 2.4rem);
-  }
-
-  .catalogSection {
-    padding-top: clamp(1.5rem, 2.5vw, 2.4rem);
-  }
-
-  .catalogGroup {
-    margin-top: clamp(1.75rem, 3vw, 2.5rem);
-  }
-
-  .catalogGrid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1.5rem;
-    margin-top: .9rem;
-  }
-
-  .catalogCard {
-    min-height: 0;
-    height: clamp(30rem, 31vw, 35rem);
-    padding: 1.35rem;
-  }
-
-  .cardContent strong {
-    font-size: clamp(1.85rem, 2.25vw, 2.55rem);
-  }
-
-  .cardContent em {
-    margin-top: .7rem;
-    font-size: .86rem;
-  }
-
-  .cardContent b {
-    margin-top: 1.05rem;
-  }
+  .catalogSection { width: min(100% - 3rem, 94rem); }
+  .hero { grid-template-columns: minmax(0, 1fr) minmax(12rem, .4fr); }
+  .catalogGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
-@media (min-width: 48.0625rem) and (max-width: 79.9375rem) {
-  .catalogGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem;
-  }
-
-  .catalogCard {
-    min-height: clamp(30rem, 56vw, 34rem);
-  }
+@media (max-width: 60rem) {
+  .hero { grid-template-columns: 1fr; padding-top: 5.5rem; }
+  .heroSide { justify-self: stretch; width: min(100%, 26rem); margin: 2rem 0 0 auto; }
+  .catalogGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* Preserve the page's serif display treatment. */
-.hero h1 {
-  font-family: Georgia, "Times New Roman", serif;
-  font-weight: 500;
-}
-
-/* Mobile catalog cards: compact, near-square presentation instead of tall posters. */
-@media (max-width: 50rem) {
-  .catalogCard {
-    min-height: 0;
-    height: auto;
-    aspect-ratio: .82 / 1;
-    padding: 1.25rem;
-  }
-
-  .cardContent strong {
-    font-size: clamp(1.9rem, 9vw, 2.55rem);
-  }
-
-  .cardContent em {
-    margin-top: .6rem;
-  }
-
-  .cardContent b {
-    margin-top: .95rem;
-  }
-}
-
-/* Catalog archive sizing refinement. */
-.catalogSection {
-  width: min(100%, 100rem);
-  box-sizing: border-box;
-  padding: 2rem 2rem 3rem;
-}
-
-.sectionIntro {
-  padding: 0 0 1rem;
-}
-
-.catalogGroup {
-  margin-top: 1.5rem;
-}
-
-.catalogGrid {
-  row-gap: 1.75rem;
-}
-
-.catalogCard {
-  border-radius: 1.5rem;
-}
-
-@media (min-width: 64rem) {
-  .catalogSection {
-    padding-inline: 2rem;
-  }
-
-  .catalogGrid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1.5rem;
-    row-gap: 1.75rem;
-  }
-
-  .catalogCard {
-    height: auto;
-    min-height: 28.75rem;
-    max-height: 35rem;
-    aspect-ratio: .78 / 1;
-    padding: 1.5rem 1.75rem;
-  }
-
-  .cardContent strong {
-    max-width: 90%;
-    font-size: clamp(2rem, 2.2vw, 3.25rem);
-    line-height: .95;
-  }
-
-  .cardContent em {
-    max-width: 85%;
-    margin-top: .75rem;
-    font-size: .94rem;
-    line-height: 1.5;
-  }
-
-  .cardContent b {
-    margin-top: 1.375rem;
-    font-size: .82rem;
-  }
-}
-
-@media (min-width: 87.5rem) {
-  .catalogSection {
-    max-width: 100rem;
-  }
-}
-
-/* One unified catalog archive with a stable, non-overlapping four-card grid. */
-.catalogSection {
-  width: min(100%, 105rem);
-  padding-inline: 1.5rem;
-}
-
-.catalogGroup {
-  margin-top: 0;
-}
-
-@media (min-width: 64rem) {
-  .catalogSection {
-    width: min(100%, 105rem);
-    padding-inline: 1.5rem;
-  }
-
-  .catalogGrid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1.5rem;
-    row-gap: 1.75rem;
-  }
-
-  .catalogCard {
-    width: 100%;
-    min-width: 0;
-    min-height: 28.75rem;
-    height: auto;
-    aspect-ratio: .78 / 1;
-  }
-}
-
-/* Extend the catalog paper background across the full viewport. */
-.page {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 0;
-  background: #f4f1ec;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: .5rem;
-  margin-top: 2rem;
-}
-
-.pagination button {
-  display: grid;
-  width: 2.55rem;
-  height: 2.55rem;
-  place-items: center;
-  border: 1px solid #d8cec3;
-  border-radius: 50%;
-  background: #fbf8f4;
-  color: #332d29;
-  cursor: pointer;
-  font-size: .82rem;
-  font-weight: 800;
-  transition: .2s ease;
-}
-
-.pagination button:hover:not(:disabled),
-.pagination .activePage {
-  border-color: #a3153c;
-  background: #a3153c;
-  color: #fff;
-}
-
-.pagination button:disabled {
-  cursor: not-allowed;
-  opacity: .36;
-}
-
-/* Remove the decorative underline from catalog PDF CTAs. */
-.cardContent b {
-  padding-bottom: 0;
-  border-bottom: 0;
-}
-
-/* Center and scale down the catalog archive introduction. */
-.hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.hero h1 {
-  max-width: 18ch;
-  font-size: clamp(2.7rem, 4vw, 4.35rem);
-  line-height: .98;
-}
-
-.hero > p:last-child {
-  max-width: 44rem;
-}
-
-/* Catalog hero only: give the title a comfortable offset below the fixed header. */
-.hero {
-  padding-top: clamp(9.5rem, 11vw, 11rem);
-}
-
-@media (max-width: 40rem) {
-  .hero {
-    padding-top: 8rem;
-  }
-}
-/* Give the catalog archive title a small breathing space below the upper divider. */
-.hero { padding-top: clamp(10.25rem, 11.7vw, 11.75rem); }
-
-@media (max-width: 40rem) {
-  .hero { padding-top: 8.75rem; }
+@media (max-width: 42rem) {
+  .hero,
+  .catalogSection { width: min(100% - 1.75rem, 94rem); }
+  .hero { padding-top: 4.5rem; padding-bottom: 3.5rem; }
+  .heroIndex { top: 2.8rem; }
+  .heroCopy { padding-left: 2.25rem; }
+  .hero h1 { font-size: clamp(3.7rem, 17vw, 5.8rem); }
+  .sectionIntro { align-items: flex-start; flex-direction: column; gap: .45rem; }
+  .catalogGrid { grid-template-columns: 1fr; gap: 1rem; }
+  .catalogCard { aspect-ratio: 1 / 1.1; }
+  .cardContent strong { font-size: 2rem; }
+  .modal { padding: 0; }
+  .modalPanel { width: 100%; height: 100dvh; border: 0; border-radius: 0; }
+  .viewerHeader { min-height: 4.5rem; padding: .75rem 1rem; }
+  .viewerHeader .modalMeta h2 { font-size: 1.15rem; }
 }

@@ -1,257 +1,949 @@
 .mainNav {
   box-sizing: border-box;
+
+  position: relative;
+  z-index: 20;
+
   display: flex;
+
   width: 100%;
-  height: 64px !important;
-  min-height: 64px !important;
+  height: 64px;
+
   align-items: center;
-  justify-content: space-between;
-  gap: 24px;
+  justify-content: center;
+
+  gap: clamp(22px, 2vw, 34px);
+
   padding: 0 28px;
-  overflow-x: auto;
-  border-top: 1px solid rgb(0 0 0 / 10%);
+
+  border-top: 1px solid rgba(48, 42, 37, 0.12);
+
   background: transparent;
-  scrollbar-width: none;
+
   white-space: nowrap;
 }
 
-.mainNav::-webkit-scrollbar {
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.navItem {
+  position: relative;
+
+  display: inline-flex;
+
+  height: 64px;
+
+  flex: 0 0 auto;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #302b28;
+
+  font-family:
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  letter-spacing: 0.045em;
+
+  line-height: 1;
+
+  text-decoration: none;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    color 180ms ease,
+    opacity 180ms ease;
+}
+
+.navItem:hover,
+.navItem:focus-visible {
+  color: #8d233b;
+
+  outline: none;
+}
+
+.navItem.active {
+  color: #8d233b;
+}
+
+
+/* =========================================================
+   PRODUCTS MENU WRAPPER
+========================================================= */
+
+.productsMenu {
+  position: relative;
+
+  display: flex;
+
+  height: 64px;
+
+  flex: 0 0 auto;
+
+  align-items: center;
+
+  list-style: none;
+}
+
+.productsMenu summary {
+  display: inline-flex;
+
+  height: 64px;
+
+  align-items: center;
+
+  list-style: none;
+
+  cursor: pointer;
+}
+
+.productsMenu summary::-webkit-details-marker {
   display: none;
 }
 
-.mainNav .navItem {
-  position: relative;
-  display: flex;
-  height: 100%;
-  min-height: 0 !important;
-  flex: 0 0 auto;
-  align-items: center;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  color: #302d2b;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: .015em;
-  line-height: 1;
-  text-decoration: none;
-  transition: color .2s ease;
-}
 
-.mainNav .navItem:hover,
-.mainNav .navItem:focus-visible {
-  background: transparent !important;
-  box-shadow: none !important;
-  color: #a52940;
-  outline: 0;
-  transform: none;
-}
+/* Küçük aşağı ok */
 
-.mainNav .navItem.active {
-  background: transparent !important;
-  box-shadow: none !important;
-  color: #a52940;
-}
+.productsMenu > summary::after {
+  display: block;
 
-.mainNav .navItem.active::after {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 2px;
-  border-radius: 2px 2px 0 0;
-  background: #a52940;
+  width: 6px;
+  height: 6px;
+
+  margin-left: 9px;
+
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+
   content: "";
+
+  transform: rotate(45deg) translateY(-2px);
+
+  transition: transform 180ms ease;
 }
 
-@media (max-width: 74.9375rem) {
+.productsMenu[open] > summary::after {
+  transform: rotate(225deg) translateY(-1px);
+}
+
+
+/* =========================================================
+   GENEL KÜÇÜK DROPDOWN
+========================================================= */
+
+.productsSubmenu {
+  position: absolute;
+
+  z-index: 2000;
+
+  top: calc(100% + 1px);
+
+  left: 0;
+
+  min-width: 190px;
+
+  padding: 8px;
+
+  border: 1px solid rgba(48, 42, 37, 0.12);
+
+  border-radius: 10px;
+
+  background: #fffdf9;
+
+  box-shadow:
+    0 18px 45px rgba(40, 30, 24, 0.14);
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transform: translateY(-8px);
+
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.productsMenu:hover .productsSubmenu,
+.productsMenu:focus-within .productsSubmenu,
+.productsMenu[open] .productsSubmenu {
+  opacity: 1;
+
+  pointer-events: auto;
+
+  transform: translateY(0);
+}
+
+.productsSubmenu a {
+  display: flex;
+
+  min-height: 42px;
+
+  align-items: center;
+
+  padding: 0 14px;
+
+  border-radius: 7px;
+
+  color: #302b28;
+
+  font-family:
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+
+  font-size: 13px;
+
+  font-weight: 500;
+
+  text-decoration: none;
+
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.productsSubmenu a:hover,
+.productsSubmenu a:focus-visible {
+  background: #f3ede5;
+
+  color: #8d233b;
+}
+
+
+/* =========================================================
+   ÜRÜNLER — GENİŞ MEGA MENU
+========================================================= */
+
+.productsMenuMega {
+  /*
+   * static olması önemli.
+   * Mega panel header'a göre hizalanıyor.
+   */
+  position: static;
+}
+
+
+/*
+   ProductsMegaMenu componenti doğrudan
+   productsMegaPanel class'ını taşıyor.
+*/
+
+.productsMegaPanel {
+  box-sizing: border-box;
+
+  position: absolute !important;
+
+  z-index: 3000;
+
+  top: 100% !important;
+
+  left: 50% !important;
+
+  width: calc(100vw - 72px) !important;
+
+  max-width: 1380px !important;
+
+  min-width: 0 !important;
+
+  min-height: 280px;
+
+  margin: 0 !important;
+
+  padding: 34px 36px 28px !important;
+
+  border: 1px solid rgba(48, 42, 37, 0.10) !important;
+
+  border-radius: 0 0 22px 22px !important;
+
+  background: #f8f4ee !important;
+
+  box-shadow:
+    0 25px 65px rgba(40, 30, 24, 0.18) !important;
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transform:
+    translateX(-50%)
+    translateY(-10px);
+
+  transition:
+    opacity 200ms ease,
+    transform 220ms ease;
+}
+
+
+/*
+   Hover / focus / açık details
+*/
+
+.productsMenuMega:hover .productsMegaPanel,
+.productsMenuMega:focus-within .productsMegaPanel,
+.productsMenuMega[open] .productsMegaPanel {
+  display: block;
+
+  opacity: 1;
+
+  pointer-events: auto;
+
+  transform:
+    translateX(-50%)
+    translateY(0);
+}
+
+
+/* =========================================================
+   MEGA MENU GRID
+========================================================= */
+
+.productsMegaGrid {
+  display: grid;
+
+  width: 100%;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(190px, 1fr)
+    );
+
+  gap: 34px;
+
+  padding-bottom: 28px;
+
+  border-bottom: 1px solid rgba(48, 42, 37, 0.10);
+}
+
+
+/* Her kategori */
+
+.productsMegaColumn {
+  min-width: 0;
+}
+
+
+/* Kategori başlığı */
+
+.productsMegaHeading {
+  display: inline-flex;
+
+  margin-bottom: 13px;
+
+  color: #302b28 !important;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 17px !important;
+
+  font-weight: 600 !important;
+
+  letter-spacing: -0.015em;
+
+  line-height: 1.2;
+
+  text-decoration: none;
+
+  transition: color 160ms ease;
+}
+
+.productsMegaHeading:hover {
+  color: #8d233b !important;
+}
+
+
+/* Alt kategoriler */
+
+.productsMegaColumn ul {
+  display: grid;
+
+  gap: 5px;
+
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+.productsMegaColumn li {
+  margin: 0;
+  padding: 0;
+}
+
+.productsMegaColumn li a {
+  display: inline-flex;
+
+  padding: 3px 0;
+
+  color: #746b63 !important;
+
+  font-family:
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+
+  font-size: 12px !important;
+
+  font-weight: 500 !important;
+
+  line-height: 1.45;
+
+  text-decoration: none;
+
+  transition:
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.productsMegaColumn li a:hover {
+  color: #8d233b !important;
+
+  transform: translateX(3px);
+}
+
+
+/* =========================================================
+   TÜM ÜRÜNLER
+========================================================= */
+
+.productsMegaAll {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin-top: 22px;
+
+  color: #8d233b !important;
+
+  font-family:
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+
+  font-size: 11px !important;
+
+  font-weight: 700 !important;
+
+  letter-spacing: 0.08em;
+
+  text-decoration: none;
+
+  text-transform: uppercase;
+
+  transition:
+    color 160ms ease,
+    gap 160ms ease;
+}
+
+.productsMegaAll span {
+  font-size: 17px;
+
+  font-weight: 400;
+
+  transition: transform 160ms ease;
+}
+
+.productsMegaAll:hover {
+  color: #6f182e !important;
+
+  gap: 13px;
+}
+
+.productsMegaAll:hover span {
+  transform: translate(2px, -2px);
+}
+
+
+/* =========================================================
+   API VERİSİ GELMEZSE
+========================================================= */
+
+.productsMegaEmpty {
+  display: flex;
+
+  min-height: 210px;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 50px;
+}
+
+.productsMegaEmpty > div {
+  max-width: 650px;
+}
+
+.productsMegaEyebrow {
+  display: block;
+
+  margin-bottom: 12px;
+
+  color: #8d233b;
+
+  font-family:
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.16em;
+}
+
+.productsMegaEmpty h3 {
+  margin: 0 0 10px;
+
+  color: #302b28;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 34px;
+
+  font-weight: 500;
+
+  letter-spacing: -0.025em;
+}
+
+.productsMegaEmpty p {
+  max-width: 560px;
+
+  margin: 0;
+
+  color: #746b63;
+
+  font-family:
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+
+  font-size: 14px;
+
+  line-height: 1.7;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1100px) and (min-width: 769px) {
   .mainNav {
-    justify-content: flex-start;
+    gap: 17px;
+
+    padding-inline: 14px;
+  }
+
+  .navItem {
+    font-size: 11px;
+  }
+
+  .productsMegaPanel {
+    width: calc(100vw - 40px) !important;
+
+    padding: 28px !important;
+  }
+
+  .productsMegaGrid {
     gap: 24px;
   }
 }
-/* The parent header already has 28px inner padding; extend only the nav surface
-   so its own 28px padding lands on the exact same logo start line. */
-@media (min-width: 75rem) {
+
+
+/* =========================================================
+   MOBİL
+========================================================= */
+
+@media (max-width: 768px) {
   .mainNav {
-    width: calc(100% + 56px) !important;
-    margin-left: -28px !important;
+    display: none;
+  }
+
+  .productsMegaPanel {
+    position: static !important;
+
+    width: 100% !important;
+
+    min-height: 0;
+
+    padding: 20px !important;
+
+    border-radius: 0 !important;
+
+    box-shadow: none !important;
+
+    transform: none !important;
+  }
+
+  .productsMegaGrid {
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+  }
+
+  .productsMegaEmpty {
+    min-height: 0;
+
+    flex-direction: column;
+
+    align-items: flex-start;
   }
 }
-/* Products submenu restores catalogue, showroom and related destination links. */
-.mainNav .productsMenu {
-  position: relative;
-  display: flex;
-  height: 100%;
-  flex: 0 0 auto;
-  align-items: center;
+/* =========================================================
+   EKIPHAN — BONNA INSPIRED NAVBAR
+   ========================================================= */
+
+@media (min-width: 1025px) {
+
+  /* Navbar satırı */
+  .mainNav {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 68px !important;
+
+    display: flex !important;
+    align-items: center !important;
+
+    border-top: 1px solid rgba(45, 39, 34, 0.14) !important;
+    border-bottom: 0 !important;
+
+    background: transparent !important;
+  }
+
+  /* Menü listesini tüm genişliğe yay */
+  .mainNav > ul {
+    display: flex !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 100% !important;
+
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    gap: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 28px !important;
+
+    list-style: none !important;
+  }
+
+  /* Her menü elemanı */
+  .mainNav > ul > li {
+    display: flex !important;
+    height: 100% !important;
+
+    flex: 0 0 auto !important;
+
+    align-items: center !important;
+  }
+
+  /* Menü yazıları */
+  .mainNav .navItem,
+  .mainNav > ul > li > a,
+  .mainNav > ul > li > button {
+    position: relative !important;
+
+    display: inline-flex !important;
+
+    height: 100% !important;
+    min-height: 68px !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+
+    background: transparent !important;
+    box-shadow: none !important;
+
+    color: #2d2926 !important;
+
+    font-family: "Helvetica Neue", Arial, sans-serif !important;
+
+    font-size: 12px !important;
+    font-weight: 500 !important;
+
+    letter-spacing: 0.04em !important;
+    line-height: 1 !important;
+
+    text-decoration: none !important;
+    text-transform: uppercase !important;
+
+    white-space: nowrap !important;
+
+    transition:
+      color 180ms ease,
+      opacity 180ms ease !important;
+  }
+
+  /* Hover */
+  .mainNav .navItem:hover,
+  .mainNav .navItem:focus-visible,
+  .mainNav > ul > li > a:hover,
+  .mainNav > ul > li > a:focus-visible,
+  .mainNav > ul > li > button:hover,
+  .mainNav > ul > li > button:focus-visible {
+    color: #92253d !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  /* Aktif sayfa */
+  .mainNav .navItem.active,
+  .mainNav .navItem[aria-current="page"],
+  .mainNav > ul > li > a[aria-current="page"] {
+    color: #92253d !important;
+  }
+
+  /* Aktif çizgi */
+  .mainNav .navItem.active::after,
+  .mainNav .navItem[aria-current="page"]::after,
+  .mainNav > ul > li > a[aria-current="page"]::after {
+    content: "";
+
+    position: absolute;
+
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    width: 100%;
+    height: 1px;
+
+    border-radius: 0;
+
+    background: #92253d;
+
+    transform: scaleX(0.75);
+
+    transform-origin: center;
+
+    transition: transform 180ms ease;
+  }
+
+  .mainNav .navItem:hover::after,
+  .mainNav > ul > li > a:hover::after {
+    transform: scaleX(1);
+  }
+
+
+  /* =====================================================
+     ÜRÜNLER OKU
+     ===================================================== */
+
+  .mainNav .navItem svg {
+    width: 12px !important;
+    height: 12px !important;
+
+    margin-left: 7px !important;
+
+    stroke-width: 1.5 !important;
+  }
+
+
+  /* =====================================================
+     ÜRÜNLER DROPDOWN
+     ===================================================== */
+
+  .mainNav .productsSubmenu,
+  .mainNav .productsMegaMenu {
+    position: absolute !important;
+
+    top: calc(100% + 1px) !important;
+    left: 50% !important;
+
+    z-index: 1200 !important;
+
+    width: min(820px, calc(100vw - 80px)) !important;
+
+    margin: 0 !important;
+
+    padding: 26px 30px !important;
+
+    border: 1px solid rgba(47, 40, 35, 0.12) !important;
+    border-radius: 0 !important;
+
+    background: #f8f4ee !important;
+
+    box-shadow:
+      0 18px 45px rgba(39, 31, 25, 0.12) !important;
+
+    transform: translateX(-50%) !important;
+  }
+
+  .mainNav .productsSubmenu a,
+  .mainNav .productsMegaMenu a {
+    display: flex !important;
+
+    align-items: center !important;
+
+    min-height: 38px !important;
+
+    padding: 0 !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+
+    background: transparent !important;
+
+    color: #332e2a !important;
+
+    font-family: "Helvetica Neue", Arial, sans-serif !important;
+
+    font-size: 11px !important;
+    font-weight: 500 !important;
+
+    letter-spacing: 0.04em !important;
+
+    text-decoration: none !important;
+
+    transition:
+      color 180ms ease,
+      padding-left 180ms ease !important;
+  }
+
+  .mainNav .productsSubmenu a:hover,
+  .mainNav .productsSubmenu a:focus-visible,
+  .mainNav .productsMegaMenu a:hover,
+  .mainNav .productsMegaMenu a:focus-visible {
+    background: transparent !important;
+
+    color: #92253d !important;
+
+    padding-left: 5px !important;
+  }
 }
 
-.mainNav .productsSubmenu {
-  position: absolute;
-  z-index: 40;
-  top: calc(100% - .15rem);
-  left: -.85rem;
+
+/* =========================================================
+   MOBİL
+   ========================================================= */
+
+@media (max-width: 1024px) {
+
+  .mainNav .navItem {
+    font-family: "Helvetica Neue", Arial, sans-serif !important;
+
+    font-weight: 500 !important;
+    letter-spacing: 0.04em !important;
+  }
+}
+
+/* Referanstaki açık krem yüzeyli, yatay ve ferah menü düzeni. */
+@media (min-width: 769px) {
+  .mainNav {
+    height: 68px !important;
+    justify-content: space-between !important;
+    gap: clamp(12px, 2.2vw, 36px) !important;
+    padding-inline: clamp(20px, 3vw, 48px) !important;
+    border: 0 !important;
+    background: #fbf8f4 !important;
+  }
+
+  .navItem {
+    height: 68px !important;
+    min-height: 68px !important;
+    color: #302b28 !important;
+    font-family: "Helvetica Neue", Arial, sans-serif !important;
+    font-size: clamp(11px, 1.05vw, 15px) !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  .navItem:hover,
+  .navItem:focus-visible,
+  .navItem.active {
+    color: #c64c20 !important;
+  }
+
+  .mainNav a.navItem.active::after {
+    display: none !important;
+  }
+}
+
+.mobileNavUtilities {
   display: none;
-  min-width: 13.5rem;
-  padding: .5rem;
-  border: 1px solid rgb(82 49 39 / 16%);
-  border-radius: .7rem;
-  background: #fffdf9;
-  box-shadow: 0 .9rem 2.2rem rgb(48 37 29 / 14%);
 }
 
-.mainNav .productsMenu:hover .productsSubmenu,
-.mainNav .productsMenu:focus-within .productsSubmenu {
-  display: grid;
-  content-visibility: visible;
-  gap: .1rem;
+@media (max-width: 900px) {
+  .mobileNavUtilities {
+    display: grid;
+    gap: 1rem;
+    width: 100%;
+    min-width: 0;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgb(45 38 33 / 14%);
+  }
+
+  .mobileNavUtilities :global(form) {
+    display: flex !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+
+  .mobileNavUtilities > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+  }
+
+.mobileNavUtilities > div a {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    color: #302b28;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+  }
 }
 
-.mainNav .productsSubmenu a {
-  display: flex;
-  min-height: 2.35rem;
-  align-items: center;
-  padding: .35rem .6rem;
-  border-radius: .4rem;
-  background: transparent;
-  color: #423a35;
-  font-size: .75rem;
-  font-weight: 650;
-  text-decoration: none;
-}
-
-.mainNav .productsSubmenu a:hover,
-.mainNav .productsSubmenu a:focus-visible { background: rgb(144 31 59 / 7%); color: #901f3b; }
-
-@media (max-width: 74.9375rem) { .mainNav .productsSubmenu { left: 0; } }
-/* Products is click-expandable and may extend beyond the rounded header panel. */
-@media (min-width: 75rem) {
-  .productsMenu { list-style: none; }
-  .productsMenu > summary { cursor: pointer; list-style: none; }
-  .productsMenu > summary::-webkit-details-marker { display: none; }
-  .productsMenu[open] .productsSubmenu { display: grid; gap: .1rem; }
-  .productsMenu > summary::before { display: none; }
-  .productsMenu > summary::after { width: .38rem; height: .38rem; margin-left: .45rem; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; background: transparent; content: ""; transform: rotate(45deg) translateY(-.12rem); }
-  .productsMenu[open] > summary::after { transform: rotate(225deg) translateY(-.02rem); }
-  .catalogTopbar { overflow: visible !important; }
-}
-/* The opened products submenu must be visible at every responsive width. */
-.mainNav {
-  overflow: visible;
-}
-
-.mainNav .productsMenu[open] .productsSubmenu {
-  display: grid;
-  gap: .1rem;
-}
-
-.mainNav .productsMenu {
-  z-index: 45;
-}
-/* Keep the Products dropdown above page controls and content. */
-.mainNav,
-.mainNav .productsMenu {
-  isolation: isolate;
-}
-
-.mainNav .productsSubmenu {
-  z-index: 1000;
-}
-
-/* Match the expanded products menu to the dark glass navigation. */
-.mainNav .productsMenu > .navItem,
-.mainNav .productsMenu[open] > .navItem,
-.mainNav .productsMenu > .navItem:hover,
-.mainNav .productsMenu > .navItem:focus-visible {
-  color: rgb(255 255 255 / 96%) !important;
-}
-
-.mainNav .productsSubmenu {
-  border-color: rgb(235 239 235 / 22%);
-  background: rgb(39 42 41 / 78%);
-  box-shadow:
-    0 .9rem 2.2rem rgb(0 0 0 / 30%),
-    inset 0 1px 0 rgb(255 255 255 / 14%);
-  backdrop-filter: blur(1rem) saturate(112%);
-  -webkit-backdrop-filter: blur(1rem) saturate(112%);
-}
-
-.mainNav .productsSubmenu a {
-  color: rgb(255 255 255 / 92%);
-}
-
-.mainNav .productsSubmenu a:hover,
-.mainNav .productsSubmenu a:focus-visible {
-  background: rgb(201 43 73 / 22%);
-  color: #fff;
-}
-
-/* Restore the original light dropdown outside the homepage hero. */
-:global(header:not([class*="homeTopbar"]):not([class*="showroomTopbar"])) .mainNav .productsMenu > .navItem,
-:global(header:not([class*="homeTopbar"]):not([class*="showroomTopbar"])) .mainNav .productsMenu[open] > .navItem { color: #302d2b !important; }
-:global(header:not([class*="homeTopbar"]):not([class*="showroomTopbar"])) .mainNav .productsSubmenu { border-color: rgb(82 49 39 / 16%); background: #fffdf9; box-shadow: 0 .9rem 2.2rem rgb(48 37 29 / 14%); backdrop-filter: none; -webkit-backdrop-filter: none; }
-:global(header:not([class*="homeTopbar"]):not([class*="showroomTopbar"])) .mainNav .productsSubmenu a { color: #423a35; }
-:global(header:not([class*="homeTopbar"]):not([class*="showroomTopbar"])) .mainNav .productsSubmenu a:hover,
-:global(header:not([class*="homeTopbar"]):not([class*="showroomTopbar"])) .mainNav .productsSubmenu a:focus-visible { background: rgb(144 31 59 / 7%); color: #901f3b; }
-
-/* The Products caret owns its own pseudo-element instead of the active underline. */
-.mainNav .productsMenu > summary.navItem::after,
-.mainNav .productsMenu > summary.navItem.active::after {
-  position: static;
-  display: block;
-  width: .4rem;
-  height: .4rem;
-  flex: 0 0 .4rem;
-  margin-left: .5rem;
-  border-right: 1.5px solid currentColor;
-  border-bottom: 1.5px solid currentColor;
-  border-radius: 0;
-  background: transparent;
-  content: "";
-  transform: rotate(45deg) translateY(-.12rem);
-}
-
-.mainNav .productsMenu[open] > summary.navItem::after,
-.mainNav .productsMenu[open] > summary.navItem.active::after {
-  transform: rotate(225deg) translateY(-.02rem);
-}
-
-/* Keep the Products trigger legible on the showroom's light glass surface. */
-:global(header[class*="showroomTopbar"]) .mainNav .productsMenu > .navItem,
-:global(header[class*="showroomTopbar"]) .mainNav .productsMenu[open] > .navItem { color: #292724 !important; }
-:global(header[class*="showroomTopbar"]) .mainNav .productsSubmenu { border-color: rgb(255 255 255 / 58%); background: rgb(255 255 255 / 64%); box-shadow: 0 .9rem 2.2rem rgb(59 38 34 / 16%), inset 0 1px 0 rgb(255 255 255 / 76%); backdrop-filter: blur(1rem) saturate(108%); -webkit-backdrop-filter: blur(1rem) saturate(108%); }
-:global(header[class*="showroomTopbar"]) .mainNav .productsSubmenu a { color: #292724; }
-
-/* Remove the active navigation underline while retaining active text color. */
-.mainNav .navItem.active::after {
-  display: none;
-}
-
-/* Homepage product dropdown: light glass surface for readable menu items. */
-:global(header[class*="homeTopbar"]) .mainNav .productsSubmenu {
-  border-color: rgb(255 255 255 / 58%);
-  background: rgb(250 248 244 / 88%);
-  box-shadow: 0 .9rem 2.2rem rgb(30 24 20 / 18%), inset 0 1px 0 rgb(255 255 255 / 82%);
-  backdrop-filter: blur(1rem) saturate(108%);
-  -webkit-backdrop-filter: blur(1rem) saturate(108%);
-}
-
-:global(header[class*="homeTopbar"]) .mainNav .productsSubmenu a {
-  color: #302b28 !important;
-}
-
-:global(header[class*="homeTopbar"]) .mainNav .productsSubmenu a:hover,
-:global(header[class*="homeTopbar"]) .mainNav .productsSubmenu a:focus-visible {
-  background: rgb(144 31 59 / 8%);
-  color: #901f3b !important;
-}
-/* Keep the homepage Products trigger readable on the light header glass. */
-:global(header[class*="homeTopbar"]) .mainNav .productsMenu > summary.navItem,
-:global(header[class*="homeTopbar"]) .mainNav .productsMenu[open] > summary.navItem {
-  color: #302b28 !important;
+/* Keep all nine desktop links inside the viewport, including the fixed sticky row. */
+@media (min-width: 901px) {
+  .mainNav {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    justify-content: space-between !important;
+    gap: clamp(6px, 1.15vw, 16px) !important;
+    padding-inline: clamp(12px, 1.6vw, 24px) !important;
+  }
 }

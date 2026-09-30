@@ -1,6 +1,6 @@
 "use client";
 
-import type { FocusEvent, ReactNode } from "react";
+import type { FocusEvent, PointerEvent, ReactNode } from "react";
 import { useState } from "react";
 
 type HoverProductsMenuProps = {
@@ -17,14 +17,22 @@ export function HoverProductsMenu({ children, className }: HoverProductsMenuProp
     }
   }
 
+  function handlePointerEnter(event: PointerEvent<HTMLDetailsElement>) {
+    if (event.pointerType === "mouse") setIsOpen(true);
+  }
+
+  function handlePointerLeave(event: PointerEvent<HTMLDetailsElement>) {
+    if (event.pointerType === "mouse") setIsOpen(false);
+  }
+
   return (
     <details
       className={className}
       open={isOpen}
       onBlur={handleBlur}
       onFocus={() => setIsOpen(true)}
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
       onToggle={(event) => setIsOpen(event.currentTarget.open)}
     >
       {children}
