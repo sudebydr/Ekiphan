@@ -12,10 +12,9 @@ public sealed class EkiphanDbContextFactory
             "ConnectionStrings__EkiphanDatabase");
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            connectionString =
-                "Server=.\\SQLEXPRESS;Database=EkiphanDevelopment;" +
-                "Trusted_Connection=True;TrustServerCertificate=True;" +
-                "Encrypt=False";
+            throw new InvalidOperationException(
+                "ConnectionStrings__EkiphanDatabase environment variable must be set " +
+                "to create EkiphanDbContext for design-time operations.");
         }
 
         var options = new DbContextOptionsBuilder<EkiphanDbContext>()

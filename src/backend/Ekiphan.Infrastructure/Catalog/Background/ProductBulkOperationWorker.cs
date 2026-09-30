@@ -6,11 +6,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1848:Use the LoggerMessage delegates", Scope = "module", Justification = "Background worker logger.")]
-
 namespace Ekiphan.Infrastructure.Catalog.Background;
 
-public sealed class ProductBulkOperationWorker(
+public sealed partial class ProductBulkOperationWorker(
     IServiceProvider serviceProvider,
     IProductBulkOperationQueue queue,
     ILogger<ProductBulkOperationWorker> logger)
@@ -18,7 +16,7 @@ public sealed class ProductBulkOperationWorker(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("ProductBulkOperationWorker started.");
+        LogWorkerStarted(logger);
         await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
         await RecoverPendingOperationsAsync(stoppingToken);
 
@@ -28,8 +26,7 @@ public sealed class ProductBulkOperationWorker(
             {
                 if (queue is InMemoryProductBulkOperationQueue inMemoryQueue && inMemoryQueue.TryDequeue(out var operationId))
                 {
-                    if (logger.IsEnabled(LogLevel.Information))
-                        logger.LogInformation("Processing bulk operation {OperationId}.", operationId);
+                    LogProcessingBulkOperation(logger, operationId);
                     using var scope = serviceProvider.CreateScope();
                     var bulkService = scope.ServiceProvider.GetRequiredService<IProductBulkOperationService>();
                     if (bulkService is ProductBulkOperationService impl)
@@ -48,7 +45,7 @@ public sealed class ProductBulkOperationWorker(
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error processing bulk operation queue item.");
+                LogQueueItemProcessingError(logger, ex);
                 await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
             }
         }
@@ -74,7 +71,19 @@ public sealed class ProductBulkOperationWorker(
 
         if (operationIds.Count > 0)
         {
-            logger.LogInformation("Recovered {Count} pending bulk operation(s).", operationIds.Count);
+            LogRecoveredPendingOperations(logger, operationIds.Count);
         }
     }
+
+    [LoggerMessage(LogLevel.Information, "ProductBulkOperationWorker started.")]
+    private static partial void LogWorkerStarted(ILogger logger);
+
+    [LoggerMessage(LogLevel.Information, "Processing bulk operation {OperationId}.")]
+    private static partial void LogProcessingBulkOperation(ILogger logger, Guid operationId);
+
+    [LoggerMessage(LogLevel.Error, "Error processing bulk operation queue item.")]
+    private static partial void LogQueueItemProcessingError(ILogger logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Information, "Recovered {Count} pending bulk operation(s).")]
+    private static partial void LogRecoveredPendingOperations(ILogger logger, int count);
 }

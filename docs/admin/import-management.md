@@ -38,7 +38,7 @@ istemciye sızdırılmaz.
 tanımlayın:
 
 ```dotenv
-EKIPHAN_API_BASE_URL=https://localhost:7001
+EKIPHAN_API_BASE_URL=https://localhost:7064
 ```
 
 Gerçek token veya secret değerlerini `.env` dosyalarına ya da repository'ye eklemeyin.
