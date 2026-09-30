@@ -20,6 +20,8 @@ public sealed class LocalMediaFileStorage : IMediaFileStorage
 
     public bool IsConfigured => rootPath is not null;
 
+    public string ProviderName => "Local";
+
     public async Task SaveAsync(
         string storageKey,
         Stream content,

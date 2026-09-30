@@ -48,7 +48,6 @@ internal sealed class CatalogQueryService(
         var categoryRows = await dbContext.Categories
             .AsNoTracking()
             .Where(category =>
-                category.IsPublished &&
                 sectionIds.Contains(category.ProductSectionId) &&
                 category.Translations.Any(translation =>
                     translation.LanguageCode == language))
@@ -94,6 +93,26 @@ internal sealed class CatalogQueryService(
                 item.OpenGraphTitle,
                 item.OpenGraphDescription,
                 mediaUrlResolver.Resolve(item.OpenGraphImageKey)))
+            .ToArray();
+
+        // Keep public navigation aligned with the catalog product query: a category
+        // is selectable only when it, or one of its descendants, has public products.
+        var navigationCategoryIds = categories.Select(category => category.Id).ToArray();
+        var directProductCounts = await dbContext.Products
+            .AsNoTracking()
+            .Where(product =>
+                product.IsPublished &&
+                product.PrimaryCategoryId.HasValue &&
+                navigationCategoryIds.Contains(product.PrimaryCategoryId.Value) &&
+                product.Translations.Any(translation =>
+                    translation.LanguageCode == language))
+            .GroupBy(product => product.PrimaryCategoryId!.Value)
+            .Select(group => new { CategoryId = group.Key, Count = group.Count() })
+            .ToDictionaryAsync(item => item.CategoryId, item => item.Count,
+                cancellationToken);
+        var visibleCategoryIds = GetVisibleCategoryIds(categories, directProductCounts);
+        categories = categories
+            .Where(category => visibleCategoryIds.Contains(category.Id))
             .ToArray();
 
         var brandRows = await dbContext.Brands
@@ -392,7 +411,6 @@ internal sealed class CatalogQueryService(
                 product.Categories.Any(productCategory =>
                     dbContext.Categories.Any(category =>
                         category.Id == productCategory.CategoryId &&
-                        category.IsPublished &&
                         dbContext.ProductSections.Any(section =>
                             section.Id == category.ProductSectionId &&
                             section.IsPublished &&
@@ -404,14 +422,23 @@ internal sealed class CatalogQueryService(
         if (!string.IsNullOrWhiteSpace(request.CategorySlug))
         {
             var slug = request.CategorySlug.Trim().ToLowerInvariant();
+            var categoryLocations = await dbContext.Categories
+                .AsNoTracking()
+                .SelectMany(category => category.Translations
+                    .Where(translation => translation.LanguageCode == language)
+                    .Select(translation => new CategoryLocation(
+                        category.Id,
+                        category.ParentId,
+                        translation.Slug)))
+                .ToListAsync(cancellationToken);
+            var selected = categoryLocations.SingleOrDefault(category =>
+                category.Slug == slug);
+            var categoryIds = selected is null
+                ? Array.Empty<Guid>()
+                : GetDescendantCategoryIds(selected.Id, categoryLocations);
             products = products.Where(product =>
-                product.Categories.Any(productCategory =>
-                    dbContext.Categories.Any(category =>
-                        category.Id == productCategory.CategoryId &&
-                        category.IsPublished &&
-                        category.Translations.Any(translation =>
-                            translation.LanguageCode == language &&
-                            translation.Slug == slug))));
+                product.PrimaryCategoryId.HasValue &&
+                categoryIds.Contains(product.PrimaryCategoryId.Value));
         }
 
         if (!string.IsNullOrWhiteSpace(request.BrandSlug))
@@ -493,8 +520,7 @@ internal sealed class CatalogQueryService(
                 .SingleOrDefault(),
             dbContext.Categories
                 .Where(category =>
-                    category.Id == product.PrimaryCategoryId &&
-                    category.IsPublished)
+                    category.Id == product.PrimaryCategoryId)
                 .Select(category => category.Translations
                     .Where(translation =>
                         translation.LanguageCode == language)
@@ -530,6 +556,66 @@ internal sealed class CatalogQueryService(
             request.PageSize,
             totalCount);
     }
+
+    private static Guid[] GetDescendantCategoryIds(
+        Guid rootId,
+        IReadOnlyList<CategoryLocation> categories)
+    {
+        var childrenByParent = categories
+            .Where(category => category.ParentId.HasValue)
+            .GroupBy(category => category.ParentId!.Value)
+            .ToDictionary(group => group.Key, group => group.Select(category => category.Id));
+        var result = new HashSet<Guid> { rootId };
+        var pending = new Queue<Guid>();
+        pending.Enqueue(rootId);
+        while (pending.TryDequeue(out var parentId) &&
+               childrenByParent.TryGetValue(parentId, out var children))
+        {
+            foreach (var childId in children)
+            {
+                if (result.Add(childId)) pending.Enqueue(childId);
+            }
+        }
+        return result.ToArray();
+    }
+
+    private static HashSet<Guid> GetVisibleCategoryIds(
+        IReadOnlyList<CatalogCategoryNavigationItem> categories,
+        IReadOnlyDictionary<Guid, int> directProductCounts)
+    {
+        var childrenByParent = categories
+            .Where(category => category.ParentId.HasValue)
+            .GroupBy(category => category.ParentId!.Value)
+            .ToDictionary(group => group.Key, group => group.Select(category => category.Id));
+        var totals = new Dictionary<Guid, int>();
+        var visiting = new HashSet<Guid>();
+
+        int CountIncludingDescendants(Guid categoryId)
+        {
+            if (totals.TryGetValue(categoryId, out var cached)) return cached;
+            if (!visiting.Add(categoryId)) return 0;
+
+            var total = directProductCounts.GetValueOrDefault(categoryId);
+            if (childrenByParent.TryGetValue(categoryId, out var children))
+            {
+                foreach (var childId in children)
+                {
+                    total += CountIncludingDescendants(childId);
+                }
+            }
+
+            visiting.Remove(categoryId);
+            totals[categoryId] = total;
+            return total;
+        }
+
+        return categories
+            .Where(category => CountIncludingDescendants(category.Id) > 0)
+            .Select(category => category.Id)
+            .ToHashSet();
+    }
+
+    private sealed record CategoryLocation(Guid Id, Guid? ParentId, string Slug);
 
     public async Task<IReadOnlyList<CatalogFacet>> GetFacetsAsync(
         string languageCode,
@@ -857,11 +943,12 @@ internal sealed class CatalogQueryService(
             .Where(item => item.Id == product.Id)
             .SelectMany(item => item.Categories)
             .Join(
-                dbContext.Categories.Where(category => category.IsPublished),
+                dbContext.Categories,
                 productCategory => productCategory.CategoryId,
                 category => category.Id,
                 (productCategory, category) => new
                 {
+                    productCategory.IsPrimary,
                     productCategory.SortOrder,
                     category.Id,
                     category.Translations,
@@ -871,12 +958,14 @@ internal sealed class CatalogQueryService(
                     translation.LanguageCode == language)
                 .Select(translation => new
                 {
+                    item.IsPrimary,
                     item.SortOrder,
                     item.Id,
                     translation.Name,
                     translation.Slug,
                 }))
-            .OrderBy(item => item.SortOrder)
+            .OrderByDescending(item => item.IsPrimary)
+            .ThenBy(item => item.SortOrder)
             .ThenBy(item => item.Name)
             .ToListAsync(cancellationToken);
         var categories = categoryRows

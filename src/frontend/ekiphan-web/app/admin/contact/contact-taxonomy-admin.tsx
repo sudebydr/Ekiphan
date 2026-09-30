@@ -18,7 +18,9 @@ async function errorOf(response: Response): Promise<string> {
   }
 }
 
-export function ContactTaxonomyAdmin() {
+export function ContactTaxonomyAdmin({ onChange }: {
+  onChange: (data: AdminContactTaxonomy) => void;
+}) {
   const { hasPermission } = useAdminSession();
   const canManage = hasPermission("contacts.manage");
   const [data, setData] = useState<AdminContactTaxonomy>({
@@ -43,11 +45,13 @@ export function ContactTaxonomyAdmin() {
         cache: "no-store"
       });
       if (!response.ok) throw new Error(await errorOf(response));
-      setData((await response.json()) as AdminContactTaxonomy);
+      const taxonomy = (await response.json()) as AdminContactTaxonomy;
+      setData(taxonomy);
+      onChange(taxonomy);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Tanımlar alınamadı.");
     }
-  }, []);
+  }, [onChange]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -113,7 +117,62 @@ export function ContactTaxonomyAdmin() {
       { contactReasonId: complaintReason.id, name: categoryName,
         sortOrder: categoryOrder, isActive: categoryActive }
     );
-    if (ok) setMessage(categoryId ? "Şikâyet kategorisi güncellendi." : "Şikâyet kategorisi eklendi.");
+    if (ok) {
+      setMessage(categoryId ? "Şikâyet kategorisi güncellendi." : "Şikâyet kategorisi eklendi.");
+      newCategory();
+    }
+  }
+
+  async function deleteReason(item: AdminContactReason) {
+    if (!canManage || busy) return;
+    if (!window.confirm(`“${item.name}” iletişim nedeni silinsin mi?`)) return;
+    setBusy(true); setError(null); setMessage(null);
+    try {
+      const response = await fetch(`/api/admin/contact-requests/reasons/${item.id}`, {
+        method: "DELETE"
+      });
+      if (response.status === 409) {
+        throw new Error("Bu iletişim nedeni mevcut taleplerde kullanıldığı veya kendisine bağlı şikâyet kategorileri bulunduğu için silinemiyor. Bunun yerine nedeni pasif yapabilirsiniz.");
+      }
+      if (response.status === 403) {
+        throw new Error("İletişim nedenlerini silme yetkiniz bulunmuyor.");
+      }
+      if (!response.ok) throw new Error(await errorOf(response));
+      const taxonomy = {
+        ...data,
+        reasons: data.reasons.filter((reason) => reason.id !== item.id)
+      };
+      setData(taxonomy);
+      onChange(taxonomy);
+      if (reasonId === item.id) newReason();
+      setMessage("İletişim nedeni silindi.");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "İletişim nedeni silinemedi.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteCategory() {
+    if (!categoryId || !canManage || busy) return;
+    if (!window.confirm(`“${categoryName}” kategorisi silinsin mi?`)) return;
+    setBusy(true); setError(null); setMessage(null);
+    try {
+      const response = await fetch(`/api/admin/contact-requests/complaint-categories/${categoryId}`, {
+        method: "DELETE"
+      });
+      if (response.status === 409) {
+        throw new Error("Bu kategori mevcut iletişim taleplerinde kullanıldığı için silinemiyor. Bunun yerine kategoriyi pasif yapabilirsiniz.");
+      }
+      if (!response.ok) throw new Error(await errorOf(response));
+      newCategory();
+      await load();
+      setMessage("Şikâyet kategorisi silindi.");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Kategori silinemedi.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return <section className={styles.section} aria-labelledby="contact-taxonomy-title">
@@ -122,8 +181,11 @@ export function ContactTaxonomyAdmin() {
     {message && <div className={styles.success} role="status">{message}</div>}
     <div className={styles.grid}>
       <article className={styles.panel}>
-        <div className={styles.panelHeader}><h3>İletişim nedenleri</h3>{canManage && <button type="button" onClick={newReason}>Yeni neden</button>}</div>
-        <div className={styles.list}>{data.reasons.map((item) => <button type="button" key={item.id} onClick={() => chooseReason(item)} className={reasonId === item.id ? styles.selected : ""}><strong>{item.name}</strong><span>Sıra {item.sortOrder} · {item.isActive ? "Aktif" : "Pasif"}{item.isComplaintReason ? " · Şikâyet nedeni" : ""}</span></button>)}</div>
+        <div className={styles.panelHeader}><h3>İletişim nedenleri</h3>{canManage && <button type="button" disabled={busy} onClick={newReason}>Yeni neden</button>}</div>
+        <div className={styles.list}>{data.reasons.map((item) => <div key={item.id} className={styles.reasonRow}>
+          <button type="button" disabled={busy} onClick={() => chooseReason(item)} className={reasonId === item.id ? styles.selected : ""}><strong>{item.name}</strong><span>Sıra {item.sortOrder} · {item.isActive ? "Aktif" : "Pasif"}{item.isComplaintReason ? " · Şikâyet nedeni" : ""}</span></button>
+          {canManage && <button type="button" disabled={busy} onClick={() => void deleteReason(item)} aria-label={`${item.name} iletişim nedenini sil`}>Sil</button>}
+        </div>)}</div>
         {canManage && <form onSubmit={saveReason} className={styles.form}>
           <label>Ad<input required maxLength={150} value={reasonName} onChange={(e) => setReasonName(e.target.value)} /></label>
           <label>Sıra<input required min={0} type="number" value={reasonOrder} onChange={(e) => setReasonOrder(e.target.valueAsNumber)} /></label>
@@ -133,15 +195,18 @@ export function ContactTaxonomyAdmin() {
         </form>}
       </article>
       <article className={styles.panel}>
-        <div className={styles.panelHeader}><h3>Şikâyet kategorileri</h3>{canManage && <button type="button" onClick={newCategory} disabled={!complaintReason}>Yeni kategori</button>}</div>
+        <div className={styles.panelHeader}><h3>Şikâyet kategorileri</h3>{canManage && <button type="button" onClick={newCategory} disabled={busy || !complaintReason}>Yeni kategori</button>}</div>
+        {complaintReason && <p className={styles.hint}>Bağlı iletişim nedeni: {complaintReason.name}. Düzenlemek veya silmek için bir kategori seçin.</p>}
+        {complaintReason && data.complaintCategories.length === 0 && <p className={styles.hint}>Henüz şikâyet kategorisi eklenmemiş.</p>}
         {!complaintReason && <p className={styles.hint}>Önce “Müşteri şikâyeti nedeni” olarak işaretlenmiş bir iletişim nedeni ekleyin.</p>}
-        <div className={styles.list}>{data.complaintCategories.map((item) => <button type="button" key={item.id} onClick={() => chooseCategory(item)} className={categoryId === item.id ? styles.selected : ""}><strong>{item.name}</strong><span>Sıra {item.sortOrder} · {item.isActive ? "Aktif" : "Pasif"}</span></button>)}</div>
+        <div className={styles.list}>{data.complaintCategories.filter((item) => item.contactReasonId === complaintReason?.id).map((item) => <button type="button" key={item.id} disabled={busy} onClick={() => chooseCategory(item)} className={categoryId === item.id ? styles.selected : ""}><strong>{item.name}</strong><span>Sıra {item.sortOrder} · {item.isActive ? "Aktif" : "Pasif"}</span></button>)}</div>
         {canManage && complaintReason && <form onSubmit={saveCategory} className={styles.form}>
           <label>Bağlı neden<input value={complaintReason.name} disabled /></label>
           <label>Ad<input required maxLength={150} value={categoryName} onChange={(e) => setCategoryName(e.target.value)} /></label>
           <label>Sıra<input required min={0} type="number" value={categoryOrder} onChange={(e) => setCategoryOrder(e.target.valueAsNumber)} /></label>
           <label className={styles.check}><input type="checkbox" checked={categoryActive} onChange={(e) => setCategoryActive(e.target.checked)} />Aktif</label>
           <button disabled={busy || !categoryName.trim()}>Kaydet</button>
+          {categoryId && <button type="button" disabled={busy} onClick={() => void deleteCategory()}>Kategoriyi sil</button>}
         </form>}
       </article>
     </div>

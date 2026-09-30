@@ -28,6 +28,7 @@ internal static class AdvancedProductEndpoints
             group.MapPost("/{productId:guid}/revisions/{revisionId:guid}/restore", Unavailable);
             group.MapPost("/bulk/preview", Unavailable);
             group.MapPost("/bulk", Unavailable);
+            group.MapGet("/bulk/selection", Unavailable);
             group.MapGet("/bulk-operations/{operationId:guid}", Unavailable);
             group.MapGet("/bulk-operations/{operationId:guid}/errors", Unavailable);
             group.MapGet("/{productId:guid}/quality", Unavailable);
@@ -84,6 +85,10 @@ internal static class AdvancedProductEndpoints
         group.MapPost("/bulk", BulkExecuteAsync)
             .RequireAuthorization("ProductsBulkUpdate")
             .WithSummary("Execute bulk product operation");
+
+        group.MapGet("/bulk/selection", BulkSelectionAsync)
+            .RequireAuthorization("CatalogManage")
+            .WithSummary("Select filtered unpublished product IDs for bulk publishing");
 
         group.MapGet("/bulk-operations/{operationId:guid}", GetBulkOperationStatusAsync)
             .RequireAuthorization("ProductsBulkUpdate")
@@ -242,6 +247,52 @@ internal static class AdvancedProductEndpoints
         return Results.Ok(preview);
     }
 
+    private static async Task<IResult> BulkSelectionAsync(
+        HttpRequest request,
+        HttpResponse response,
+        IAdminProductRelationService service,
+        CancellationToken cancellationToken)
+    {
+        response.Headers.CacheControl = "private, no-store";
+        response.Headers.Pragma = "no-cache";
+
+        var language = request.Query.TryGetValue("language", out var rawLanguage)
+            ? rawLanguage.ToString().ToLowerInvariant()
+            : "tr";
+        var search = request.Query.TryGetValue("search", out var rawSearch)
+            ? rawSearch.ToString().Trim()
+            : null;
+        if (language is not ("tr" or "en") || search is { Length: > 100 } ||
+            !TryOptionalGuid(request, "categoryId", out var categoryId) ||
+            !TryOptionalGuid(request, "brandId", out var brandId) ||
+            !TryBoolean(request, "missingImage", out var missingImage) ||
+            !TryBoolean(request, "missingEnglish", out var missingEnglish) ||
+            !TryRequiredFalse(request, "isPublished") ||
+            (brandId is null && string.IsNullOrWhiteSpace(search)))
+        {
+            return Problem(400, "Bulk selection requires isPublished=false and a brand or search filter.");
+        }
+
+        try
+        {
+            var productIds = await service.SelectUnpublishedProductIdsAsync(
+                new AdminProductBulkSelectionQuery(
+                    language,
+                    search,
+                    categoryId,
+                    brandId,
+                    missingImage,
+                    missingEnglish),
+                cancellationToken);
+            return Results.Ok(new { productIds });
+        }
+        catch (InvalidOperationException exception) when (
+            exception.Message == ProductManagementErrorCodes.ProductBulkItemLimitExceeded)
+        {
+            return Problem(400, "Bulk selection cannot exceed 5000 products.");
+        }
+    }
+
     private static async Task<IResult> BulkExecuteAsync(
         [FromBody] ProductBulkExecuteCommand command,
         ClaimsPrincipal user,
@@ -253,6 +304,26 @@ internal static class AdvancedProductEndpoints
         var res = await service.ExecuteAsync(fullCommand, cancellationToken);
         return Results.Accepted($"/api/admin/products/bulk-operations/{res.BulkOperationId}", res);
     }
+
+    private static bool TryOptionalGuid(HttpRequest request, string key, out Guid? value)
+    {
+        value = null;
+        if (!request.Query.TryGetValue(key, out var raw) || string.IsNullOrWhiteSpace(raw)) return true;
+        if (!Guid.TryParse(raw, out var parsed) || parsed == Guid.Empty) return false;
+        value = parsed;
+        return true;
+    }
+
+    private static bool TryBoolean(HttpRequest request, string key, out bool value)
+    {
+        value = false;
+        return !request.Query.TryGetValue(key, out var raw) ||
+            string.IsNullOrWhiteSpace(raw) ||
+            bool.TryParse(raw, out value);
+    }
+
+    private static bool TryRequiredFalse(HttpRequest request, string key) =>
+        request.Query.TryGetValue(key, out var raw) && bool.TryParse(raw, out var value) && !value;
 
     private static async Task<IResult> GetBulkOperationStatusAsync(
         Guid operationId,

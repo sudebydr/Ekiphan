@@ -4,6 +4,7 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAdminSession } from "../admin-session-guard";
 import type {
+  AdminContactTaxonomy,
   AdminContactDetail,
   AdminContactPage,
   ContactAssignee,
@@ -16,7 +17,10 @@ import {
 } from "../../../lib/admin-contact-types";
 import styles from "../quotes/quotes.module.css";
 
+import { ContactTaxonomyAdmin } from "./contact-taxonomy-admin";
+
 type Draft = {
+  complaintCategoryId: string;
   search: string; status: string; dateFrom: string; dateTo: string;
   assignedUserId: string; newOnly: boolean; sort: "Newest" | "Oldest";
   pageSize: string;
@@ -24,6 +28,7 @@ type Draft = {
 
 function draftOf(params: URLSearchParams): Draft {
   return {
+    complaintCategoryId: params.get("complaintCategoryId") ?? "",
     search: params.get("search") ?? "",
     status: params.get("status") ?? "",
     dateFrom: params.get("dateFromInput") ?? "",
@@ -60,6 +65,7 @@ export function ContactAdminClient() {
   const canManage = hasPermission("contacts.manage");
   const [draft, setDraft] = useState<Draft>(() => draftOf(searchParams));
   const [result, setResult] = useState<AdminContactPage | null>(null);
+  const [taxonomy, setTaxonomy] = useState<AdminContactTaxonomy>({ reasons: [], complaintCategories: [] });
   const [assignees, setAssignees] = useState<ContactAssignee[]>([]);
   const [selected, setSelected] = useState<AdminContactDetail | null>(null);
   const [targetStatus, setTargetStatus] = useState<ContactStatus | null>(null);
@@ -137,6 +143,7 @@ export function ContactAdminClient() {
     event.preventDefault();
     const params = new URLSearchParams({ page: "1", pageSize: draft.pageSize, sort: draft.sort });
     if (draft.search.trim()) params.set("search", draft.search.trim());
+    if (draft.complaintCategoryId) params.set("complaintCategoryId", draft.complaintCategoryId);
     if (draft.status) params.set("status", draft.status);
     if (draft.dateFrom) params.set("dateFromInput", draft.dateFrom);
     if (draft.dateTo) params.set("dateToInput", draft.dateTo);
@@ -206,6 +213,7 @@ export function ContactAdminClient() {
       <form className={styles.filters} onSubmit={filter}>
         <div className={`${styles.field} ${styles.searchField}`}><label htmlFor="contact-search">Arama</label><input id="contact-search" maxLength={100} value={draft.search} onChange={(e) => field("search", e.target.value)} placeholder="Ad, konu, firma" /></div>
         <div className={styles.field}><label htmlFor="contact-status">Durum</label><select id="contact-status" value={draft.status} onChange={(e) => field("status", e.target.value)}><option value="">Tümü</option>{contactStatusOptions.map(([value, item]) => <option value={value} key={value}>{contactStatusLabels[item]}</option>)}</select></div>
+        <div className={styles.field}><label htmlFor="contact-category">Kategori</label><select id="contact-category" value={draft.complaintCategoryId} onChange={(e) => field("complaintCategoryId", e.target.value)}><option value="">Tümü</option>{taxonomy.complaintCategories.map((item) => <option key={item.id} value={item.id}>{item.name}{item.isActive ? "" : " (Pasif)"}</option>)}</select></div>
         <div className={styles.field}><label htmlFor="contact-assignee">Atanan</label><select id="contact-assignee" value={draft.assignedUserId} onChange={(e) => field("assignedUserId", e.target.value)}><option value="">Tümü</option><option value="unassigned">Atanmamış</option>{assignees.map((item) => <option key={item.id} value={item.id}>{item.displayName}</option>)}</select></div>
         <div className={styles.field}><label htmlFor="contact-from">Başlangıç</label><input id="contact-from" type="date" value={draft.dateFrom} onChange={(e) => field("dateFrom", e.target.value)} /></div>
         <div className={styles.field}><label htmlFor="contact-to">Bitiş</label><input id="contact-to" type="date" value={draft.dateTo} onChange={(e) => field("dateTo", e.target.value)} /></div>
@@ -214,20 +222,21 @@ export function ContactAdminClient() {
         <label className={styles.checkbox}><input type="checkbox" checked={draft.newOnly} onChange={(e) => field("newOnly", e.target.checked)} /> Yalnızca yeni</label>
         <div className={styles.actions}><button>Filtrele</button><button type="button" className={styles.secondaryButton} onClick={reset}>Temizle</button></div>
       </form>
-      <div className={styles.tableWrap}><table><thead><tr><th>Tarih</th><th>Gönderen</th><th>İletişim</th><th>Konu / Özet</th><th>Durum</th><th>Atanan</th><th>Son işlem</th><th><span className={styles.srOnly}>İşlem</span></th></tr></thead><tbody>
-        {loading && Array.from({ length: 5 }, (_, row) => <tr key={row} className={styles.skeletonRow}><td colSpan={8}><span /></td></tr>)}
-        {!loading && result?.items.map((item) => <tr key={item.id}><td>{date(item.createdAt)}</td><td>{item.fullName}</td><td>{item.maskedEmail}<br /><small>{item.maskedPhone ?? "—"}</small></td><td><strong>{item.subject}</strong><br /><small>{item.messagePreview}</small></td><td><span className={`${styles.badge} ${styles[`status${item.status}`]}`}>{contactStatusLabels[item.status]}</span></td><td>{item.assignedToDisplayName ?? "Atanmamış"}</td><td>{date(item.updatedAt)}</td><td><button type="button" className={styles.textButton} onClick={() => void detail(item.id)}>İncele</button></td></tr>)}
-        {!loading && result?.items.length === 0 && <tr><td colSpan={8} className={styles.empty}>Filtrelerle eşleşen iletişim talebi yok.</td></tr>}
+      <div className={styles.tableWrap}><table><thead><tr><th>Tarih</th><th>Gönderen</th><th>İletişim</th><th>İletişim Nedeni</th><th>Kategori</th><th>Konu / Özet</th><th>Durum</th><th>Atanan</th><th>Son işlem</th><th><span className={styles.srOnly}>İşlem</span></th></tr></thead><tbody>
+        {loading && Array.from({ length: 5 }, (_, row) => <tr key={row} className={styles.skeletonRow}><td colSpan={10}><span /></td></tr>)}
+        {!loading && result?.items.map((item) => <tr key={item.id}><td>{date(item.createdAt)}</td><td>{item.fullName}</td><td>{item.maskedEmail}<br /><small>{item.maskedPhone ?? "—"}</small></td><td>{item.reasonName ?? "—"}</td><td>{item.complaintCategoryName ?? "—"}</td><td><strong>{item.subject}</strong><br /><small>{item.messagePreview}</small></td><td><span className={`${styles.badge} ${styles[`status${item.status}`]}`}>{contactStatusLabels[item.status]}</span></td><td>{item.assignedToDisplayName ?? "Atanmamış"}</td><td>{date(item.updatedAt)}</td><td><button type="button" className={styles.textButton} onClick={() => void detail(item.id)}>İncele</button></td></tr>)}
+        {!loading && result?.items.length === 0 && <tr><td colSpan={10} className={styles.empty}>Filtrelerle eşleşen iletişim talebi yok.</td></tr>}
       </tbody></table></div>
       <nav className={styles.pagination}><button type="button" disabled={page <= 1} onClick={() => go(page - 1)}>Önceki</button><span>{page} / {totalPages}</span><button type="button" disabled={page >= totalPages} onClick={() => go(page + 1)}>Sonraki</button></nav>
     </section>
     {detailLoading && <section className={styles.panel} aria-busy="true"><p role="status">Talep detayı yükleniyor…</p></section>}
     {selected && !detailLoading && <section className={styles.panel}><div className={styles.sectionHeader}><div><p className={styles.sectionIndex}>02</p><h2>{selected.subject}</h2></div><span className={`${styles.badge} ${styles[`status${selected.status}`]}`}>{contactStatusLabels[selected.status]}</span></div>
-      <div className={styles.detailGrid}><div className={styles.contact}><dl><div><dt>Ad soyad</dt><dd>{selected.fullName}</dd></div><div><dt>Firma</dt><dd>{selected.companyName ?? "—"}</dd></div><div><dt>E-posta</dt><dd><a href={`mailto:${selected.email}`}>{selected.email}</a></dd></div><div><dt>Telefon</dt><dd>{selected.phone ? <a href={`tel:${selected.phone}`}>{selected.phone}</a> : "—"}</dd></div><div><dt>Atanan</dt><dd>{selected.assignedToDisplayName ?? "Atanmamış"}</dd></div><div><dt>Oluşturulma</dt><dd>{date(selected.createdAt)}</dd></div><div><dt>Son işlem</dt><dd>{date(selected.updatedAt)}</dd></div><div><dt>KVKK kaydı</dt><dd>{date(selected.consentAt)} · {selected.consentVersion}</dd></div></dl><div className={styles.message}>{selected.message}</div></div>
+      <div className={styles.detailGrid}><div className={styles.contact}><dl><div><dt>Ad soyad</dt><dd>{selected.fullName}</dd></div><div><dt>İletişim Nedeni</dt><dd>{selected.reasonName ?? "—"}</dd></div><div><dt>Kategori</dt><dd>{selected.complaintCategoryName ?? "—"}</dd></div><div><dt>Firma</dt><dd>{selected.companyName ?? "—"}</dd></div><div><dt>E-posta</dt><dd><a href={`mailto:${selected.email}`}>{selected.email}</a></dd></div><div><dt>Telefon</dt><dd>{selected.phone ? <a href={`tel:${selected.phone}`}>{selected.phone}</a> : "—"}</dd></div><div><dt>Atanan</dt><dd>{selected.assignedToDisplayName ?? "Atanmamış"}</dd></div><div><dt>Oluşturulma</dt><dd>{date(selected.createdAt)}</dd></div><div><dt>Son işlem</dt><dd>{date(selected.updatedAt)}</dd></div><div><dt>KVKK kaydı</dt><dd>{date(selected.consentAt)} · {selected.consentVersion}</dd></div></dl><div className={styles.message}>{selected.message}</div></div>
         <div>{canManage ? <div className={styles.managementGrid}><form className={styles.compactForm} onSubmit={assign}><label htmlFor="contact-detail-assignee">Sorumlu kullanıcı</label><select id="contact-detail-assignee" name="assignee" defaultValue={selected.assignedToUserId ?? ""}><option value="">Atanmamış</option>{assignees.map((item) => <option key={item.id} value={item.id}>{item.displayName}</option>)}</select><button disabled={busy}>Atamayı kaydet</button></form>
           {contactTransitions[selected.status].length > 0 && <form className={styles.compactForm} onSubmit={status}><label htmlFor="contact-target-status">Yeni durum</label><select id="contact-target-status" value={targetStatus ?? ""} onChange={(e) => setTargetStatus(Number(e.target.value) as ContactStatus)}>{contactTransitions[selected.status].map((item) => <option key={item} value={item}>{contactStatusLabels[item]}</option>)}</select><button disabled={busy}>Durumu güncelle</button></form>}
           <form className={styles.compactForm} onSubmit={addNote}><label htmlFor="contact-note">Dahili not</label><textarea id="contact-note" required maxLength={2000} value={note} onChange={(e) => setNote(e.target.value)} /><button disabled={busy || !note.trim()}>Not ekle</button></form></div> : <p className={styles.readOnly}>Bu kayıt salt okunur görüntüleniyor.</p>}</div></div>
       <div className={styles.auditGrid}><section><h3>Durum geçmişi</h3><ol className={styles.history}>{selected.statusHistory.map((item) => <li key={item.id}><time>{date(item.changedAt)}</time><div><strong>{item.fromStatus ? `${contactStatusLabels[item.fromStatus]} → ` : ""}{contactStatusLabels[item.toStatus]}</strong><br /><small>{item.changedByDisplayName ?? "Sistem"}</small></div></li>)}</ol></section><section><h3>Dahili notlar</h3><ol className={styles.history}>{selected.internalNotes.map((item) => <li key={item.id}><time>{date(item.recordedAt)}</time><div><p>{item.text}</p><small>{item.authorDisplayName}</small></div></li>)}{selected.internalNotes.length === 0 && <li className={styles.empty}>Henüz dahili not yok.</li>}</ol></section></div>
     </section>}
+    <ContactTaxonomyAdmin onChange={setTaxonomy} />
   </div>;
 }

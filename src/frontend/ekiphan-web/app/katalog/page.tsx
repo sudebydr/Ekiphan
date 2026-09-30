@@ -18,6 +18,7 @@ import type {
 import { defaultSocialImage } from "../../lib/social-metadata";
 import { DynamicCatalogFilters } from "./dynamic-catalog-filters";
 import { CatalogFilterForm } from "./catalog-filter-form";
+import { CatalogCategoryFilter } from "./catalog-category-filter";
 import styles from "./catalog.module.css";
 
 export const dynamic = "force-dynamic";
@@ -222,13 +223,7 @@ export default async function CatalogPage({
                     {navigation?.sections.map((item) => <option key={item.id} value={item.slug}>{item.name}</option>)}
                   </select>
                 </div>
-                <div className={styles.field}>
-                  <label htmlFor="category">Kategori</label>
-                  <select id="category" name="category" defaultValue={one(params.category)}>
-                    <option value="">{"T\u00fcm kategoriler"}</option>
-                    {navigation?.categories.map((item) => <option key={item.id} value={item.slug}>{item.name}</option>)}
-                  </select>
-                </div>
+                {navigation && <CatalogCategoryFilter categories={navigation.categories} selectedSlug={one(params.category)} />}
                 <div className={styles.field}>
                   <label htmlFor="brand">Marka</label>
                   <select id="brand" name="brand" defaultValue={one(params.brand)}>

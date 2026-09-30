@@ -9,7 +9,24 @@ internal sealed class ProductMediaImportRepository(EkiphanDbContext db) : IProdu
 {
     public async Task AddBatchAsync(ProductMediaImportBatch batch, CancellationToken cancellationToken = default)
     { db.Add(batch); await db.SaveChangesAsync(cancellationToken); }
-    public Task SaveAsync(CancellationToken cancellationToken = default) => db.SaveChangesAsync(cancellationToken);
+    public async Task SaveAsync(CancellationToken cancellationToken = default)
+{
+    foreach (var entry in db.ChangeTracker
+                 .Entries<ProductMediaImportBatchItem>()
+                 .Where(x => x.State == EntityState.Modified))
+    {
+        var exists = await db.Set<ProductMediaImportBatchItem>()
+            .AsNoTracking()
+            .AnyAsync(x => x.Id == entry.Entity.Id, cancellationToken);
+
+        if (!exists)
+        {
+            entry.State = EntityState.Added;
+        }
+    }
+
+    await db.SaveChangesAsync(cancellationToken);
+}
 
     public async Task<IReadOnlyList<ProductMediaProductMatch>> FindProductsAsync(IReadOnlyCollection<string> skus,
         IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken = default)

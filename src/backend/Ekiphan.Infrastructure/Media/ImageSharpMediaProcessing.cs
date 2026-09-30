@@ -214,7 +214,7 @@ internal sealed class MediaProcessingService(
                 var extension = Path.GetExtension(command.FileName).ToLowerInvariant();
                 var originalKey = $"media/{now:yyyy/MM}/{id:N}/original/{Guid.NewGuid():N}{extension}";
                 var asset = MediaAsset.CreateFile(id, MediaAssetType.Image, command.FileName,
-                    originalKey, command.ContentType, command.Length, hash);
+                    originalKey, command.ContentType, command.Length, hash, storage.ProviderName);
                 asset.AddTranslation(command.LanguageCode, command.Title, command.AltText, command.Description);
                 asset.BeginProcessing(command.UserId);
 
@@ -241,7 +241,7 @@ internal sealed class MediaProcessingService(
                             $"{type} variant is valid but exceeds the configured target size."));
                 }
 
-                asset.CompleteProcessing(image.Width, image.Height, "Local", now);
+                asset.CompleteProcessing(image.Width, image.Height, storage.ProviderName, now);
                 await repository.AddAsync(asset, token);
                 await repository.SaveAsync(token);
                 ProcessingCompleted(logger, id, hash, stopwatch.ElapsedMilliseconds, null);

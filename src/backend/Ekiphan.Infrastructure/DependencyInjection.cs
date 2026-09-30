@@ -74,10 +74,22 @@ public static class DependencyInjection
             MediaFileSignatureValidator>();
         services.AddSingleton<IMediaThreatScanner,
             NoOpMediaThreatScanner>();
-        services.AddSingleton<IMediaFileStorage>(
-            new LocalMediaFileStorage(
+        var mediaPublicBaseUrl = configuration["Storage:CdnBaseUrl"] ??
+            configuration["PublicMedia:BaseUrl"];
+        var mediaStorageProvider = configuration["MediaStorage:Provider"]?.Trim();
+        services.AddSingleton<IMediaFileStorage>(mediaStorageProvider?.ToUpperInvariant() switch
+        {
+            "LOCAL" => new LocalMediaFileStorage(
                 configuration["MediaStorage:LocalRoot"],
-                configuration["Storage:CdnBaseUrl"] ?? configuration["PublicMedia:BaseUrl"]));
+                mediaPublicBaseUrl),
+            "S3" => new S3MediaFileStorage(
+                S3MediaStorageOptions.FromConfiguration(configuration),
+                mediaPublicBaseUrl),
+            null or "" => throw new InvalidOperationException(
+                "MediaStorage:Provider must be configured as 'Local' or 'S3'."),
+            _ => throw new InvalidOperationException(
+                $"Unsupported MediaStorage:Provider '{mediaStorageProvider}'. Supported values are 'Local' and 'S3'."),
+        });
         services.AddScoped<IMediaAssetRepository, MediaAssetRepository>();
         services.AddScoped<MediaUploadService>();
         services.AddOptions<MediaProcessingOptions>()

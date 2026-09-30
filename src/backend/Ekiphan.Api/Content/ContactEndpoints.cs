@@ -408,10 +408,17 @@ internal static class ContactEndpoints
             if (!Guid.TryParse(reason, out var parsedReason)) return false;
             contactReasonId = parsedReason;
         }
+        var category = Value(request, "complaintCategoryId");
+        Guid? complaintCategoryId = null;
+        if (category is not null)
+        {
+            if (!Guid.TryParse(category, out var parsedCategory)) return false;
+            complaintCategoryId = parsedCategory;
+        }
         result = new AdminContactListQuery(
             page, pageSize, status, search, dateFrom, dateTo,
             assignedUserId, unassigned, newOnly, contactReasonId,
-            sort ?? AdminContactSortOrder.Newest);
+            sort ?? AdminContactSortOrder.Newest, complaintCategoryId);
         return true;
     }
 

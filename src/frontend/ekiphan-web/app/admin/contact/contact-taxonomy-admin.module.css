@@ -22,3 +22,8 @@
 .success { background: #eaf7ee; color: #176234; }
 .hint { color: #756d68; font-size: 13px; }
 @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+.reasonRow { display: flex; align-items: stretch; gap: 8px; }
+.reasonRow > button:first-child { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.reasonRow > button:last-child:not(:first-child) { justify-content: center; color: #8b1a1a; }
+.reasonRow button:disabled { cursor: not-allowed; opacity: .5; }

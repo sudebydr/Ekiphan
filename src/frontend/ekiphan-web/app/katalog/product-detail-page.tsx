@@ -23,8 +23,8 @@ function attributeValue(attribute: CatalogAttribute): string {
   if (attribute.numericValue !== null) {
     return `${attribute.numericValue.toLocaleString("tr-TR")}${attribute.unitSymbol ? ` ${attribute.unitSymbol}` : ""}`;
   }
-  if (attribute.booleanValue !== null) return attribute.booleanValue ? "Evet" : "HayÄ±r";
-  return "â€”";
+  if (attribute.booleanValue !== null) return attribute.booleanValue ? "Evet" : "Hayır";
+  return "—";
 }
 
 function uniqueProducts(products: CatalogProductSummary[]): CatalogProductSummary[] {
@@ -33,8 +33,8 @@ function uniqueProducts(products: CatalogProductSummary[]): CatalogProductSummar
 
 function specificationGroup(attribute: CatalogAttribute): string {
   const name = attribute.name.toLocaleLowerCase("tr-TR");
-  if (/geniÅŸ|yÃ¼ksek|derin|uzun|Ã¶lÃ§|Ã§ap|aÄŸÄ±rlÄ±k/.test(name)) return "Boyutlar";
-  if (/volt|gÃ¼Ã§|frekans|elektr|enerji/.test(name)) return "Elektrik";
+  if (/geniş|yüksek|derin|uzun|ölç|çap|ağırlık/.test(name)) return "Boyutlar";
+  if (/volt|güç|frekans|elektr|enerji/.test(name)) return "Elektrik";
   if (/kapasite|hacim|porsiyon|adet/.test(name)) return "Kapasite";
   return "Ürün bilgileri";
 }
@@ -49,7 +49,7 @@ function groupedAttributes(attributes: CatalogAttribute[]) {
 
 function RelatedProducts({ products }: { products: CatalogProductSummary[] }) {
   if (products.length === 0) return null;
-  return <section className={styles.relatedSection} aria-labelledby="related-products-title"><div className={styles.sectionHeading}><div><p className={styles.sectionEyebrow}>ÜRÜN ÖNERİLERİ</p><h2 id="related-products-title">Bunları da inceleyin</h2></div><Link href="/katalog">Tüm ürünler <span aria-hidden="true">→</span></Link></div><RelatedProductsCarousel items={products.map(product=>({id:product.id,slug:product.slug,name:product.name,sku:product.sku,category:product.primaryCategory?.name ?? "Profesyonel ürün",brand:product.brand?.name ?? "Ekiphan",image:product.image}))}/></section>;
+  return <section className={styles.relatedSection} aria-labelledby="related-products-title"><div className={styles.sectionHeading}><div><p className={styles.sectionEyebrow}>ÜRÜN ÖNERİLERİ</p><h2 id="related-products-title">Bunları da inceleyin</h2></div><Link href="/katalog">Tüm ürünler <span aria-hidden="true">→</span></Link></div><RelatedProductsCarousel items={products.map(product=>({id:product.id,slug:product.slug,name:product.name,sku:product.sku,category:product.primaryCategory?.name ?? "—",brand:product.brand?.name ?? "Ekiphan",image:product.image}))}/></section>;
 }
 export async function generateMetadata({ params, searchParams }: {
   params: Promise<{ slug: string }>;
@@ -59,7 +59,7 @@ export async function generateMetadata({ params, searchParams }: {
   const language = (await searchParams).lang === "en" ? "en" : "tr";
   try {
     const product = await getProduct(slug, language);
-    const description = product.metaDescription ?? product.shortDescription ?? `${product.name} Ã¼rÃ¼n Ã¶zellikleri ve detaylarÄ±.`;
+    const description = product.metaDescription ?? product.shortDescription ?? `${product.name} ürün özellikleri ve detayları.`;
     const path = `/katalog/${encodeURIComponent(product.slug)}`;
     return {
       title: product.metaTitle ?? product.name,
@@ -84,7 +84,7 @@ export async function generateMetadata({ params, searchParams }: {
       }
     };
   } catch {
-    return { title: "ÃœrÃ¼n", robots: { index: false, follow: false } };
+    return { title: "Ürün", robots: { index: false, follow: false } };
   }
 }
 
@@ -93,11 +93,11 @@ function ErrorState({ caught }: { caught: unknown }) {
     <main className={`${catalogStyles.page} ${catalogStyles.detailPage}`} data-public-page>
       <PublicHeader currentPath="/katalog" />
       <section className={catalogStyles.hero}>
-        <div><p className={catalogStyles.eyebrow}>ÃœRÃœN KATALOï¿½?U</p><h1>ÃœrÃ¼n bilgisine ulaÅŸÄ±lamadÄ±.</h1></div>
-        <p className={catalogStyles.heroText}>BaÄŸlantÄ± yeniden kurulduÄŸunda Ã¼rÃ¼n bilgileri burada gÃ¶sterilecek.</p>
+        <div><p className={catalogStyles.eyebrow}>ÜRÜN KATALOĞU</p><h1>Ürün bilgisine ulaşılamadı.</h1></div>
+        <p className={catalogStyles.heroText}>Bağlantı yeniden kurulduğunda ürün bilgileri burada gösterilecek.</p>
       </section>
-      <Link className={catalogStyles.backLink} href="/katalog">â† KataloÄŸa dÃ¶n</Link>
-      <div className={catalogStyles.error} role="alert"><strong>ÃœrÃ¼n bilgisi yÃ¼klenemedi.</strong><p>{caught instanceof CatalogApiError ? caught.message : "LÃ¼tfen daha sonra tekrar deneyin."}</p></div>
+      <Link className={catalogStyles.backLink} href="/katalog">← Kataloğa dön</Link>
+      <div className={catalogStyles.error} role="alert"><strong>Ürün bilgisi yüklenemedi.</strong><p>{caught instanceof CatalogApiError ? caught.message : "Lütfen daha sonra tekrar deneyin."}</p></div>
     </main>
   );
 }
@@ -105,10 +105,10 @@ function ErrorState({ caught }: { caught: unknown }) {
 function quickSpecifications(product: CatalogProductDetail) {
   const fromAttributes = product.attributes.slice(0, 4).map((attribute) => ({ label: attribute.name, value: attributeValue(attribute) }));
   const fallbacks = [
-    { label: "Kategori", value: product.categories[0]?.name ?? "Profesyonel ürün" },
+    { label: "Kategori", value: product.categories[0]?.name ?? "—" },
     { label: "Marka", value: product.brand?.name ?? "Ekiphan" },
     { label: "Seri", value: product.tags[0]?.name ?? "Profesyonel seri" },
-    { label: "ÃœrÃ¼n kodu", value: product.sku }
+    { label: "Ürün kodu", value: product.sku }
   ];
   return [...fromAttributes, ...fallbacks].slice(0, 4);
 }
@@ -127,7 +127,7 @@ export default async function ProductDetailPage({ params, searchParams }: {
     return <ErrorState caught={caught} />;
   }
 
-  const category = product.categories[0]?.name ?? "Profesyonel ürün";
+  const category = product.categories[0]?.name ?? "—";
   const specs = quickSpecifications(product);
   const groups = groupedAttributes(product.attributes);
   const related = uniqueProducts([...product.similarProducts, ...product.complementaryProducts]);
@@ -140,8 +140,8 @@ export default async function ProductDetailPage({ params, searchParams }: {
   const overviewItems = Array.from(new Set([
     ...product.tags.map((tag) => tag.name),
     ...product.categories.map((item) => item.name),
-    "YoÄŸun kullanÄ±ma uygun",
-    "Profesyonel servis desteÄŸi"
+    "Yoğun kullanıma uygun",
+    "Profesyonel servis desteği"
   ])).slice(0, 4);
 
   const detailSpecificationGroups = Object.entries(groups).map(([name, attributes]) => ({
@@ -172,7 +172,7 @@ export default async function ProductDetailPage({ params, searchParams }: {
             </div>
             <h1 id="product-title">{product.name}</h1>
             <p className={styles.modelLine}><span>Ürün Kodu: {product.sku}</span></p>
-            <p className={styles.lead}>{product.shortDescription ?? "Profesyonel kullanÄ±m iÃ§in Ekiphan Ã¼rÃ¼n kataloÄŸundan seÃ§ilen, proje ihtiyaÃ§larÄ±na uyumlu Ã¼rÃ¼n Ã§Ã¶zÃ¼mÃ¼."}</p>
+            <p className={styles.lead}>{product.shortDescription ?? "Profesyonel kullanım için Ekiphan ürün kataloğundan seçilen, proje ihtiyaçlarına uyumlu ürün çözümü."}</p>
             <dl className={styles.quickSpecs}>{specs.map((spec) => <div key={`${spec.label}-${spec.value}`}><dt>{spec.label}</dt><dd>{spec.value}</dd></div>)}</dl>
             <div className={styles.statusList} aria-label="Ürün durumu"><span>Profesyonel Seri</span><span>Proje kullanımına uygun</span><span>Bilgi için iletişime geçin</span></div>
             <div className={styles.primaryAction}>
@@ -185,7 +185,7 @@ export default async function ProductDetailPage({ params, searchParams }: {
       </div>`r`n<ProductDetailSections
         productName={product.name}
         category={category}
-        description={product.longDescription ?? product.shortDescription ?? "ÃœrÃ¼n, profesyonel mutfak ve servis projelerinin operasyonel ihtiyaÃ§larÄ± iÃ§in seÃ§ilmiÅŸtir."}
+        description={product.longDescription ?? product.shortDescription ?? "Ürün, profesyonel mutfak ve servis projelerinin operasyonel ihtiyaçları için seçilmiştir."}
         features={overviewItems}
         specificationGroups={detailSpecificationGroups}
         applicationAreas={applicationAreas}
@@ -199,9 +199,5 @@ export default async function ProductDetailPage({ params, searchParams }: {
     </main>
   );
 }
-
-
-
-
 
 

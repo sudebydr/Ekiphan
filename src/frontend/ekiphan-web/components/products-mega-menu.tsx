@@ -34,7 +34,7 @@ export async function ProductsMegaMenu() {
   if (groups.length === 0) {
     return (
       <div className={styles.productsSubmenu}>
-        <Link href="/katalog">Tüm Ürünler</Link>
+        <Link href="/urunler">Tüm Ürünler</Link>
       </div>
     );
   }
@@ -59,7 +59,7 @@ export async function ProductsMegaMenu() {
           </div>
         ))}
       </div>
-      <Link className={styles.productsMegaAll} href="/katalog">
+      <Link className={styles.productsMegaAll} href="/urunler">
         Tüm Ürünler <span aria-hidden="true">→</span>
       </Link>
     </div>

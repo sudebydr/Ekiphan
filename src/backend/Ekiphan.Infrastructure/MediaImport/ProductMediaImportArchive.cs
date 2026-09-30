@@ -41,9 +41,7 @@ public sealed class ProductMediaSkuParser : IProductMediaSkuParser
         else
         {
             var numberMatch = NumberSuffix.Match(stem);
-            var dashIsClearlySuffix = numberMatch.Success && numberMatch.Groups["sep"].Value == "-" &&
-                (stem[..numberMatch.Index].Contains('-') || stem[..numberMatch.Index].Contains('_'));
-            if (numberMatch.Success && (numberMatch.Groups["sep"].Value == "_" || dashIsClearlySuffix) &&
+            if (numberMatch.Success &&
                 int.TryParse(numberMatch.Groups["n"].Value, out var number))
             { order = number; primary = number == 1; stem = stem[..numberMatch.Index]; }
         }

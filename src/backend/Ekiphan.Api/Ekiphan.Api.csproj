@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
     <ProjectReference Include="..\Ekiphan.Application\Ekiphan.Application.csproj" />
@@ -21,6 +21,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>4153723d-52dd-42e3-ad08-caf581c14257</UserSecretsId>
   </PropertyGroup>
 
 </Project>

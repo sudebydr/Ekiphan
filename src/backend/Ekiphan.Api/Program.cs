@@ -471,6 +471,7 @@ app.MapHealthChecks(
             [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable,
         },
     });
+app.MapPublicMediaEndpoints();
 app.MapCatalogEndpoints();
 app.MapContentEndpoints(jwtSettings.IsConfigured);
 app.MapMenuEndpoints(jwtSettings.IsConfigured);

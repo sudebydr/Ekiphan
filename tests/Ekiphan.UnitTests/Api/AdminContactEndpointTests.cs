@@ -23,6 +23,7 @@ public sealed class AdminContactEndpointTests
     [Fact]
     public async Task ContactReaderCanListWithServerFilters()
     {
+        var categoryId = Guid.NewGuid();
         var service = new StubContactService();
         await using var factory = CreateFactory(service);
         using var client = factory.CreateClient();
@@ -31,14 +32,32 @@ public sealed class AdminContactEndpointTests
 
         using var response = await client.GetAsync(
             "/api/admin/contact-requests?page=2&pageSize=10" +
-            "&status=Read&search=mutfak&sort=Oldest");
+            "&status=Read&search=mutfak&sort=Oldest" +
+            $"&complaintCategoryId={categoryId}");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(categoryId, service.Query?.ComplaintCategoryId);
         Assert.Equal(2, service.Query?.Page);
         Assert.Equal(10, service.Query?.PageSize);
         Assert.Equal(ContactRequestStatus.Read, service.Query?.Status);
         Assert.Equal("mutfak", service.Query?.Search);
         Assert.Equal(AdminContactSortOrder.Oldest, service.Query?.SortOrder);
+    }
+
+    [Fact]
+    public async Task ContactListRejectsInvalidCategoryFilter()
+    {
+        var service = new StubContactService();
+        await using var factory = CreateFactory(service);
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Bearer", Token("contacts.read"));
+
+        using var response = await client.GetAsync(
+            "/api/admin/contact-requests?complaintCategoryId=invalid");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Null(service.Query);
     }
 
     [Fact]
@@ -82,7 +101,7 @@ public sealed class AdminContactEndpointTests
                 [new AdminContactSummary(
                     Guid.NewGuid(), DateTimeOffset.UtcNow, "Test Kullanıcı",
                     "t***@example.com", "*** 0000", "Bilgi", "Kısa özet",
-                    ContactRequestStatus.New, null, null, DateTimeOffset.UtcNow,
+                    ContactRequestStatus.New, "Müşteri Şikayeti", "Teslimat", null, null, DateTimeOffset.UtcNow,
                     Convert.ToBase64String(new byte[8]))],
                 1, 20, 1),
         };
@@ -95,6 +114,9 @@ public sealed class AdminContactEndpointTests
         var json = await response.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var page = await response.Content.ReadFromJsonAsync<AdminContactPage>();
+        Assert.Equal("Müşteri Şikayeti", page!.Items[0].ReasonName);
+        Assert.Equal("Teslimat", page.Items[0].ComplaintCategoryName);
         Assert.DoesNotContain("test@example.com", json, StringComparison.Ordinal);
         Assert.DoesNotContain("full message", json, StringComparison.OrdinalIgnoreCase);
     }

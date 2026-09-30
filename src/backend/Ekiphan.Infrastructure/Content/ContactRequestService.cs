@@ -101,6 +101,11 @@ internal sealed class ContactRequestService(
             query = query.Where(item =>
                 item.ContactReasonId == request.ContactReasonId.Value);
         }
+        if (request.ComplaintCategoryId.HasValue)
+        {
+            query = query.Where(item =>
+                item.ComplaintCategoryId == request.ComplaintCategoryId.Value);
+        }
         if (search is not null)
         {
             query = query.Where(item =>

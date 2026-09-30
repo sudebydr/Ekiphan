@@ -19,8 +19,9 @@ export async function getPublicSettings(): Promise<SiteSettingsDto | null> {
   if (!base) return null;
 
   try {
-    const response = await fetch(`${base}/api/settings`, {
-      cache: "no-store"
+    const response = await fetch(`${base}/api/public/settings`, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(8_000)
     });
     if (!response.ok) return null;
     return (await response.json()) as SiteSettingsDto;

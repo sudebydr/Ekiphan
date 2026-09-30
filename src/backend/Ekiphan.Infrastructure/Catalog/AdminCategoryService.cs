@@ -28,6 +28,22 @@ internal sealed class AdminCategoryService(EkiphanDbContext dbContext)
             .ThenBy(item => item.Id);
         var categories = await ProjectCategories(categoryQuery)
             .ToListAsync(cancellationToken);
+        var productCounts = await dbContext.Set<ProductCategory>()
+            .AsNoTracking()
+            .Join(
+                dbContext.Products.AsNoTracking().Where(product => !product.IsDeleted),
+                assignment => assignment.ProductId,
+                product => product.Id,
+                (assignment, _) => assignment.CategoryId)
+            .GroupBy(categoryId => categoryId)
+            .Select(group => new { CategoryId = group.Key, Count = group.Count() })
+            .ToDictionaryAsync(item => item.CategoryId, item => item.Count, cancellationToken);
+        categories = categories
+            .Select(category => category with
+            {
+                ProductCount = productCounts.GetValueOrDefault(category.Id),
+            })
+            .ToList();
         return new AdminCatalogStructure(sections, categories);
     }
 
@@ -180,7 +196,7 @@ internal sealed class AdminCategoryService(EkiphanDbContext dbContext)
                 section.CreatedAt,
                 section.UpdatedAt));
 
-    private IQueryable<AdminCategoryDetail> ProjectCategories(
+    private static IQueryable<AdminCategoryDetail> ProjectCategories(
         IQueryable<Category> categories) =>
         categories.Select(category =>
             new AdminCategoryDetail(
@@ -189,9 +205,7 @@ internal sealed class AdminCategoryService(EkiphanDbContext dbContext)
                 category.ParentId,
                 category.IsPublished,
                 category.SortOrder,
-                dbContext.Products.Count(product =>
-                    !product.IsDeleted && product.Categories.Any(assignment =>
-                        assignment.CategoryId == category.Id)),
+                0,
                 category.Translations
                     .OrderBy(item => item.LanguageCode)
                     .Select(item => new AdminCategoryTranslation(

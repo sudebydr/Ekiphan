@@ -48,6 +48,14 @@ public sealed record AdminProductListQuery(
     AdminProductSortBy SortBy,
     AdminSortDirection SortDirection);
 
+public sealed record AdminProductBulkSelectionQuery(
+    string LanguageCode,
+    string? Search,
+    Guid? CategoryId,
+    Guid? BrandId,
+    bool MissingGalleryImage,
+    bool MissingEnglishContent);
+
 public sealed record AdminProductRelation(
     Guid Id,
     Guid SourceProductId,
@@ -71,6 +79,10 @@ public interface IAdminProductRelationService
 {
     Task<AdminCatalogProductPage> GetProductsAsync(
         AdminProductListQuery query,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Guid>> SelectUnpublishedProductIdsAsync(
+        AdminProductBulkSelectionQuery query,
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<AdminProductRelation>> GetRelationsAsync(

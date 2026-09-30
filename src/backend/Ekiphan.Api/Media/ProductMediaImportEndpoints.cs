@@ -24,7 +24,7 @@ internal static class ProductMediaImportEndpoints
             .WithDescription("media.import izni gerektirir. multipart/form-data içindeki file alanını güvenli biçimde analiz eder; kalıcı medya oluşturmaz.")
             .Accepts<IFormFile>("multipart/form-data").Produces<ProductMediaImportPreviewDto>(200)
             .ProducesProblem(400).ProducesProblem(401).ProducesProblem(403).ProducesProblem(413).ProducesProblem(422).ProducesProblem(500)
-            .WithMetadata(new RequestSizeLimitAttribute(251L * 1024 * 1024));
+            .WithMetadata(new RequestSizeLimitAttribute(1537L * 1024 * 1024));
         group.MapPost("/validate", ValidateAsync)
             .WithSummary("ZIP görsellerini ürünlerle eşleştirir")
             .WithDescription("media.import izni gerektirir. Otomatik ve manuel SKU eşleştirmelerini dry-run olarak doğrular; kalıcı kayıt yazmaz.")

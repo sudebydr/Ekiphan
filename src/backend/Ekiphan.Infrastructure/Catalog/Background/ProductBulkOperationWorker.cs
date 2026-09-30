@@ -1,7 +1,10 @@
 using Ekiphan.Application.Catalog;
+using Ekiphan.Domain.Catalog;
+using Ekiphan.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1848:Use the LoggerMessage delegates", Scope = "module", Justification = "Background worker logger.")]
 
@@ -17,6 +20,7 @@ public sealed class ProductBulkOperationWorker(
     {
         logger.LogInformation("ProductBulkOperationWorker started.");
         await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+        await RecoverPendingOperationsAsync(stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -47,6 +51,30 @@ public sealed class ProductBulkOperationWorker(
                 logger.LogError(ex, "Error processing bulk operation queue item.");
                 await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
             }
+        }
+    }
+
+    private async Task RecoverPendingOperationsAsync(CancellationToken cancellationToken)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<EkiphanDbContext>();
+        var operationIds = await dbContext.ProductBulkOperations
+            .AsNoTracking()
+            .Where(operation =>
+                operation.Status == ProductBulkOperationStatus.Pending ||
+                operation.Status == ProductBulkOperationStatus.Processing)
+            .OrderBy(operation => operation.RequestedAt)
+            .Select(operation => operation.Id)
+            .ToListAsync(cancellationToken);
+
+        foreach (var operationId in operationIds)
+        {
+            await queue.EnqueueAsync(operationId, cancellationToken);
+        }
+
+        if (operationIds.Count > 0)
+        {
+            logger.LogInformation("Recovered {Count} pending bulk operation(s).", operationIds.Count);
         }
     }
 }

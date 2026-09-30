@@ -47,6 +47,8 @@ public interface IMediaFileStorage
 {
     bool IsConfigured { get; }
 
+    string ProviderName => "Local";
+
     Task SaveAsync(
         string storageKey,
         Stream content,

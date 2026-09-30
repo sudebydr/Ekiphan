@@ -17,7 +17,7 @@ function problem(status: number, title: string, detail: string): Response {
 
 function allowed(
   segments: string[],
-  method: "GET" | "POST" | "PUT"
+  method: "GET" | "POST" | "PUT" | "DELETE"
 ): boolean {
   if (segments.length === 0) return method === "GET";
   if (segments.length === 1 && segments[0] === "taxonomy") {
@@ -34,7 +34,7 @@ function allowed(
     ["reasons", "complaint-categories"].includes(segments[0] ?? "") &&
     guidPattern.test(segments[1] ?? "")
   ) {
-    return method === "PUT";
+    return method === "PUT" || method === "DELETE";
   }
   if (segments.length === 1 && ["assignees", "complaints"].includes(segments[0] ?? "")) {
     return method === "GET";
@@ -48,7 +48,7 @@ function allowed(
 async function proxy(
   request: NextRequest,
   context: RouteContext,
-  method: "GET" | "POST" | "PUT"
+  method: "GET" | "POST" | "PUT" | "DELETE"
 ): Promise<Response> {
   const { segments = [] } = await context.params;
   if (!allowed(segments, method)) {
@@ -74,7 +74,7 @@ async function proxy(
         return problem(403, "İstek reddedildi", "Origin değeri geçersiz.");
       }
     }
-    if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) {
+    if (method !== "DELETE" && !request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) {
       return problem(415, "Desteklenmeyen içerik", "İstek JSON olmalıdır.");
     }
   }
@@ -88,7 +88,7 @@ async function proxy(
     Authorization: `Bearer ${token}`
   });
   let body: ArrayBuffer | undefined;
-  if (method !== "GET") {
+  if (method === "POST" || method === "PUT") {
     body = await request.arrayBuffer();
     if (body.byteLength > maximumRequestBytes) {
       return problem(413, "İstek çok büyük", "İstek 16 KB sınırını aşıyor.");
@@ -126,4 +126,8 @@ export function POST(request: NextRequest, context: RouteContext) {
 
 export function PUT(request: NextRequest, context: RouteContext) {
   return proxy(request, context, "PUT");
+}
+
+export function DELETE(request: NextRequest, context: RouteContext) {
+  return proxy(request, context, "DELETE");
 }

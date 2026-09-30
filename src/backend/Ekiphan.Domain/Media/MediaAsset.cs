@@ -57,7 +57,8 @@ public sealed class MediaAsset : Entity
         string storageKey,
         string mimeType,
         long fileSizeBytes,
-        string sha256Checksum)
+        string sha256Checksum,
+        string storageProvider = "Local")
     {
         if (assetType == MediaAssetType.ExternalVideo)
         {
@@ -117,6 +118,10 @@ public sealed class MediaAsset : Entity
             MimeType = normalizedMime,
             FileSizeBytes = fileSizeBytes,
             Sha256Checksum = normalizedChecksum,
+            StorageProvider = MediaGuard.Required(
+                storageProvider,
+                50,
+                nameof(storageProvider)),
         };
     }
 

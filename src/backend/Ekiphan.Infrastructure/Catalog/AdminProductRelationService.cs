@@ -22,56 +22,14 @@ internal sealed class AdminProductRelationService(EkiphanDbContext dbContext)
             throw new ArgumentOutOfRangeException(nameof(query));
         }
 
-        var products = dbContext.Products
-            .AsNoTracking()
-            .Where(AdminProductRelationRules.SelectableProduct(language));
-
-        if (!string.IsNullOrWhiteSpace(query.Search))
-        {
-            var value = query.Search.Trim();
-            if (value.Length > 100)
-            {
-                throw new ArgumentOutOfRangeException(nameof(query));
-            }
-
-            products = products.Where(product =>
-                product.SKU.Contains(value) ||
-                product.Translations.Any(translation =>
-                    translation.Name.Contains(value)));
-        }
-
-        if (query.CategoryId.HasValue)
-        {
-            products = products.Where(product => product.Categories.Any(
-                category => category.CategoryId == query.CategoryId.Value));
-        }
-
-        if (query.BrandId.HasValue)
-        {
-            products = products.Where(product =>
-                product.BrandId == query.BrandId.Value);
-        }
-
-        if (query.IsPublished.HasValue)
-        {
-            products = products.Where(product =>
-                product.IsPublished == query.IsPublished.Value);
-        }
-
-        if (query.MissingGalleryImage)
-        {
-            products = products.Where(product =>
-                !dbContext.ProductMedia.Any(media =>
-                    media.ProductId == product.Id &&
-                    media.Role == ProductMediaRole.GalleryImage));
-        }
-
-        if (query.MissingEnglishContent)
-        {
-            products = products.Where(product =>
-                !product.Translations.Any(translation =>
-                    translation.LanguageCode == "en"));
-        }
+        var products = FilterProducts(
+            language,
+            query.Search,
+            query.CategoryId,
+            query.BrandId,
+            query.IsPublished,
+            query.MissingGalleryImage,
+            query.MissingEnglishContent);
 
         var totalCount = await products.CountAsync(cancellationToken);
         var ordered = OrderProducts(
@@ -116,6 +74,101 @@ internal sealed class AdminProductRelationService(EkiphanDbContext dbContext)
             query.Page,
             query.PageSize,
             totalCount);
+    }
+
+    public async Task<IReadOnlyList<Guid>> SelectUnpublishedProductIdsAsync(
+        AdminProductBulkSelectionQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+        var productIds = await FilterProducts(
+                ValidateLanguage(query.LanguageCode),
+                query.Search,
+                query.CategoryId,
+                query.BrandId,
+                isPublished: false,
+                missingGalleryImage: query.MissingGalleryImage,
+                missingEnglishContent: query.MissingEnglishContent)
+            .Where(product => dbContext.ProductMedia.Any(media =>
+                media.ProductId == product.Id &&
+                media.Role == ProductMediaRole.GalleryImage &&
+                dbContext.MediaAssets.Any(asset =>
+                    asset.Id == media.MediaAssetId &&
+                    asset.Status == MediaStatus.Active &&
+                    asset.AssetType == MediaAssetType.Image &&
+                    asset.StorageKey != null &&
+                    asset.StorageKey != string.Empty)))
+            .Select(product => product.Id)
+            .Take(5_001)
+            .ToListAsync(cancellationToken);
+
+        if (productIds.Count > 5_000)
+        {
+            throw new InvalidOperationException(ProductManagementErrorCodes.ProductBulkItemLimitExceeded);
+        }
+
+        return productIds;
+    }
+
+    private IQueryable<Product> FilterProducts(
+        string language,
+        string? search,
+        Guid? categoryId,
+        Guid? brandId,
+        bool? isPublished,
+        bool missingGalleryImage,
+        bool missingEnglishContent)
+    {
+        var products = dbContext.Products
+            .AsNoTracking()
+            .Where(AdminProductRelationRules.SelectableProduct(language));
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var value = search.Trim();
+            if (value.Length > 100)
+            {
+                throw new ArgumentOutOfRangeException(nameof(search));
+            }
+
+            products = products.Where(product =>
+                product.SKU.Contains(value) ||
+                product.Translations.Any(translation =>
+                    translation.Name.Contains(value)));
+        }
+
+        if (categoryId.HasValue)
+        {
+            products = products.Where(product => product.Categories.Any(
+                category => category.CategoryId == categoryId.Value));
+        }
+
+        if (brandId.HasValue)
+        {
+            products = products.Where(product => product.BrandId == brandId.Value);
+        }
+
+        if (isPublished.HasValue)
+        {
+            products = products.Where(product => product.IsPublished == isPublished.Value);
+        }
+
+        if (missingGalleryImage)
+        {
+            products = products.Where(product =>
+                !dbContext.ProductMedia.Any(media =>
+                    media.ProductId == product.Id &&
+                    media.Role == ProductMediaRole.GalleryImage));
+        }
+
+        if (missingEnglishContent)
+        {
+            products = products.Where(product =>
+                !product.Translations.Any(translation =>
+                    translation.LanguageCode == "en"));
+        }
+
+        return products;
     }
 
     private static IOrderedQueryable<Product> OrderProducts(

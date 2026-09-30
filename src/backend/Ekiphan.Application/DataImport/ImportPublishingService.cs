@@ -144,8 +144,10 @@ public sealed class ImportPublishingService(
 
     private static string CreateSlug(string name, Guid productId)
     {
-        var decomposed = name.Trim().ToLowerInvariant()
+        var decomposed = name.Trim()
+            .Replace('İ', 'I')
             .Replace('ı', 'i')
+            .ToLowerInvariant()
             .Normalize(NormalizationForm.FormD);
         var builder = new StringBuilder(decomposed.Length);
         var previousWasSeparator = false;
@@ -158,15 +160,18 @@ public sealed class ImportPublishingService(
                 continue;
             }
 
-            if (char.IsLetterOrDigit(character))
+            foreach (var mapped in ToAscii(character))
             {
-                builder.Append(character);
-                previousWasSeparator = false;
-            }
-            else if (!previousWasSeparator && builder.Length > 0)
-            {
-                builder.Append('-');
-                previousWasSeparator = true;
+                if (mapped is >= 'a' and <= 'z' or >= '0' and <= '9')
+                {
+                    builder.Append(mapped);
+                    previousWasSeparator = false;
+                }
+                else if (!previousWasSeparator && builder.Length > 0)
+                {
+                    builder.Append('-');
+                    previousWasSeparator = true;
+                }
             }
         }
 
@@ -178,4 +183,17 @@ public sealed class ImportPublishingService(
 
         return $"{(namePart.Length == 0 ? "product" : namePart)}-{productId:N}";
     }
+
+    private static string ToAscii(char character) =>
+        character switch
+        {
+            'ø' => "o",
+            'ß' => "ss",
+            'æ' => "ae",
+            'œ' => "oe",
+            'đ' => "d",
+            'ł' => "l",
+            'þ' => "th",
+            _ => character.ToString(),
+        };
 }

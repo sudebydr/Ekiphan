@@ -7,7 +7,7 @@ import type { SiteSettingsDto } from "../lib/public-settings";
 
 const groups = [
   { title: "Kurumsal", links: [{ href: "/hakkimizda", label: "Biz Kimiz" }, { href: "/referanslar", label: "Referanslar" }, { href: "/galeri", label: "Galeri" }, { href: "/showroom", label: "Showroom" }, { href: "/basin-odasi", label: "Basın Odası" }] },
-  { title: "Ürünler", links: [{ href: "/katalog", label: "Tüm Ürünler" }, { href: "/endustriyel-mutfak", label: "Endüstriyel Mutfak" }] }
+  { title: "Ürünler", links: [{ href: "/urunler", label: "Tüm Ürünler" }, { href: "/endustriyel-mutfak", label: "Endüstriyel Mutfak" }] }
 ];
 
 export function PublicFooter({ settings }: { settings: SiteSettingsDto | null }) {

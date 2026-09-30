@@ -10,13 +10,13 @@ export async function GET() {
   try {
     const upstream = await fetch(new URL("/api/contact-taxonomy", base), {
       headers: { Accept: "application/json" },
-      next: { revalidate: 60 }
+      cache: "no-store"
     });
     return new Response(upstream.body, {
       status: upstream.status,
       headers: {
         "Content-Type": upstream.headers.get("content-type") ?? "application/json",
-        "Cache-Control": "public, max-age=60"
+        "Cache-Control": "no-store"
       }
     });
   } catch {

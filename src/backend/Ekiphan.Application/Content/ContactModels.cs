@@ -34,7 +34,8 @@ public sealed record AdminContactListQuery(
     bool UnassignedOnly = false,
     bool NewOnly = false,
     Guid? ContactReasonId = null,
-    AdminContactSortOrder SortOrder = AdminContactSortOrder.Newest);
+    AdminContactSortOrder SortOrder = AdminContactSortOrder.Newest,
+    Guid? ComplaintCategoryId = null);
 
 public sealed record AdminContactPage(
     IReadOnlyList<AdminContactSummary> Items,

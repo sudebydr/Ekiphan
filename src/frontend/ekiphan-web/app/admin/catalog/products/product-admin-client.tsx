@@ -16,6 +16,12 @@ import type { AdminBrandPage } from "../../../../lib/admin-brand-types";
 import type { AdminCatalogStructure } from "../../../../lib/admin-category-types";
 import type { AdminAttributeCatalog } from "../../../../lib/admin-attribute-types";
 import type { AdminDictionaryCatalog } from "../../../../lib/admin-dictionary-types";
+import type {
+  ProductBulkExecution,
+  ProductBulkOperation,
+  ProductBulkPreview,
+  ProductBulkSelection
+} from "../../../../lib/admin-product-bulk-types";
 import styles from "./products.module.css";
 
 type TranslationDraft = {
@@ -91,6 +97,11 @@ export function ProductAdminClient() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkPreview, setBulkPreview] = useState<ProductBulkPreview | null>(null);
+  const [bulkTargetCount, setBulkTargetCount] = useState(0);
+  const [bulkOperation, setBulkOperation] = useState<ProductBulkOperation | null>(null);
+  const [bulkError, setBulkError] = useState<string | null>(null);
 
   const loadProducts = useCallback(async (term = "", targetPage = 1) => {
     const query = new URLSearchParams({
@@ -175,6 +186,134 @@ export function ProductAdminClient() {
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
+
+  useEffect(() => {
+    if (!bulkOperation || isBulkOperationComplete(bulkOperation.status)) return;
+
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const poll = async () => {
+      try {
+        const response = await fetch(
+          `/api/admin/products/bulk-operations/${bulkOperation.operationId}`,
+          { cache: "no-store" }
+        );
+        if (!response.ok) throw new Error(await readError(response));
+        const next = (await response.json()) as ProductBulkOperation;
+        if (cancelled) return;
+        setBulkOperation(next);
+        if (!isBulkOperationComplete(next.status)) {
+          timer = setTimeout(() => void poll(), 5_000);
+        }
+      } catch (reason) {
+        if (!cancelled) {
+          setBulkError(reason instanceof Error ? reason.message : "Toplu işlem durumu alınamadı.");
+        }
+      }
+    };
+
+    void poll();
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [bulkOperation?.operationId, bulkOperation?.status]);
+
+  const canBulkPublish = publicationFilter === "false" && Boolean(brandFilter || search.trim());
+
+  async function collectFilteredProductIds(): Promise<string[]> {
+    const query = new URLSearchParams({ language: "tr", isPublished: "false" });
+    if (search.trim()) query.set("search", search.trim());
+    if (brandFilter) query.set("brandId", brandFilter);
+    if (categoryFilter) query.set("categoryId", categoryFilter);
+    if (missingImageFilter) query.set("missingImage", "true");
+    if (missingEnglishFilter) query.set("missingEnglish", "true");
+
+    const response = await fetch(`/api/admin/products/bulk/selection?${query}`, {
+      cache: "no-store"
+    });
+    if (!response.ok) throw new Error(await readError(response));
+    const selection = (await response.json()) as ProductBulkSelection;
+    const productIds = [...new Set(selection.productIds)];
+    if (productIds.length !== selection.productIds.length || productIds.length > 5_000) {
+      throw new Error("Toplu yayınlama için geçersiz ürün seçimi döndürüldü.");
+    }
+    return productIds;
+  }
+
+  async function previewBulkPublish() {
+    if (!canBulkPublish) return;
+    setBulkBusy(true);
+    setBulkError(null);
+    setBulkOperation(null);
+    setBulkPreview(null);
+    try {
+      const productIds = await collectFilteredProductIds();
+      if (productIds.length === 0) {
+        throw new Error("Mevcut filtrelere uygun pasif ürün bulunamadı.");
+      }
+
+      const response = await fetch("/api/admin/products/bulk/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          operationType: 1,
+          productIds,
+          parameters: null,
+          reason: "Filtrelenen pasif ürünlerin toplu yayınlama önizlemesi"
+        })
+      });
+      if (!response.ok) throw new Error(await readError(response));
+      setBulkTargetCount(productIds.length);
+      setBulkPreview((await response.json()) as ProductBulkPreview);
+    } catch (reason) {
+      setBulkError(reason instanceof Error ? reason.message : "Toplu yayınlama önizlemesi alınamadı.");
+    } finally {
+      setBulkBusy(false);
+    }
+  }
+
+  async function executeBulkPublish() {
+    if (!bulkPreview || bulkPreview.affectedProductIds.length === 0) return;
+    if (!window.confirm(`${bulkPreview.eligibleProducts} ürünü arka planda yayınlamak istediğinizi onaylıyor musunuz?`)) {
+      return;
+    }
+
+    setBulkBusy(true);
+    setBulkError(null);
+    try {
+      const response = await fetch("/api/admin/products/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          operationType: 1,
+          productIds: bulkPreview.affectedProductIds,
+          parameters: null,
+          reason: "Filtrelenen pasif ürünlerin toplu yayınlanması",
+          executeAsBackgroundJob: true,
+          previewToken: bulkPreview.previewToken
+        })
+      });
+      if (!response.ok) throw new Error(await readError(response));
+      const execution = (await response.json()) as ProductBulkExecution;
+      setBulkOperation({
+        operationId: execution.bulkOperationId,
+        operationType: 1,
+        status: execution.status,
+        totalCount: execution.totalCount,
+        successCount: execution.successCount,
+        failedCount: execution.failedCount,
+        skippedCount: execution.skippedCount,
+        progressPercentage: 0,
+        errorMessage: execution.errorMessage
+      });
+      setBulkPreview(null);
+    } catch (reason) {
+      setBulkError(reason instanceof Error ? reason.message : "Toplu yayınlama başlatılamadı.");
+    } finally {
+      setBulkBusy(false);
+    }
+  }
 
   function resetForm() {
     setSelectedId(null);
@@ -382,6 +521,32 @@ export function ProductAdminClient() {
               <button type="submit" disabled={listLoading}>Filtreleri uygula</button>
             </div>
           </form>
+          <section className={styles.bulkPublish} aria-labelledby="bulk-publish-title">
+            <h3 id="bulk-publish-title">Toplu yayınlama</h3>
+            <p>Yalnız pasif ve Marka veya Arama ile sınırlandırılmış ürünler için kullanılabilir.</p>
+            <button
+              type="button"
+              disabled={!canBulkPublish || bulkBusy || Boolean(bulkOperation && !isBulkOperationComplete(bulkOperation.status))}
+              onClick={() => void previewBulkPublish()}
+            >
+              {bulkBusy ? "Önizleme hazırlanıyor…" : "Filtrelenen pasif ürünleri toplu yayınla"}
+            </button>
+            {!canBulkPublish && <small>Önce Yayın durumu = Pasif seçin; ayrıca Marka veya Arama alanını doldurun.</small>}
+            {bulkError && <p className={styles.bulkError} role="alert">{bulkError}</p>}
+            {bulkPreview && <div className={styles.bulkResult}>
+              <p>Hedef: <strong>{bulkTargetCount}</strong> · Uygun: <strong>{bulkPreview.eligibleProducts}</strong> · Atlanacak: <strong>{bulkPreview.skippedProducts}</strong> · Geçersiz: <strong>{bulkPreview.invalidProducts}</strong></p>
+              <button type="button" disabled={bulkBusy || bulkPreview.eligibleProducts === 0} onClick={() => void executeBulkPublish()}>
+                Onayla ve arka planda başlat
+              </button>
+              <button type="button" className={styles.secondaryButton} disabled={bulkBusy} onClick={() => setBulkPreview(null)}>Vazgeç</button>
+            </div>}
+            {bulkOperation && <div className={styles.bulkResult} role="status">
+              <p>İşlem durumu: <strong>{bulkOperationStatusLabel(bulkOperation.status)}</strong> · %{bulkOperation.progressPercentage}</p>
+              <p>Başarılı: {bulkOperation.successCount} · Başarısız: {bulkOperation.failedCount} · Atlanan: {bulkOperation.skippedCount} / {bulkOperation.totalCount}</p>
+              {bulkOperation.errorMessage && <p className={styles.bulkError}>{bulkOperation.errorMessage}</p>}
+              {bulkOperation.failedCount > 0 && <a href={`/api/admin/products/bulk-operations/${bulkOperation.operationId}/errors`}>Başarısız öğeler CSV raporunu indir</a>}
+            </div>}
+          </section>
           <div className={styles.productList}>
             {listLoading && <p className={styles.listState} role="status">Ürünler yükleniyor…</p>}
             {!listLoading && products.length === 0 && <p className={styles.listState}>Filtrelere uygun ürün bulunamadı.</p>}
@@ -470,6 +635,14 @@ export function ProductAdminClient() {
       </div>
     </div>
   );
+}
+
+function isBulkOperationComplete(status: number): boolean {
+  return status === 3 || status === 4 || status === 5 || status === 6;
+}
+
+function bulkOperationStatusLabel(status: number): string {
+  return ({ 1: "Bekliyor", 2: "İşleniyor", 3: "Tamamlandı", 4: "Kısmen tamamlandı", 5: "Başarısız", 6: "İptal edildi" } as Record<number, string>)[status] ?? "Bilinmiyor";
 }
 
 function TranslationFields({ title, prefix, value, setValue, required }: { title: string; prefix: string; value: TranslationDraft; setValue: (value: TranslationDraft) => void; required: boolean }) {

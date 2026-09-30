@@ -3365,3 +3365,146 @@
 .catalogPage .productActions > div:not(.quoteQuantity) { display: block; }
 .catalogPage .productActions .productQuoteButton { min-width: 0; border-radius: .8rem !important; }
 .catalogPage .productActions .quoteQuantity :global(.quoteQuantityControl) { width: 100%; }
+/* Public catalogue category rail: keep the accordion contained in its sidebar. */
+.catalogPage .categoryFilter {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  flex-direction: column;
+  align-items: stretch;
+  gap: .45rem;
+  overflow: hidden;
+}
+
+.catalogPage .categoryFilter h3 {
+  margin: .4rem 0 .15rem;
+  color: #405448;
+  font-size: .74rem;
+  font-weight: 850;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.catalogPage .categoryFilter a {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: .4rem .45rem;
+  border-radius: .4rem;
+  color: inherit;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+  white-space: normal;
+}
+
+.catalogPage .categoryRoot {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.catalogPage .categoryRoot > div {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  gap: .35rem;
+}
+
+.catalogPage .categoryRoot > div > a {
+  flex: 1 1 auto;
+  font-weight: 650;
+}
+
+.catalogPage .categoryRoot button {
+  display: grid;
+  width: 1.75rem;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: .35rem;
+  background: transparent;
+  color: #6b625a;
+  cursor: pointer;
+  font: inherit;
+}
+
+.catalogPage .categoryRoot button:hover,
+.catalogPage .categoryRoot button:focus-visible {
+  background: rgb(158 18 52 / 8%);
+  color: #9e1234;
+  outline: 0;
+}
+
+.catalogPage .categoryGroups {
+  display: flex;
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  flex-direction: column;
+  align-items: stretch;
+  gap: .1rem;
+  margin: .2rem 0 .45rem 1rem;
+  padding-left: .35rem;
+  border-left: 1px solid rgb(82 49 39 / 12%);
+}
+
+.catalogPage .categoryGroups a {
+  font-size: .88rem;
+  font-weight: 500;
+}
+
+.catalogPage .categoryFilter a:hover,
+.catalogPage .categoryFilter a:focus-visible {
+  background: rgb(158 18 52 / 6%);
+  color: #8b0b2b;
+  outline: 0;
+}
+
+.catalogPage .categorySelected {
+  background: color-mix(in srgb, var(--color-primary, #b51f2c) 8%, transparent);
+  color: var(--color-primary, #b51f2c) !important;
+  font-weight: 700 !important;
+}
+
+/* The submit action belongs to the mobile filter drawer; desktop filtering is immediate. */
+@media (min-width: 48.0625rem) {
+  .catalogPage .simpleFilterFields .filterActions .primaryButton {
+    display: none;
+  }
+}
+
+/* The desktop rail is sticky at 1rem; keep its expanded filters within that viewport. */
+@media (min-width: 80rem) {
+  .catalogPage .filters {
+    min-height: 0;
+    max-height: calc(100dvh - 2rem);
+  }
+
+  .catalogPage .filterPanel[open] > .filterDrawer {
+    box-sizing: border-box;
+    max-height: calc(100dvh - 2rem);
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    scrollbar-color: rgb(82 49 39 / 36%) transparent;
+    scrollbar-width: thin;
+  }
+
+  .catalogPage .filterPanel[open] > .filterDrawer::-webkit-scrollbar {
+    width: .45rem;
+  }
+
+  .catalogPage .filterPanel[open] > .filterDrawer::-webkit-scrollbar-thumb {
+    border: .12rem solid transparent;
+    border-radius: 999px;
+    background: rgb(82 49 39 / 34%);
+    background-clip: padding-box;
+  }
+}

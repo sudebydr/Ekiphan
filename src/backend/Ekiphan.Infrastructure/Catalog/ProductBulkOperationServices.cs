@@ -11,10 +11,12 @@ namespace Ekiphan.Infrastructure.Catalog;
 public sealed class ProductBulkOperationService(
     EkiphanDbContext dbContext,
     IProductBulkOperationQueue queue,
-    IProductRevisionService revisionService)
+    IProductRevisionService revisionService,
+    IProductQualityService qualityService)
     : IProductBulkOperationService
 {
     private const int SynchronousLimit = 50;
+    private const int OperationItemInsertBatchSize = 100;
 
     public async Task<ProductBulkPreviewResultDto> PreviewAsync(
         ProductBulkPreviewCommand command,
@@ -81,13 +83,21 @@ public sealed class ProductBulkOperationService(
             command.ProductIds.Count,
             payloadJson);
 
-        foreach (var productId in command.ProductIds)
-        {
-            bulkOp.AddItem(Guid.NewGuid(), productId);
-        }
-
         dbContext.ProductBulkOperations.Add(bulkOp);
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        // Persist the operation items in bounded batches. A single SaveChanges for a
+        // large selection can produce an oversized INSERT command and hold locks long
+        // enough to time out under normal admin traffic.
+        foreach (var productIdBatch in command.ProductIds.Chunk(OperationItemInsertBatchSize))
+        {
+            foreach (var productId in productIdBatch)
+            {
+                bulkOp.AddItem(Guid.NewGuid(), productId);
+            }
+
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
 
         bool isBackground = command.ExecuteAsBackgroundJob || command.ProductIds.Count > SynchronousLimit;
 
@@ -136,10 +146,12 @@ public sealed class ProductBulkOperationService(
         op.Start(DateTimeOffset.UtcNow);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        int success = 0, failed = 0, skipped = 0;
+        int success = op.SuccessCount, failed = op.FailedCount, skipped = op.SkippedCount;
         int batchSize = 100;
 
-        var itemsList = op.Items.ToList();
+        var itemsList = op.Items
+            .Where(item => item.Status == ProductBulkOperationItemStatus.Pending)
+            .ToList();
         for (int i = 0; i < itemsList.Count; i += batchSize)
         {
             var batch = itemsList.Skip(i).Take(batchSize).ToList();
@@ -168,8 +180,13 @@ public sealed class ProductBulkOperationService(
                 try
                 {
                     var prevVersion = product.VersionNumber;
-                    bool updated = ApplyBulkAction(op.OperationType, product, op.RequestPayloadJson, op.RequestedByUserId);
-                    if (updated)
+                    var actionResult = await ApplyBulkActionAsync(
+                        op.OperationType,
+                        product,
+                        op.RequestPayloadJson,
+                        op.RequestedByUserId,
+                        cancellationToken);
+                    if (actionResult.Updated)
                     {
                         product.IncrementVersion();
                         item.MarkCompleted(prevVersion, product.VersionNumber, DateTimeOffset.UtcNow);
@@ -183,6 +200,11 @@ public sealed class ProductBulkOperationService(
                             source: ProductRevisionSource.BulkOperation,
                             bulkOperationId: op.Id,
                             cancellationToken: cancellationToken);
+                    }
+                    else if (actionResult.ErrorCode is not null)
+                    {
+                        failed++;
+                        item.MarkFailed(actionResult.ErrorCode, actionResult.ErrorMessage!, DateTimeOffset.UtcNow);
                     }
                     else
                     {
@@ -204,6 +226,50 @@ public sealed class ProductBulkOperationService(
 
         op.Complete(DateTimeOffset.UtcNow);
         await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task<BulkActionResult> ApplyBulkActionAsync(
+        ProductBulkOperationType type,
+        Product product,
+        string? payloadJson,
+        Guid actorUserId,
+        CancellationToken cancellationToken)
+    {
+        if (type == ProductBulkOperationType.Publish)
+        {
+            if (product.WorkflowStatus is not (ProductWorkflowStatus.InReview or ProductWorkflowStatus.Draft))
+            {
+                return BulkActionResult.NoChanges;
+            }
+
+            var quality = await qualityService.EvaluateAsync(product.Id, cancellationToken);
+            if (quality.BlocksPublishing)
+            {
+                return new BulkActionResult(
+                    Updated: false,
+                    ErrorCode: ProductManagementErrorCodes.ProductQualityBlocksPublishing,
+                    ErrorMessage: BuildQualityBlockingMessage(quality));
+            }
+
+            product.SetWorkflowStatus(ProductWorkflowStatus.Published, actorUserId);
+            return BulkActionResult.UpdatedSuccessfully;
+        }
+
+        return ApplyBulkAction(type, product, payloadJson, actorUserId)
+            ? BulkActionResult.UpdatedSuccessfully
+            : BulkActionResult.NoChanges;
+    }
+
+    private static string BuildQualityBlockingMessage(ProductQualityResultDto quality)
+    {
+        var blockingIssues = quality.Issues
+            .Where(issue => issue.BlocksPublishing)
+            .Select(issue => $"{issue.Code}: {issue.Message}")
+            .ToList();
+
+        return blockingIssues.Count > 0
+            ? string.Join(" | ", blockingIssues)
+            : "Product quality evaluation blocks publishing.";
     }
 
     private static bool ApplyBulkAction(ProductBulkOperationType type, Product product, string? payloadJson, Guid actorUserId)
@@ -280,6 +346,12 @@ public sealed class ProductBulkOperationService(
             default:
                 return false;
         }
+    }
+
+    private sealed record BulkActionResult(bool Updated, string? ErrorCode, string? ErrorMessage)
+    {
+        public static readonly BulkActionResult UpdatedSuccessfully = new(true, null, null);
+        public static readonly BulkActionResult NoChanges = new(false, null, null);
     }
 
     public async Task<ProductBulkOperationDetailDto?> GetOperationAsync(Guid operationId, CancellationToken cancellationToken = default)

@@ -159,7 +159,28 @@ internal sealed class ProductMediaImportValidationService(
         }
         var matched = files.Count(x => x.Status == ProductMediaValidationFileStatus.Valid);
         var errorsCount = files.Count(x => x.Status is ProductMediaValidationFileStatus.Invalid or ProductMediaValidationFileStatus.Conflict);
-        batch.SetValidationSummary(files.Count, matched, files.Count - matched - errorsCount, errorsCount); await repository.SaveAsync(cancellationToken);
+        batch.SetValidationSummary(
+    files.Count,
+    matched,
+    files.Count - matched - errorsCount,
+    errorsCount);
+
+try
+{
+    await repository.SaveAsync(cancellationToken);
+}
+catch (Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException ex)
+{
+    foreach (var entry in ex.Entries)
+    {
+        Console.WriteLine(
+            $"CONCURRENCY ENTITY: {entry.Metadata.ClrType.FullName} | " +
+            $"STATE: {entry.State} | " +
+            $"VALUES: {string.Join(", ", entry.Properties.Select(p => $"{p.Metadata.Name}={p.CurrentValue}"))}");
+    }
+
+    throw;
+}
         var validation = new ProductMediaStoredValidation(batch.Id, command.UploadToken, importOptions, files,
             clock.GetUtcNow().AddMinutes(options.Value.ValidationTokenLifetimeMinutes));
         var validationToken = tokens.CreateValidation(validation);
@@ -219,6 +240,8 @@ internal sealed class ProductMediaImportExecutionService(
             throw new ProductMediaImportConflictException("ZIP hash changed after preview.");
         var batch = await repository.GetBatchAsync(validation.BatchId, true, cancellationToken) ?? throw new KeyNotFoundException();
         var errors = new List<ProductMediaImportErrorDto>(); var imported = 0; var skipped = 0;
+        var storageKeysToCompensate = new HashSet<string>(StringComparer.Ordinal);
+        var transactionCommitted = false;
         var now = clock.GetUtcNow(); batch.Start(now); await repository.SaveAsync(cancellationToken);
         if (logger.IsEnabled(LogLevel.Information))
             logger.LogInformation("Product media execute started. BatchId={BatchId} UserId={UserId}", batch.Id, upload.UserId);
@@ -242,6 +265,7 @@ internal sealed class ProductMediaImportExecutionService(
                         uploaded = await mediaUpload.UploadAsync(new(content, Path.GetFileName(file.OriginalFileName), archiveEntry.ContentType,
                             archiveEntry.Length, MediaAssetType.Image, "tr", file.MatchedProductName ?? file.MatchedProductSku ?? "Ürün görseli",
                             file.MatchedProductName ?? file.MatchedProductSku ?? "Ürün görseli"), ct);
+                        storageKeysToCompensate.Add(uploaded.StorageKey);
                         await repository.AddProductMediaAsync(file.MatchedProductId.Value, uploaded.Id, batch.Id, file.SortOrder,
                             file.IsPrimary, validation.Options.ReplaceExistingPrimaryImage, now, ct);
                         item.Imported(uploaded.Id, now); imported++;
@@ -263,6 +287,7 @@ internal sealed class ProductMediaImportExecutionService(
                 }
                 batch.Complete(clock.GetUtcNow(), imported, skipped, errors.Count);
             }, cancellationToken);
+            transactionCommitted = true;
             await temporaryStorage.DeleteAsync(upload.Archive.ContainerId, CancellationToken.None);
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("Product media batch completed. BatchId={BatchId} UserId={UserId} Status={Status}", batch.Id, upload.UserId, batch.Status);
@@ -270,6 +295,22 @@ internal sealed class ProductMediaImportExecutionService(
         }
         catch (Exception ex)
         {
+            if (!transactionCommitted)
+            {
+                foreach (var storageKey in storageKeysToCompensate)
+                {
+                    try
+                    {
+                        await mediaStorage.DeleteAsync(storageKey, CancellationToken.None);
+                    }
+                    catch (Exception cleanupException)
+                    {
+                        logger.LogWarning(cleanupException,
+                            "Product media storage compensation failed. BatchId={BatchId} StorageKey={StorageKey}",
+                            batch.Id, storageKey);
+                    }
+                }
+            }
             batch.Fail(clock.GetUtcNow(), ex.Message, compensationRequired: true);
             try { await repository.SaveAsync(CancellationToken.None); } catch { }
             logger.LogError(ex, "Product media batch failed. BatchId={BatchId} UserId={UserId} Status={Status}", batch.Id, upload.UserId, batch.Status);

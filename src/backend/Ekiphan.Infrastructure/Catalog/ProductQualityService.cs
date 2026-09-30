@@ -10,6 +10,8 @@ public sealed class ProductQualityService(
     IEnumerable<IProductQualityRule> rules)
     : IProductQualityService
 {
+    private Task<List<Product>>? allActiveProductsTask;
+
     public async Task<ProductQualityResultDto> EvaluateAsync(
         Guid productId,
         CancellationToken cancellationToken = default)
@@ -22,10 +24,7 @@ public sealed class ProductQualityService(
             .SingleOrDefaultAsync(x => x.Id == productId && !x.IsDeleted, cancellationToken)
             ?? throw new KeyNotFoundException(ProductManagementErrorCodes.ProductNotFound);
 
-        var allActive = await dbContext.Products.AsNoTracking()
-            .Include(x => x.Translations)
-            .Where(x => !x.IsDeleted)
-            .ToListAsync(cancellationToken);
+        var allActive = await GetAllActiveProductsAsync(cancellationToken);
 
         var context = new ProductQualityContext(product, allActive);
         var issues = new List<ProductQualityIssueDto>();
@@ -62,6 +61,12 @@ public sealed class ProductQualityService(
             evaluatedAt,
             issues);
     }
+
+    private Task<List<Product>> GetAllActiveProductsAsync(CancellationToken cancellationToken) =>
+        allActiveProductsTask ??= dbContext.Products.AsNoTracking()
+            .Include(x => x.Translations)
+            .Where(x => !x.IsDeleted)
+            .ToListAsync(cancellationToken);
 
     public async Task<ProductQualitySummaryDto> EvaluateBatchAsync(
         IReadOnlyCollection<Guid> productIds,

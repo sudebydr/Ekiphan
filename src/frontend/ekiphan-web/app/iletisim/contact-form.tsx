@@ -28,7 +28,7 @@ export function ContactForm() {
   const [reasonId, setReasonId] = useState("");
 
   useEffect(() => {
-    void fetch("/api/contact-taxonomy")
+    void fetch("/api/contact-taxonomy", { cache: "no-store" })
       .then(async (response) => {
         if (!response.ok) {
           throw new Error();
@@ -65,6 +65,9 @@ export function ContactForm() {
         },
         body: JSON.stringify({
           ...Object.fromEntries(form.entries()),
+          contactReasonId: reasonId,
+          complaintCategoryId: selectedReason?.isComplaintReason
+            ? form.get("complaintCategoryId") : null,
           languageCode: "tr",
           kvkkConsent: form.get("kvkkConsent") === "on",
         }),
@@ -165,6 +168,7 @@ export function ContactForm() {
           Şikâyet kategorisi
 
           <select
+            key={reasonId}
             name="complaintCategoryId"
             required
             defaultValue=""

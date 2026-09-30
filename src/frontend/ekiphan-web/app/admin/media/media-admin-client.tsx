@@ -7,6 +7,7 @@ import type {
 } from "../../../lib/admin-media-types";
 import type { ProblemDetails } from "../../../lib/admin-product-relation-types";
 import styles from "../catalog/products/products.module.css";
+import { ProductMediaImport } from "./product-media-import";
 
 type Target = { id: string; name: string };
 
@@ -288,6 +289,7 @@ export function MediaAdminClient() {
         </form>}
       </section>
       <section className={styles.panel}>
+        <ProductMediaImport />
         <form className={styles.editor} onSubmit={upload}><h2>Dosya yükle</h2>
           <label>Dosya tipi<select value={assetType} onChange={(e) => setAssetType(e.target.value)}><option>Image</option><option>Pdf</option><option>Document</option></select></label>
           <label>Dosyalar<input type="file" required multiple

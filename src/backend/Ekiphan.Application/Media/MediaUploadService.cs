@@ -101,7 +101,8 @@ public sealed class MediaUploadService(
             storageKey,
             command.ContentType,
             command.Length,
-            checksum);
+            checksum,
+            storage.ProviderName);
         asset.AddTranslation(
             command.LanguageCode,
             command.Title,
