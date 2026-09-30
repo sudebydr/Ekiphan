@@ -1,0 +1,195 @@
+/* =========================================================
+   EKIPHAN — BLOCK TYPOGRAPHY
+   Navbar'a dokunmaz.
+   Serif ve italik başlıkları tamamen kaldırır.
+   ========================================================= */
+
+main[data-public-page] {
+  font-family:
+    "Helvetica Neue",
+    Arial,
+    sans-serif !important;
+}
+
+/* =========================================================
+   TÜM BAŞLIKLAR — DÜZ / BLOK / MODERN
+   ========================================================= */
+
+main[data-public-page] h1,
+main[data-public-page] h2,
+main[data-public-page] h3,
+main[data-public-page] h4,
+main[data-public-page] h5,
+main[data-public-page] h6,
+main[data-public-page] .hero h1,
+main[data-public-page] .hero h2,
+main[data-public-page] .heroCopy h1,
+main[data-public-page] .heroCopy h2,
+main[data-public-page] .sectionHeading h2,
+main[data-public-page] .sectionHead h2,
+main[data-public-page] .showroomCta h2,
+main[data-public-page] .productWorlds h2,
+main[data-public-page] .catalogIntro h2,
+main[data-public-page] .featureContent h2,
+main[data-public-page] .featuresHeading h2,
+main[data-public-page] .statement h2,
+main[data-public-page] .pageTitle {
+  font-family:
+    "Helvetica Neue",
+    Arial,
+    sans-serif !important;
+
+  font-style: normal !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.045em !important;
+  line-height: 0.98 !important;
+}
+
+/* =========================================================
+   H1
+   ========================================================= */
+
+main[data-public-page] h1,
+main[data-public-page] .hero h1,
+main[data-public-page] .heroCopy h1,
+main[data-public-page] .pageTitle {
+  font-size: clamp(42px, 5.2vw, 82px) !important;
+}
+
+/* =========================================================
+   H2
+   ========================================================= */
+
+main[data-public-page] h2,
+main[data-public-page] .sectionHeading h2,
+main[data-public-page] .sectionHead h2,
+main[data-public-page] .showroomCta h2,
+main[data-public-page] .productWorlds h2,
+main[data-public-page] .catalogIntro h2,
+main[data-public-page] .featuresHeading h2,
+main[data-public-page] .statement h2 {
+  font-size: clamp(34px, 4.1vw, 62px) !important;
+}
+
+/* =========================================================
+   H3
+   ========================================================= */
+
+main[data-public-page] h3,
+main[data-public-page] .productBody h3,
+main[data-public-page] .catalogCard h3,
+main[data-public-page] .featureContent h3 {
+  font-size: clamp(21px, 2.2vw, 30px) !important;
+  font-weight: 700 !important;
+  line-height: 1.05 !important;
+}
+
+/* =========================================================
+   İTALİKLERİ TAMAMEN KAPAT
+   ========================================================= */
+
+main[data-public-page] h1 em,
+main[data-public-page] h2 em,
+main[data-public-page] h3 em,
+main[data-public-page] h4 em,
+main[data-public-page] h5 em,
+main[data-public-page] h6 em,
+main[data-public-page] .hero h1 em,
+main[data-public-page] .hero h2 em,
+main[data-public-page] .heroCopy h1 em,
+main[data-public-page] .sectionHead h2 em,
+main[data-public-page] .sectionHeading h2 em,
+main[data-public-page] .showroomCta h2 em,
+main[data-public-page] .productWorlds h2 em,
+main[data-public-page] .catalogIntro h2 em,
+main[data-public-page] .statement h2 em {
+  font-family:
+    "Helvetica Neue",
+    Arial,
+    sans-serif !important;
+
+  font-style: normal !important;
+  font-weight: 700 !important;
+  color: inherit !important;
+}
+
+/* =========================================================
+   NORMAL METİNLER
+   ========================================================= */
+
+main[data-public-page] p,
+main[data-public-page] li,
+main[data-public-page] label,
+main[data-public-page] small {
+  font-family:
+    "Helvetica Neue",
+    Arial,
+    sans-serif !important;
+
+  font-style: normal !important;
+  line-height: 1.65;
+}
+
+/* =========================================================
+   FORM
+   ========================================================= */
+
+main[data-public-page] input,
+main[data-public-page] textarea,
+main[data-public-page] select,
+main[data-public-page] button {
+  font-family:
+    "Helvetica Neue",
+    Arial,
+    sans-serif !important;
+
+  font-style: normal !important;
+}
+
+/* =========================================================
+   NAVBAR — DOKUNMA
+   ========================================================= */
+
+main[data-public-page] header,
+main[data-public-page] header *,
+main[data-public-page] nav,
+main[data-public-page] nav * {
+  font-family: inherit;
+}
+
+/* =========================================================
+   MOBİL
+   ========================================================= */
+
+@media (max-width: 900px) {
+  main[data-public-page] h1,
+  main[data-public-page] .hero h1,
+  main[data-public-page] .heroCopy h1,
+  main[data-public-page] .pageTitle {
+    font-size: clamp(38px, 10vw, 66px) !important;
+  }
+
+  main[data-public-page] h2,
+  main[data-public-page] .sectionHead h2,
+  main[data-public-page] .sectionHeading h2,
+  main[data-public-page] .showroomCta h2,
+  main[data-public-page] .productWorlds h2 {
+    font-size: clamp(32px, 8vw, 52px) !important;
+  }
+}
+
+@media (max-width: 560px) {
+  main[data-public-page] h1,
+  main[data-public-page] .hero h1,
+  main[data-public-page] .heroCopy h1,
+  main[data-public-page] .pageTitle {
+    font-size: clamp(34px, 11vw, 54px) !important;
+  }
+
+  main[data-public-page] h2,
+  main[data-public-page] .sectionHead h2,
+  main[data-public-page] .sectionHeading h2,
+  main[data-public-page] .showroomCta h2 {
+    font-size: clamp(30px, 9vw, 44px) !important;
+  }
+}

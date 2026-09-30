@@ -21,6 +21,23 @@
 /* Keep the mission/vision chapter close to its lead-in and separate from the next section. */
 .aboutPage .missionVision{margin-top:clamp(3.5rem,5.5vw,5rem);margin-bottom:clamp(5rem,8vw,8rem)}@media(max-width:34rem){.aboutPage .missionVision{margin-top:3.25rem;margin-bottom:4.5rem}}
 
+@media (max-width: 60rem) {
+  .page:not(.aboutPage) {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 6rem 1.25rem 3rem;
+  }
+
+  .page:not(.aboutPage) .hero {
+    padding-top: 3rem;
+  }
+
+  .page:not(.aboutPage) .content {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
 /* Clear the two-row public header before the About page hero begins. */
 @media (min-width: 75rem) {
   .aboutPage .aboutLayout {

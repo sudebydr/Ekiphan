@@ -1,288 +1,716 @@
-.page{background:#d8d2c8;color:#18242d;overflow:hidden}.storyHero{position:relative;display:flex;min-height:39rem;align-items:center;justify-content:flex-end;padding:10.5rem max(2rem,calc((100% - 100rem)/2)) 4rem;background:linear-gradient(90deg,rgb(39 35 31 / 52%),rgb(39 35 31 / 12%)),url("/images/showroom-experience.png") center/cover no-repeat}.storyHero:after{position:absolute;inset:0;background:linear-gradient(115deg,rgb(94 78 63 / 28%),transparent 62%);content:""}.storyPanel{position:relative;z-index:1;width:min(100%,48rem);padding:clamp(2.5rem,5vw,4rem);border:1px solid rgb(255 255 255 / 45%);border-radius:1.5rem;background:rgb(250 248 244 / 78%);box-shadow:0 .5rem 1.5rem rgb(24 36 45 / 6%);backdrop-filter:blur(.5rem);-webkit-backdrop-filter:blur(.5rem)}.eyebrow{margin:0 0 1rem;color:#8b6327;font-size:.75rem;font-weight:800;letter-spacing:.16em}.storyPanel h1{max-width:10ch;margin:0 0 1.5rem;font-size:clamp(2.7rem,5vw,5.2rem);letter-spacing:-.055em;line-height:.95}.storyPanel p:not(.eyebrow),.identity p,.missionVision article>p:not(.eyebrow){margin:0;color:#526166;font-size:.96rem;line-height:1.7}.storyPanel p+p,.identity p+p{margin-top:1rem}.identity,.missionVision,.values{width:min(calc(100% - 2rem),88rem);margin-inline:auto}.identity{display:grid;grid-template-columns:minmax(11rem,14rem) minmax(0,1fr);gap:2rem;margin-top:clamp(3rem,6vw,5rem);padding:clamp(2rem,4vw,3rem) clamp(2rem,5vw,5rem);border-radius:1.1rem;background:#faf8f4;box-shadow:0 .5rem 1.5rem rgb(24 36 45 / 6%)}.sectionLabel{margin:.2rem 0 0;color:#8b6327;font-size:.76rem;font-weight:800;letter-spacing:.16em}.identity h2,.missionVision h2,.values h2,.contactCta h2{margin:0;color:#18242d;font-size:clamp(1.8rem,3vw,3rem);letter-spacing:-.045em;line-height:1}.missionVision{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;padding-top:clamp(2.5rem,5vw,4rem)}.missionVision article{padding:clamp(1.5rem,3vw,2.5rem);border-radius:1.25rem;box-shadow:0 .5rem 1.5rem rgb(24 36 45 / 6%)}.mission{background:#e4ded3}.vision{background:#dfe4e2}.missionVision h2{max-width:18ch;margin-bottom:1rem}.values{padding-block:clamp(3.5rem,6vw,5rem)}.values header{margin-bottom:1.75rem}.values h2{max-width:20ch}.valuesGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}.valuesGrid article{min-height:9.5rem;padding:1.35rem;border-radius:1rem;background:#faf8f4;box-shadow:0 .5rem 1.5rem rgb(24 36 45 / 6%)}.valuesGrid span{color:#8b6327;font-size:.72rem;font-weight:800;letter-spacing:.1em}.valuesGrid h3{margin:1.4rem 0 .55rem;font-size:1rem}.valuesGrid p{margin:0;color:#526166;font-size:.85rem;line-height:1.6}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:#304652;color:#f8f4ec}.stats article{padding:clamp(1.8rem,3vw,2.6rem) 1.5rem;text-align:center}.stats strong{display:block;font-size:clamp(1.7rem,3vw,2.8rem);letter-spacing:-.04em}.stats span{display:block;margin-top:.45rem;color:rgb(248 244 236 / 74%);font-size:.78rem;line-height:1.4}.contactCta{width:min(calc(100% - 2rem),44rem);margin-inline:auto;padding:clamp(4rem,7vw,6rem) 0;text-align:center}.contactCta h2{max-width:20ch;margin:0 auto 1.5rem}.contactCta a{display:inline-flex;min-height:3.25rem;align-items:center;justify-content:center;padding:0 1.5rem;border-radius:.75rem;background:#88051f;color:#fff;font-size:.95rem;font-weight:800;text-decoration:none;box-shadow:0 .75rem 1.5rem rgb(136 5 31 / 18%)}@media(max-width:56.25rem){.storyHero{min-height:0;padding:8rem 1rem 1rem;align-items:end}.storyPanel{width:100%}.identity{grid-template-columns:1fr;gap:1.25rem}.missionVision{padding-top:2rem}.valuesGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:42.5rem){.storyHero{display:block;padding-top:7rem;background-position:center top}.storyPanel{margin-top:15rem;border-radius:1rem}.identity,.missionVision,.values,.contactCta{width:calc(100% - 2rem)}.identity{padding:1.75rem}.missionVision,.valuesGrid{grid-template-columns:1fr}.missionVision article{padding:1.5rem}.values{padding-block:3rem}.stats article{padding:1.5rem .8rem}}
-/* Keep the About story panel aligned within its hero image. */
-.storyHero {
-  box-sizing: border-box;
+.page {
+  --cream: #f4efe8;
+  --cream-light: #faf7f2;
+  --burgundy: #92253d;
+  --ink: #211f1d;
+  --muted: #756f69;
+  --line: rgba(33, 31, 29, 0.18);
+
   width: 100%;
-  justify-content: flex-end;
+  min-height: 100vh;
   overflow: hidden;
+
+  background: var(--cream);
+  color: var(--ink);
 }
 
-.storyPanel {
-  box-sizing: border-box;
-  width: min(calc(100% - 3rem), 58rem);
-  margin-left: auto;
-  margin-right: 0;
-}
+/* =========================================================
+   COMMON
+========================================================= */
 
-@media (max-width: 56.25rem) {
-  .storyPanel {
-    width: 100%;
-    margin-inline: 0;
-  }
-}
-/* Override the generic first-section shell only for the About hero. */
-main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero {
-  box-sizing: border-box;
-  min-height: 39rem;
-  margin-inline: 0;
-  padding: 10.5rem max(2rem, calc((100% - 100rem) / 2)) 4rem;
-  overflow: hidden;
-  background: linear-gradient(90deg, rgb(39 35 31 / 52%), rgb(39 35 31 / 12%)), url("/images/showroom-experience.png") center / cover no-repeat;
-  color: #18242d;
-}
-
-main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero::after {
-  right: auto;
-  bottom: auto;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-  border-radius: 0;
-  background: linear-gradient(115deg, rgb(94 78 63 / 28%), transparent 62%);
-}
-
-main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero .storyPanel {
-  box-sizing: border-box;
-  width: min(calc(100% - 3rem), 58rem);
-  margin-left: auto;
-  margin-right: 0;
-}
-
-@media (max-width: 56.25rem) {
-  main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero {
-    min-height: 0;
-    padding: 8rem 1rem 1rem;
-  }
-
-  main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero .storyPanel {
-    width: 100%;
-    margin-inline: 0;
-  }
-}
-/* About-page hero only: full-bleed existing image with a compact glass story panel. */
-.page > .storyHero,
-main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero {
-  position: relative;
-  box-sizing: border-box;
-  display: flex;
-  width: 100%;
-  min-height: 41.25rem;
-  max-height: 48.75rem;
-  align-items: center;
-  justify-content: flex-start;
+.eyebrow {
   margin: 0;
-  padding: 3rem clamp(3rem, 6vw, 7.5rem);
-  overflow: hidden;
-  border-radius: 0 0 1.75rem 1.75rem;
-  background: url("/images/showroom-experience.png") center / cover no-repeat;
-  color: #162432;
+  color: var(--burgundy);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  line-height: 1.4;
 }
 
-.page > .storyHero::after,
-main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero::after {
+.sectionIndex {
+  color: var(--burgundy);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero {
+  position: relative;
+  min-height: calc(100vh - 5rem);
+
+  display: flex;
+  align-items: center;
+
+  padding: 5rem clamp(2rem, 7vw, 8rem);
+
+  isolation: isolate;
+}
+
+.heroImage {
   position: absolute;
   inset: 0;
-  width: auto;
-  height: auto;
-  border: 0;
-  border-radius: 0;
-  background: linear-gradient(90deg, rgb(13 17 20 / 20%), transparent 56%);
+  z-index: -2;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(22, 18, 16, 0.68) 0%,
+      rgba(22, 18, 16, 0.38) 42%,
+      rgba(22, 18, 16, 0.08) 75%
+    ),
+    url("/images/showroom-experience.png") center / cover no-repeat;
+
+  transform: scale(1.01);
+}
+
+.hero::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(20, 17, 15, 0.2),
+      transparent 35%,
+      rgba(20, 17, 15, 0.18)
+    );
+
   content: "";
 }
 
-.page > .storyHero .storyPanel,
-main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero .storyPanel {
-  position: relative;
-  z-index: 1;
-  box-sizing: border-box;
-  width: min(35rem, 42vw);
-  margin: 0;
-  padding: 2.625rem 2.75rem;
-  border: 1px solid rgb(255 255 255 / 45%);
-  border-radius: 1.75rem;
-  background: rgb(248 245 238 / 78%);
-  box-shadow: 0 1.25rem 3.125rem rgb(20 20 20 / 8%);
-  backdrop-filter: blur(1rem);
-  -webkit-backdrop-filter: blur(1rem);
+.heroContent {
+  width: min(48rem, 100%);
+  color: #fff;
 }
 
-.page > .storyHero .storyPanel .eyebrow {
-  position: relative;
-  margin: 0 0 1.375rem;
-  color: #a81831;
-  font-size: .8125rem;
-  font-weight: 700;
-  letter-spacing: .18em;
-  text-transform: uppercase;
+.heroContent .eyebrow {
+  color: #fff;
+  opacity: 0.9;
 }
 
-.page > .storyHero .storyPanel .eyebrow::after {
-  display: block;
-  width: 2.375rem;
-  height: 2px;
-  margin-top: .75rem;
-  background: #a81831;
-  content: "";
-}
-
-.page > .storyHero .storyPanel h1 {
+.heroContent h1 {
   max-width: 9ch;
-  margin: 0;
-  color: #162432;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: clamp(3.25rem, 4vw, 4.5rem);
-  font-weight: 700;
-  letter-spacing: -.045em;
-  line-height: .96;
+
+  margin: 1.5rem 0 0;
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(4rem, 8vw, 8.5rem);
+  font-weight: 400;
+  letter-spacing: -0.065em;
+  line-height: 0.88;
 }
 
-.page > .storyHero .storyPanel p:not(.eyebrow) {
-  max-width: 30rem;
-  margin: 1.75rem 0 0;
-  color: rgb(22 36 50 / 74%);
-  font-size: 1rem;
+.heroContent h1 em {
+  color: #e7c5ca;
+  font-style: italic;
+}
+
+.heroLine {
+  width: 4rem;
+  height: 1px;
+
+  margin: 2rem 0;
+
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.heroText {
+  width: min(32rem, 100%);
+
+  margin: 0;
+
+  color: rgba(255, 255, 255, 0.82);
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.95rem;
   line-height: 1.75;
 }
 
-.page > .storyHero .storyPanel p:not(.eyebrow) + p:not(.eyebrow) {
-  margin-top: .65rem;
+.heroText + .heroText {
+  margin-top: 0.7rem;
 }
 
-@media (max-width: 64rem) {
-  .page > .storyHero,
-  main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero {
-    min-height: 37rem;
-    padding-inline: 2rem;
-  }
+.heroNumber {
+  position: absolute;
+  right: clamp(2rem, 6vw, 7rem);
+  bottom: 3rem;
 
-  .page > .storyHero .storyPanel,
-  main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero .storyPanel {
-    width: min(32.5rem, 50vw);
-    padding: 2.25rem;
-  }
+  color: rgba(255, 255, 255, 0.65);
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
 }
 
-@media (max-width: 56.25rem) {
-  .page > .storyHero,
-  main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero {
-    display: block;
-    min-height: 0;
-    max-height: none;
-    padding: 17.5rem 1rem 1rem;
-    background-position: center top;
-  }
+/* =========================================================
+   IDENTITY
+========================================================= */
 
-  .page > .storyHero .storyPanel,
-  main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero .storyPanel {
-    width: 100%;
-    margin: 0;
-    padding: 1.75rem;
-  }
-}
-/* Extend only the About hero image through the unused side and lower canvas. */
-.page > .storyHero,
-main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero {
-  width: 100vw;
-  min-height: calc(100vh - 5rem);
-  max-height: none;
-  margin-left: 50%;
-  padding-left: clamp(3rem, 6vw, 7.5rem);
-  padding-right: clamp(3rem, 6vw, 7.5rem);
-  border-radius: 0;
-  transform: translateX(-50%);
+.identity {
+  display: grid;
+  grid-template-columns: 4rem 10rem minmax(0, 1fr);
+
+  width: min(100% - 4rem, 90rem);
+
+  margin: 0 auto;
+
+  padding: clamp(7rem, 12vw, 11rem) 0;
 }
 
-@media (max-width: 56.25rem) {
-  .page > .storyHero,
-  main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero {
-    width: 100vw;
-    min-height: 0;
-    margin-left: 50%;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    transform: translateX(-50%);
-  }
+.identity .sectionIndex {
+  padding-top: 0.4rem;
 }
 
-/* About page only: break out of the shared content rail without affecting other routes. */
-.page {
-  width: 100vw;
-  max-width: none;
-  margin-left: calc(50% - 50vw);
+.sectionLabel {
+  padding-top: 0.4rem;
+
+  color: var(--burgundy);
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
 }
-/* Keep the About hero flush with the viewport below the shared header. */
-.page > .storyHero {
-  min-height: 100vh;
-  padding-bottom: 0;
+
+.identityContent {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(16rem, 0.65fr);
+
+  gap: clamp(3rem, 8vw, 9rem);
 }
-/* Separate the identity heading from its supporting copy. */
-.identity h2 { margin-bottom: 1.25rem; }
-/* Let the identity description use the available horizontal space. */
-.identity > div { min-width: 0; }
-.identity > div > p { max-width: none; }
-/* Compact, centered mission and vision cards only. */
-.missionVision { width: min(calc(100% - 2rem), 72rem); }
-.missionVision article { min-height: 15rem; padding: 1.75rem 2rem; text-align: center; }
-.missionVision h2 { margin-right: auto; margin-left: auto; }
-.missionVision article > p:not(.eyebrow) { margin-right: auto; margin-left: auto; }
-/* Refine mission and vision card scale and typography only. */
-.missionVision { width: min(calc(100% - 2rem), 64rem); }
-.missionVision article { min-height: 12.5rem; padding: 1.5rem 1.75rem; }
-.missionVision h2 { max-width: 16ch; font-family: Georgia, "Times New Roman", serif; font-size: clamp(1.65rem, 2.25vw, 2.35rem); font-weight: 500; letter-spacing: -.035em; line-height: 1.06; }
-.missionVision h2 { font-weight: 600; }
-/* Subtle glass frame around the About contact CTA only. */
+
+.identityContent h2 {
+  max-width: 11ch;
+
+  margin: 0;
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3rem, 5vw, 5.8rem);
+  font-weight: 400;
+  letter-spacing: -0.06em;
+  line-height: 0.94;
+}
+
+.identityContent h2 em {
+  color: var(--burgundy);
+  font-style: italic;
+}
+
+.identityCopy {
+  align-self: end;
+  padding-bottom: 0.4rem;
+}
+
+.identityCopy p {
+  margin: 0;
+
+  color: var(--muted);
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.92rem;
+  line-height: 1.8;
+}
+
+.identityCopy p + p {
+  margin-top: 1rem;
+}
+
+/* =========================================================
+   MISSION / VISION
+========================================================= */
+
+.missionVision {
+  width: min(100% - 4rem, 90rem);
+
+  margin: 0 auto;
+
+  padding-bottom: clamp(7rem, 12vw, 11rem);
+}
+
+.missionVisionHeader {
+  margin-left: 14rem;
+  margin-bottom: 4rem;
+}
+
+.missionVisionHeader > span {
+  display: block;
+
+  margin-bottom: 1.25rem;
+
+  color: var(--burgundy);
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.missionVisionHeader h2 {
+  max-width: 14ch;
+
+  margin: 0;
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.5rem, 4vw, 4.5rem);
+  font-weight: 400;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+}
+
+.missionVisionHeader h2 em {
+  color: var(--burgundy);
+  font-style: italic;
+}
+
+.missionVisionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  margin-left: 14rem;
+
+  border-top: 1px solid var(--line);
+}
+
+.missionVisionGrid article {
+  position: relative;
+
+  min-height: 22rem;
+
+  padding: 2.5rem 3rem 2.5rem 0;
+}
+
+.missionVisionGrid article + article {
+  padding-left: 3rem;
+
+  border-left: 1px solid var(--line);
+}
+
+.cardNumber {
+  display: block;
+
+  margin-bottom: 3.5rem;
+
+  color: var(--burgundy);
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.missionVisionGrid .eyebrow {
+  margin-bottom: 1rem;
+}
+
+.missionVisionGrid h3 {
+  max-width: 18ch;
+
+  margin: 0;
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.8rem, 2.6vw, 3rem);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+}
+
+.cardText {
+  max-width: 28rem;
+
+  margin: 1.5rem 0 0;
+
+  color: var(--muted);
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.88rem;
+  line-height: 1.75;
+}
+
+/* =========================================================
+   VALUES
+========================================================= */
+
+.values {
+  padding: clamp(7rem, 11vw, 10rem) max(2rem, calc((100% - 90rem) / 2));
+
+  background: #e9e1d8;
+}
+
+.valuesHeader {
+  display: grid;
+  grid-template-columns: 14rem minmax(0, 1fr);
+
+  margin-bottom: 4.5rem;
+}
+
+.valuesHeader h2 {
+  max-width: 14ch;
+
+  margin: 0;
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3rem, 5vw, 5.5rem);
+  font-weight: 400;
+  letter-spacing: -0.06em;
+  line-height: 0.93;
+}
+
+.valuesHeader h2 em {
+  color: var(--burgundy);
+  font-style: italic;
+}
+
+.valuesGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  border-top: 1px solid var(--line);
+}
+
+.valuesGrid article {
+  min-height: 18rem;
+
+  padding: 2rem 2rem 2rem 0;
+}
+
+.valuesGrid article + article {
+  padding-left: 2rem;
+
+  border-left: 1px solid var(--line);
+}
+
+.valueNumber {
+  color: var(--burgundy);
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.valueLine {
+  width: 2.5rem;
+  height: 1px;
+
+  margin: 3rem 0 1.5rem;
+
+  background: var(--burgundy);
+}
+
+.valuesGrid h3 {
+  margin: 0;
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.55rem;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+.valuesGrid p {
+  max-width: 15rem;
+
+  margin: 1rem 0 0;
+
+  color: var(--muted);
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.7;
+}
+
+/* =========================================================
+   CTA
+========================================================= */
+
 .contactCta {
-  box-sizing: border-box;
-  padding: clamp(2.75rem, 5vw, 4rem) clamp(1.5rem, 4vw, 3rem);
-  border: 1px solid rgb(255 255 255 / 42%);
-  border-radius: 1.5rem;
-  background: rgb(248 245 238 / 30%);
-  box-shadow: 0 .75rem 2rem rgb(20 20 20 / 4%);
-  backdrop-filter: blur(.5rem);
-  -webkit-backdrop-filter: blur(.5rem);
+  position: relative;
+
+  min-height: 40rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  text-align: center;
 }
-/* About hero only: center the existing story panel over the image. */
-@media (min-width: 56.3125rem) {
-  .page > .storyHero,
-  main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero {
-    justify-content: center;
+
+.contactCta img {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  transform: scale(1.02);
+}
+
+.ctaOverlay {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(25, 17, 15, 0.25),
+      rgba(25, 17, 15, 0.72)
+    );
+}
+
+.ctaContent {
+  position: relative;
+  z-index: 1;
+
+  width: min(100% - 2rem, 60rem);
+
+  color: #fff;
+}
+
+.ctaContent .eyebrow {
+  color: #e7c5ca;
+}
+
+.ctaContent h2 {
+  margin: 1.5rem auto 2.5rem;
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3rem, 6vw, 6.5rem);
+  font-weight: 400;
+  letter-spacing: -0.06em;
+  line-height: 0.94;
+}
+
+.ctaContent h2 em {
+  color: #e7c5ca;
+  font-style: italic;
+}
+
+.ctaContent a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+
+  color: #fff;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+
+  text-decoration: none;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.65);
+
+  padding-bottom: 0.65rem;
+
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.ctaContent a span {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.ctaContent a:hover {
+  color: #e7c5ca;
+  border-color: #e7c5ca;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 900px) {
+  .hero {
+    min-height: 43rem;
+  }
+
+  .identity {
+    grid-template-columns: 3rem 8rem minmax(0, 1fr);
+  }
+
+  .identityContent {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .missionVisionHeader,
+  .missionVisionGrid {
+    margin-left: 11rem;
+  }
+
+  .valuesHeader {
+    grid-template-columns: 10rem minmax(0, 1fr);
+  }
+
+  .valuesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .valuesGrid article:nth-child(3) {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding-left: 0;
+  }
+
+  .valuesGrid article:nth-child(4) {
+    border-top: 1px solid var(--line);
   }
 }
-/* Narrow About hero: keep the story panel inside the 320px viewport. */
-@media (max-width: 40rem) {
-  .page > .storyHero,
-  main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero {
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 650px) {
+  .hero {
+    min-height: 43rem;
+
+    align-items: flex-end;
+
+    padding: 2rem 1.25rem 3rem;
+  }
+
+  .heroImage {
+    background-position: 62% center;
+  }
+
+  .heroContent h1 {
+    font-size: clamp(3.5rem, 17vw, 5rem);
+  }
+
+  .heroText {
+    font-size: 0.88rem;
+  }
+
+  .heroNumber {
+    display: none;
+  }
+
+  .identity {
     display: block;
-    min-height: 0 !important;
-    padding: 8.75rem 1rem 1rem !important;
-    background-position: center top;
+
+    width: calc(100% - 2.5rem);
+
+    padding: 5rem 0;
   }
 
-  .page > .storyHero .storyPanel,
-  main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero .storyPanel {
-    box-sizing: border-box;
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 1.35rem 1.2rem !important;
-    border-radius: 1.25rem;
+  .identity .sectionIndex {
+    margin-bottom: 1.5rem;
   }
 
-  .page > .storyHero .storyPanel h1,
-  main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero .storyPanel h1 {
-    max-width: 100% !important;
-    font-size: clamp(2.25rem, 11vw, 3rem) !important;
-    line-height: .98 !important;
-    overflow-wrap: anywhere;
+  .sectionLabel {
+    margin-bottom: 2.5rem;
   }
 
-  .page > .storyHero .storyPanel p:not(.eyebrow),
-  main[data-public-page] > header:first-child:not([class*="catalogTopbar"]) + section.storyHero .storyPanel p:not(.eyebrow) {
-    max-width: 100% !important;
-    font-size: .92rem !important;
-    line-height: 1.6 !important;
+  .identityContent h2 {
+    max-width: 100%;
+
+    font-size: clamp(2.7rem, 13vw, 4rem);
+  }
+
+  .identityCopy {
+    margin-top: 3rem;
+  }
+
+  .missionVision {
+    width: calc(100% - 2.5rem);
+
+    padding-bottom: 5rem;
+  }
+
+  .missionVisionHeader {
+    margin: 0 0 3rem;
+  }
+
+  .missionVisionHeader h2 {
+    font-size: clamp(2.5rem, 12vw, 3.8rem);
+  }
+
+  .missionVisionGrid {
+    display: block;
+
+    margin: 0;
+  }
+
+  .missionVisionGrid article {
+    min-height: auto;
+
+    padding: 2rem 0 3rem;
+  }
+
+  .missionVisionGrid article + article {
+    padding: 3rem 0 0;
+
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .cardNumber {
+    margin-bottom: 2rem;
+  }
+
+  .values {
+    padding: 5rem 1.25rem;
+  }
+
+  .valuesHeader {
+    display: block;
+
+    margin-bottom: 3rem;
+  }
+
+  .valuesHeader h2 {
+    margin-top: 1.5rem;
+
+    font-size: clamp(2.8rem, 13vw, 4rem);
+  }
+
+  .valuesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .valuesGrid article,
+  .valuesGrid article:nth-child(3),
+  .valuesGrid article:nth-child(4) {
+    min-height: auto;
+
+    padding: 2.25rem 0;
+
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .valuesGrid article:first-child {
+    border-top: 0;
+  }
+
+  .valueLine {
+    margin: 2rem 0 1.25rem;
+  }
+
+  .valuesGrid h3 {
+    font-size: 1.8rem;
+  }
+
+  .contactCta {
+    min-height: 34rem;
+  }
+
+  .ctaContent h2 {
+    font-size: clamp(2.8rem, 13vw, 4rem);
   }
 }
-/* Keep the values heading on one natural line when its container allows it. */
-.values h2 { max-width: none; }

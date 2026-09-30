@@ -10,7 +10,7 @@
 @media (max-width: 48rem) { .hero { min-height: 42rem; }.content { padding-top: 8rem; }.actions a { min-width: min(100%, 16rem); }.assurances { grid-template-columns: repeat(2, 1fr); padding: 1rem; }.assurances div { justify-content: flex-start; } }
 /* The 404 tabletop is a full-bleed scene, independent from the global content width. */
 .page {
-  width: 100vw;
+  width: 100%;
   max-width: none !important;
   margin: 0 !important;
   padding: 0 !important;

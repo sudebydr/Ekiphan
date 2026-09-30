@@ -336,7 +336,7 @@
 /* Gallery page only: release the inherited narrow main container. */
 .page {
   display: block;
-  width: 100vw;
+  width: 100%;
   max-width: none;
   margin: 0;
   padding: 0;

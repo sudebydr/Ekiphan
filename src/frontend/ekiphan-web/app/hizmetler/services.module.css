@@ -1,87 +1,310 @@
-.page { min-height: 100vh; background: #f8f6f1; color: #18242d; overflow-x: clip; }
-.hero { position: relative; z-index: 0; width: 100%; background: #f8f6f1; padding: 7.5rem 0 3.5rem; }
-.heroInner { display: grid; width: min(calc(100% - 4rem), 112rem); grid-template-columns: minmax(0, 45fr) minmax(0, 55fr); align-items: center; gap: clamp(2rem, 4vw, 4.5rem); margin: 0 auto; }
-.heroCopy { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; justify-content: center; padding: 1rem 0; }
-.breadcrumb { display: flex; align-items: center; gap: .55rem; margin: 0 0 1.5rem; color: #526166; font-size: .78rem; }.breadcrumb a { color: inherit; text-decoration: none; }.breadcrumb strong { color: #88051f; font-weight: 800; }
-.hero h1 { max-width: 9.5ch; margin: 0; color: #18242d; font-family: Arial,Helvetica,sans-serif; font-size: clamp(3.25rem, 4.35vw, 5rem); font-weight: 700; letter-spacing: -.055em; line-height: .94; }
-.accent { display: block; width: 3.5rem; height: .2rem; margin: 1.5rem 0; background: #88051f; }.heroCopy > p { max-width: 33rem; margin: 0; color: #526166; font-size: 1.05rem; line-height: 1.75; }
-.heroVisual { display: block; min-width: 0; }.heroVisual img { display: block; width: 100%; height: clamp(30rem, 34vw, 35rem); border-radius: 1.75rem; object-fit: cover; object-position: center; box-shadow: 0 .75rem 2rem rgb(24 36 45 / 7%); }
-@media (max-width: 75rem) { .hero { padding-top: 6.5rem; }.heroInner { width: calc(100% - 3rem); gap: 2rem; }.heroVisual img { height: 29rem; }.hero h1 { font-size: clamp(3rem, 4.8vw, 4.25rem); } }
-@media (max-width: 56.25rem) { .hero { padding: 5.5rem 0 2.5rem; }.heroInner { width: calc(100% - 2rem); grid-template-columns: 1fr; gap: 2rem; }.heroCopy { padding: 0; }.heroVisual img { height: 22rem; border-radius: 1.25rem; }.hero h1 { max-width: 10ch; } }
-/* Services hero only: existing project image behind the copy. */
-.hero {
-  min-height: 41.25rem;
-  padding: 0;
-  overflow: hidden;
-  background: url("/images/feature-consultation.png") center / cover no-repeat;
+.page {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 100%;
+
+  min-height: 100vh;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  overflow-x: clip;
+
+  background: #f4efe8;
+  color: #292522;
 }
 
-.hero::after {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(90deg, rgb(15 20 24 / 34%), transparent 62%);
-  content: "";
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero {
+  width: 100%;
+  min-width: 100%;
+
+  overflow: hidden;
+
+  background: #f4efe8;
 }
 
 .heroInner {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  width: min(calc(100% - 6rem), 105rem);
-  min-height: 41.25rem;
-  align-items: center;
-  margin: 0 auto;
+  display: grid;
+
+  width: 100%;
+  min-width: 100%;
+
+  min-height: calc(100svh - 80px);
+
+  grid-template-columns: 48% 52%;
 }
+
+/* =========================================================
+   HERO LEFT
+   ========================================================= */
 
 .heroCopy {
-  box-sizing: border-box;
-  width: min(35rem, 42vw);
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+
   min-width: 0;
-  padding: 2.75rem;
-  border: 1px solid rgb(255 255 255 / 44%);
-  border-radius: 1.75rem;
-  background: rgb(248 246 241 / 78%);
-  box-shadow: 0 1.25rem 3.125rem rgb(20 20 20 / 8%);
-  backdrop-filter: blur(1rem);
-  -webkit-backdrop-filter: blur(1rem);
+
+  flex-direction: column;
+  justify-content: center;
+
+  box-sizing: border-box;
+
+  padding:
+    clamp(4rem, 7vw, 7rem)
+    clamp(2rem, 6vw, 7rem);
+
+  background: #f4efe8;
 }
 
-.heroVisual { display: none; }
+.breadcrumb {
+  display: flex;
 
-@media (max-width: 75rem) {
-  .hero, .heroInner { min-height: 37rem; }
-  .heroInner { width: calc(100% - 4rem); }
-  .heroCopy { width: min(32.5rem, 50vw); padding: 2.25rem; }
+  align-items: center;
+
+  gap: 0.65rem;
+
+  margin-bottom: 2.5rem;
+
+  font-family:
+    var(--font-inter),
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  font-size: 0.64rem;
+
+  font-weight: 600;
+
+  letter-spacing: 0.12em;
+
+  text-transform: uppercase;
 }
 
-@media (max-width: 56.25rem) {
-  .hero { min-height: 0; padding: 16rem 0 1rem; background-position: center top; }
-  .heroInner { display: block; width: calc(100% - 2rem); min-height: 0; }
-  .heroCopy { width: 100%; padding: 1.75rem; }
-}
-/* Let the services hero image reach the bottom of the opening viewport. */
-.hero,
-.heroInner {
-  min-height: 100svh;
+.breadcrumb a {
+  color: #8b8179;
+
+  text-decoration: none;
+
+  transition:
+    color 180ms ease;
 }
 
-@media (max-width: 56.25rem) {
-  .hero,
-  .heroInner { min-height: 0; }
+.breadcrumb a:hover {
+  color: #92253d;
 }
-/* Services hero only: center the existing glass copy panel. */
-@media (min-width: 56.3125rem) {
+
+.breadcrumb span {
+  color: #b7ada4;
+}
+
+.breadcrumb strong {
+  color: #92253d;
+
+  font-weight: 600;
+}
+
+/* =========================================================
+   MAIN TITLE
+   ========================================================= */
+
+.hero h1 {
+  width: 100%;
+  max-width: 8ch;
+
+  margin: 0;
+
+  color: #292522;
+
+  font-family:
+    var(--font-cormorant),
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(4rem, 6vw, 7.2rem);
+
+  font-weight: 500;
+
+  letter-spacing: -0.06em;
+
+  line-height: 0.82;
+}
+
+.accent {
+  display: block;
+
+  width: 4rem;
+  height: 1px;
+
+  margin:
+    2rem
+    0;
+
+  background: #92253d;
+}
+
+.heroCopy > p {
+  width: 100%;
+  max-width: 31rem;
+
+  margin: 0;
+
+  color: #6b645e;
+
+  font-family:
+    var(--font-inter),
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  font-size: 0.9rem;
+
+  line-height: 1.8;
+}
+
+/* =========================================================
+   HERO IMAGE
+   ========================================================= */
+
+.heroVisual {
+  position: relative;
+
+  z-index: 1;
+
+  width: 100%;
+  min-width: 0;
+
+  min-height: calc(100svh - 80px);
+
+  overflow: hidden;
+
+  background: #d8d0c7;
+}
+
+.heroVisual::after {
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      transparent 55%,
+      rgb(25 20 17 / 28%) 100%
+    );
+
+  content: "";
+
+  pointer-events: none;
+}
+
+.heroVisual img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  object-position: center;
+
+  filter:
+    saturate(0.82)
+    contrast(0.98);
+
+  transform: scale(1.01);
+
+  transition:
+    transform 1.2s
+    cubic-bezier(.2, .7, .2, 1);
+}
+
+.heroVisual:hover img {
+  transform: scale(1.035);
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 70rem) {
   .heroInner {
-    justify-content: center;
+    grid-template-columns: 47% 53%;
+  }
+
+  .heroCopy {
+    padding:
+      5rem
+      3.5rem;
+  }
+
+  .hero h1 {
+    font-size:
+      clamp(3.8rem, 6.5vw, 6rem);
   }
 }
-/* Keep only the Services hero title inside its glass panel on wide screens. */
-@media (min-width: 56.3125rem) {
-  .heroCopy h1 {
-    max-width: 100%;
-    font-size: clamp(3rem, 3.6vw, 3.8rem);
-    line-height: .96;
-    overflow-wrap: normal;
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 56rem) {
+  .heroInner {
+    display: grid;
+
+    grid-template-columns: 1fr;
+
+    min-height: 0;
+  }
+
+  .heroCopy {
+    min-height: 34rem;
+
+    padding:
+      4rem
+      1.25rem
+      3.5rem;
+  }
+
+  .hero h1 {
+    max-width: 9ch;
+
+    font-size:
+      clamp(4rem, 15vw, 5.5rem);
+  }
+
+  .heroVisual {
+    min-height: 27rem;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 30rem) {
+  .heroCopy {
+    min-height: 30rem;
+  }
+
+  .hero h1 {
+    font-size: 3.8rem;
+  }
+
+  .heroVisual {
+    min-height: 23rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroVisual img {
+    transition: none;
   }
 }

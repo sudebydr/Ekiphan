@@ -32,3 +32,6 @@ tmp/
 # Large media - add later
 src/frontend/ekiphan-web/public/catalogs/
 src/frontend/ekiphan-web/public/videos/
+!src/frontend/ekiphan-web/public/videos/
+src/frontend/ekiphan-web/public/videos/*
+!src/frontend/ekiphan-web/public/videos/ekiphan-showroom-hero.mp4
