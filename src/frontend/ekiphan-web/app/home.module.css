@@ -7,12 +7,9 @@
   width: 100%;
   max-width: none;
   min-height: 100vh;
-
   margin: 0;
   padding: 0;
-
   overflow: hidden;
-
   background: #f4eee7;
   color: #292522;
 }
@@ -24,68 +21,35 @@
 
 .eyebrow {
   margin: 0 0 1.4rem;
-
   color: #92253d;
-
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 0.62rem;
-
   font-weight: 700;
-
   letter-spacing: 0.22em;
-
   text-transform: uppercase;
 }
 
 .editorialLink {
   display: inline-flex;
-
   align-items: center;
-
   gap: 0.6rem;
-
   margin-top: 2rem;
-
   padding-bottom: 0.45rem;
-
   border-bottom: 1px solid #92253d;
-
   color: #92253d;
-
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 0.62rem;
-
   font-weight: 700;
-
   letter-spacing: 0.12em;
-
   text-decoration: none;
-
   text-transform: uppercase;
 }
 
 .editorialLink span {
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-style: normal;
-
-  transition:
-    transform 180ms ease;
+  transition: transform 180ms ease;
 }
 
 .editorialLink:hover span {
@@ -99,16 +63,10 @@
 
 .hero {
   position: relative;
-
   display: block;
-
   width: 100%;
-
-  min-height:
-    clamp(46rem, 90vh, 55rem);
-
+  min-height: 100svh; /* DEĞİŞTİ */
   overflow: hidden;
-
   background: #f4eee7;
 }
 
@@ -117,44 +75,28 @@
 
 .heroVisual {
   position: absolute;
-
   inset: 0;
-
   z-index: 0;
-
   overflow: hidden;
-
   background: #292522;
 }
 
 .heroVisual video {
   position: absolute;
-
   inset: 0;
-
   width: 100%;
   height: 100%;
-
   display: block;
-
   object-fit: cover;
-
   object-position: center;
-
-  filter:
-    saturate(0.78)
-    contrast(1.02);
-
+  filter: saturate(0.78) contrast(1.02);
   transform: scale(1.01);
 }
 
 .heroImageShade {
   position: absolute;
-
   inset: 0;
-
   z-index: 1;
-
   background:
     linear-gradient(
       90deg,
@@ -174,7 +116,6 @@
       transparent 35%,
       rgb(20 16 13 / 25%)
     );
-
   pointer-events: none;
 }
 
@@ -185,25 +126,16 @@
 
 .hero :global(header) {
   position: absolute !important;
-
   box-sizing: border-box !important;
-
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
-
   z-index: 20 !important;
-
   width: 100% !important;
-
   margin: 0 !important;
-
   border-radius: 0 !important;
-
   box-shadow: none !important;
-
   background: #f4eee7 !important;
-
   color: #292522 !important;
 }
 
@@ -214,16 +146,11 @@
 
 .heroGrid {
   position: relative;
-
   z-index: 3;
-
-  display: block;
-
+  display: flex; /* DEĞİŞTİ */
+  align-items: center; /* DEĞİŞTİ */
   width: 100%;
-
-  min-height:
-    clamp(46rem, 90vh, 55rem);
-
+  min-height: 100svh; /* DEĞİŞTİ */
   box-sizing: border-box;
 }
 
@@ -234,67 +161,34 @@
 
 .heroCopy {
   display: flex;
-
   width: 42%;
-
   min-width: 0;
-
   flex-direction: column;
-
   justify-content: center;
-
   box-sizing: border-box;
-
-  padding:
-    11rem
-    clamp(2rem, 6vw, 7rem)
-    5rem;
-
+  padding: 11rem clamp(2rem, 6vw, 7rem) 5rem;
   background: transparent;
-
   color: #292522;
 }
 
 .heroKicker {
   margin: 0 0 1.6rem;
-
   color: #92253d;
-
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 0.62rem;
-
   font-weight: 700;
-
   letter-spacing: 0.2em;
-
   text-transform: uppercase;
 }
 
 .heroCopy h1 {
   max-width: 8ch;
-
   margin: 0;
-
   color: #292522;
-
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
-  font-size:
-    clamp(4rem, 6vw, 7.4rem);
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: clamp(4rem, 6vw, 7.4rem);
   font-weight: 500;
-
   letter-spacing: -0.045em;
-
   line-height: 0.88;
 }
 
@@ -305,36 +199,22 @@
 
 .heroCopy h1 em {
   color: #292522;
-
   font-style: normal;
 }
 
 .heroLine {
   width: 3.8rem;
   height: 1px;
-
-  margin:
-    2rem
-    0
-    1.6rem;
-
+  margin: 2rem 0 1.6rem;
   background: #92253d;
 }
 
 .heroLead {
   max-width: 30rem;
-
   margin: 0;
-
   color: #68615b;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.82rem;
-
   line-height: 1.8;
 }
 
@@ -345,103 +225,56 @@
 
 .heroActions {
   display: flex;
-
   align-items: center;
-
   gap: 1.5rem;
-
   margin-top: 2rem;
 }
 
 .primaryButton {
   display: inline-flex;
-
   min-height: 2.8rem;
-
   align-items: center;
   justify-content: center;
-
   gap: 0.8rem;
-
-  padding:
-    0
-    1.4rem;
-
+  padding: 0 1.4rem;
   border-radius: 999px;
-
   background: #92253d;
-
   color: #fff;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.61rem;
-
   font-weight: 700;
-
   letter-spacing: 0.1em;
-
   text-decoration: none;
-
   text-transform: uppercase;
-
-  transition:
-    transform 180ms ease,
-    background 180ms ease;
+  transition: transform 180ms ease, background 180ms ease;
 }
 
 .primaryButton:hover {
   background: #7e1d34;
-
   transform: translateY(-2px);
 }
 
 .primaryButton i {
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-style: normal;
 }
 
 .textButton {
   display: inline-flex;
-
   align-items: center;
-
   gap: 0.45rem;
-
   color: #92253d;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.61rem;
-
   font-weight: 700;
-
   letter-spacing: 0.1em;
-
   text-decoration: none;
-
   text-transform: uppercase;
 }
 
 .textButton i {
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-style: normal;
 }
@@ -453,27 +286,15 @@
 
 .heroMeta {
   position: absolute;
-
   z-index: 5;
-
   right: 2.8rem;
   bottom: 2rem;
-
   display: flex;
-
   align-items: center;
-
   gap: 0.9rem;
-
   color: rgb(255 255 255 / 72%);
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.55rem;
-
   letter-spacing: 0.1em;
 }
 
@@ -483,38 +304,25 @@
 
 .heroMeta i {
   display: block;
-
   width: 3rem;
   height: 1px;
-
   background: rgb(255 255 255 / 60%);
 }
 
 .heroVisualLabel {
   position: absolute;
-
   z-index: 5;
-
   right: 3rem;
   bottom: 4.8rem;
-
   color: #292522;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.55rem;
-
   font-weight: 700;
-
   letter-spacing: 0.16em;
 }
 
 .heroVisualLabel span {
   margin: 0 0.55rem;
-
   color: #68615b;
 }
 
@@ -525,49 +333,24 @@
 
 .metrics {
   position: relative;
-
   z-index: 6;
-
   display: grid;
-
   width: min(100% - 6rem, 86rem);
-
   min-height: 8.5rem;
-
-  margin:
-    -2.5rem
-    auto
-    0;
-
+  margin: 0 auto; /* DEĞİŞTİ */
   padding: 0;
-
-  grid-template-columns:
-    repeat(4, 1fr);
-
-  border-top:
-    1px solid
-    #d8cec5;
-
-  border-bottom:
-    1px solid
-    #d8cec5;
-
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid #d8cec5;
+  border-bottom: 1px solid #d8cec5;
   background: #f4eee7;
 }
 
 .metrics article {
   display: grid;
-
   min-height: 8.5rem;
-
   place-items: center;
-
-  border-right:
-    1px solid
-    #d8cec5;
-
-  transition:
-    background 200ms ease;
+  border-right: 1px solid #d8cec5;
+  transition: background 200ms ease;
 }
 
 .metrics article:last-child {
@@ -580,43 +363,24 @@
 
 .metrics article > div {
   display: grid;
-
   gap: 0.55rem;
-
   text-align: center;
 }
 
 .metrics strong {
   color: #92253d;
-
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
-  font-size:
-    clamp(2.5rem, 4vw, 4rem);
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: clamp(2.5rem, 4vw, 4rem);
   font-weight: 500;
-
   letter-spacing: -0.045em;
-
   line-height: 0.9;
 }
 
 .metrics span {
   color: #746d66;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.55rem;
-
   font-weight: 700;
-
   letter-spacing: 0.16em;
 }
 
@@ -627,118 +391,67 @@
 
 .categories {
   width: 100%;
-
   box-sizing: border-box;
-
-  padding:
-    9rem
-    clamp(1.5rem, 5vw, 5rem)
-    8rem;
-
+  padding: 9rem clamp(1.5rem, 5vw, 5rem) 8rem;
   background: #f4eee7;
 }
 
 .categoriesIntro {
   display: grid;
-
   width: min(100%, 86rem);
-
-  margin:
-    0
-    auto
-    4rem;
-
+  margin: 0 auto 4rem;
   grid-template-columns:
-    1.1fr
-    0.65fr;
-
+    minmax(0, 1.1fr)
+    minmax(0, 0.65fr)
+    minmax(18rem, 21rem);
   gap: 5rem;
-
-  align-items: end;
+  align-items: start;
 }
 
 .categoriesIntro h2 {
   max-width: 8ch;
-
   margin: 0;
-
   color: #292522;
-
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
-  font-size:
-    clamp(3.5rem, 5.5vw, 6rem);
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: clamp(3.5rem, 5.5vw, 6rem);
   font-weight: 500;
-
   letter-spacing: -0.04em;
-
   line-height: 0.9;
 }
 
 .categoriesIntro h2 em {
   color: #92253d;
-
   font-style: normal;
 }
 
 .categoriesDescription {
   max-width: 25rem;
-
-  margin-left: auto;
+  margin: 0;
 }
 
 .categoriesDescription p {
   margin: 0;
-
   color: #68615b;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.82rem;
-
   line-height: 1.8;
 }
 
 .categoriesDescription a {
   display: inline-flex;
-
   align-items: center;
-
   gap: 0.7rem;
-
   margin-top: 1.8rem;
-
   color: #92253d;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.6rem;
-
   font-weight: 700;
-
   letter-spacing: 0.12em;
-
   text-decoration: none;
 }
 
 .categoriesDescription a span {
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-style: normal;
 }
@@ -750,71 +463,46 @@
 
 .categoryGrid {
   display: grid;
-
   width: min(100%, 86rem);
-
   margin: 0 auto;
-
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
-
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.7rem;
 }
 
 .categoryCard {
   position: relative;
-
   display: block;
-
   min-height: 29rem;
-
   overflow: hidden;
-
   background: #ddd3c9;
-
   color: #fff;
-
   text-decoration: none;
 }
 
 .categoryImage {
   position: absolute;
-
   inset: 0;
-
   overflow: hidden;
 }
 
 .categoryImage::after {
   position: absolute;
-
   inset: 0;
-
-  background:
-    linear-gradient(
-      180deg,
-      transparent 30%,
-      rgb(25 20 17 / 70%) 100%
-    );
-
+  background: linear-gradient(
+    180deg,
+    transparent 30%,
+    rgb(25 20 17 / 70%) 100%
+  );
   content: "";
 }
 
 .categoryImage img {
   display: block;
-
   width: 100%;
   height: 100%;
-
   object-fit: cover;
-
-  filter:
-    saturate(0.8)
-    contrast(0.98);
-
-  transition:
-    transform 800ms
-    cubic-bezier(.2, .7, .2, 1);
+  filter: saturate(0.8) contrast(0.98);
+  transition: transform 800ms cubic-bezier(.2, .7, .2, 1);
 }
 
 .categoryCard:hover .categoryImage img {
@@ -823,91 +511,50 @@
 
 .categoryContent {
   position: absolute;
-
   right: 1.5rem;
   bottom: 1.5rem;
   left: 1.5rem;
-
   z-index: 2;
 }
 
 .categoryContent > span {
   display: block;
-
   margin-bottom: 0.7rem;
-
   color: rgb(255 255 255 / 68%);
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.5rem;
-
   font-weight: 700;
-
   letter-spacing: 0.18em;
 }
 
 .categoryContent h3 {
   max-width: 10ch;
-
   margin: 0;
-
   color: #fff;
-
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
-  font-size:
-    clamp(1.9rem, 2.4vw, 2.8rem);
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: clamp(1.9rem, 2.4vw, 2.8rem);
   font-weight: 500;
-
   letter-spacing: -0.03em;
-
   line-height: 0.96;
 }
 
 .categoryContent small {
   display: inline-flex;
-
   align-items: center;
-
   gap: 0.6rem;
-
   margin-top: 1.3rem;
-
   color: #fff;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.5rem;
-
   font-weight: 700;
-
   letter-spacing: 0.12em;
 }
 
 .categoryContent small i {
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-style: normal;
-
-  transition:
-    transform 180ms ease;
+  transition: transform 180ms ease;
 }
 
 .categoryCard:hover small i {
@@ -921,109 +568,61 @@
 
 .about {
   display: grid;
-
   width: 100%;
-
-  grid-template-columns:
-    56%
-    44%;
-
+  grid-template-columns: 56% 44%;
   background: #ebe2d8;
 }
 
 .aboutImage {
   min-height: 42rem;
-
   overflow: hidden;
 }
 
 .aboutImage img {
   display: block;
-
   width: 100%;
   height: 100%;
-
   object-fit: cover;
-
-  filter:
-    saturate(0.8)
-    contrast(0.98);
+  filter: saturate(0.8) contrast(0.98);
 }
 
 .aboutContent {
   display: flex;
-
   box-sizing: border-box;
-
   flex-direction: column;
-
   justify-content: center;
-
-  padding:
-    6rem
-    clamp(2rem, 6vw, 7rem);
+  padding: 6rem clamp(2rem, 6vw, 7rem);
 }
 
 .aboutContent h2 {
   margin: 0;
-
   color: #292522;
-
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
-  font-size:
-    clamp(3.5rem, 5.5vw, 6rem);
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: clamp(3.5rem, 5.5vw, 6rem);
   font-weight: 500;
-
   letter-spacing: -0.04em;
-
   line-height: 0.9;
 }
 
 .aboutContent h2 em {
   color: #92253d;
-
   font-style: normal;
 }
 
 .aboutAccent {
-  margin:
-    1.5rem
-    0
-    1rem;
-
+  margin: 1.5rem 0 1rem;
   color: #92253d;
-
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1.25rem;
-
   font-style: normal;
 }
 
 .aboutText {
   max-width: 31rem;
-
   margin: 0;
-
   color: #6c645d;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.82rem;
-
   line-height: 1.8;
 }
 
@@ -1034,194 +633,108 @@
 
 .projectBanner {
   position: relative;
-
   min-height: 39rem;
-
   overflow: hidden;
-
   background: #211b18;
-
   color: #fff;
 }
 
 .projectBanner > img {
   position: absolute;
-
   inset: 0;
-
   width: 100%;
   height: 100%;
-
   object-fit: cover;
-
-  filter:
-    saturate(0.72)
-    contrast(1.02);
+  filter: saturate(0.72) contrast(1.02);
 }
 
 .projectOverlay {
   position: absolute;
-
   inset: 0;
-
-  background:
-    linear-gradient(
-      90deg,
-      rgb(25 18 15 / 88%) 0%,
-      rgb(25 18 15 / 67%) 40%,
-      rgb(25 18 15 / 18%) 100%
-    );
+  background: linear-gradient(
+    90deg,
+    rgb(25 18 15 / 88%) 0%,
+    rgb(25 18 15 / 67%) 40%,
+    rgb(25 18 15 / 18%) 100%
+  );
 }
 
 .projectContent {
   position: relative;
-
   z-index: 2;
-
   width: min(100% - 3rem, 86rem);
-
   margin: 0 auto;
-
-  padding:
-    8rem
-    0;
+  padding: 8rem 0;
 }
 
 .projectEyebrow {
   margin: 0 0 1.5rem;
-
   color: #d79aaa;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.58rem;
-
   font-weight: 700;
-
   letter-spacing: 0.2em;
 }
 
 .projectContent h2 {
   max-width: 8ch;
-
   margin: 0;
-
   color: #fff;
-
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
-  font-size:
-    clamp(4rem, 6vw, 7rem);
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: clamp(4rem, 6vw, 7rem);
   font-weight: 500;
-
   letter-spacing: -0.04em;
-
   line-height: 0.9;
 }
 
 .projectContent h2 em {
   color: #e0a2af;
-
   font-style: normal;
 }
 
 .projectContent > p:not(.projectEyebrow) {
   max-width: 32rem;
-
-  margin:
-    2rem
-    0
-    0;
-
+  margin: 2rem 0 0;
   color: rgb(255 255 255 / 75%);
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.82rem;
-
   line-height: 1.8;
 }
 
 .lightButton {
   display: inline-flex;
-
   min-height: 2.8rem;
-
   align-items: center;
-
   gap: 0.7rem;
-
   margin-top: 1.8rem;
-
-  padding:
-    0
-    1.5rem;
-
+  padding: 0 1.5rem;
   border-radius: 999px;
-
   background: #fff;
-
   color: #92253d;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.58rem;
-
   font-weight: 700;
-
   letter-spacing: 0.1em;
-
   text-decoration: none;
 }
 
 .lightButton span {
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-style: normal;
 }
 
 .projectSideText {
   position: absolute;
-
   z-index: 2;
-
   right: 5vw;
   bottom: 4rem;
-
   color: rgb(255 255 255 / 75%);
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.55rem;
-
   font-weight: 700;
-
   letter-spacing: 0.16em;
-
   line-height: 1.8;
-
   text-align: right;
 }
 
@@ -1232,210 +745,111 @@
 
 .features {
   width: 100%;
-
   box-sizing: border-box;
-
-  padding:
-    9rem
-    clamp(1.5rem, 5vw, 5rem);
-
+  padding: 9rem clamp(1.5rem, 5vw, 5rem);
   background: #f4eee7;
 }
 
 .featuresIntro {
   display: grid;
-
   width: min(100%, 86rem);
-
-  margin:
-    0
-    auto
-    5rem;
-
-  grid-template-columns:
-    1.15fr
-    0.65fr;
-
+  margin: 0 auto 5rem;
+  grid-template-columns: 1.15fr 0.65fr;
   gap: 5rem;
-
   align-items: end;
 }
 
 .featuresIntro h2 {
   margin: 0;
-
   color: #292522;
-
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
-  font-size:
-    clamp(3.4rem, 5vw, 5.8rem);
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: clamp(3.4rem, 5vw, 5.8rem);
   font-weight: 500;
-
   letter-spacing: -0.04em;
-
   line-height: 0.92;
 }
 
 .featuresIntro h2 em {
   color: #92253d;
-
   font-style: normal;
 }
 
 .featuresIntro > p {
   max-width: 28rem;
-
   margin: 0 0 0 auto;
-
   color: #68615b;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.82rem;
-
   line-height: 1.8;
 }
 
 .featureList {
   width: min(100%, 86rem);
-
   margin: 0 auto;
-
-  border-top:
-    1px solid
-    #cfc5bc;
+  border-top: 1px solid #cfc5bc;
 }
 
 .featureItem {
   display: grid;
-
   min-height: 12rem;
-
   box-sizing: border-box;
-
-  grid-template-columns:
-    5rem
-    1fr
-    auto;
-
+  grid-template-columns: 5rem 1fr auto;
   gap: 3rem;
-
   align-items: center;
-
-  border-bottom:
-    1px solid
-    #cfc5bc;
-
-  transition:
-    padding 250ms ease,
-    background 250ms ease;
+  border-bottom: 1px solid #cfc5bc;
+  transition: padding 250ms ease, background 250ms ease;
 }
 
 .featureItem:hover {
   padding-left: 1.5rem;
-
   background: #eee5dc;
 }
 
 .featureItem > span {
   color: #92253d;
-
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1.1rem;
   font-weight: 600;
 }
 
 .featureItem h3 {
   margin: 0 0 0.5rem;
-
   color: #292522;
-
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
-  font-size:
-    clamp(2rem, 3vw, 3.2rem);
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: clamp(2rem, 3vw, 3.2rem);
   font-weight: 500;
-
   letter-spacing: -0.035em;
-
   line-height: 0.96;
 }
 
 .featureItem p {
   max-width: 36rem;
-
   margin: 0;
-
   color: #6c645d;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.78rem;
-
   line-height: 1.7;
 }
 
 .featureItem a {
   display: inline-flex;
-
   align-items: center;
-
   gap: 0.5rem;
-
   color: #92253d;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.58rem;
-
   font-weight: 700;
-
   letter-spacing: 0.1em;
-
   text-decoration: none;
-
   text-transform: uppercase;
-
   white-space: nowrap;
 }
 
 .featureItem a i {
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-style: normal;
-
-  transition:
-    transform 180ms ease;
+  transition: transform 180ms ease;
 }
 
 .featureItem a:hover i {
@@ -1449,167 +863,93 @@
 
 .showroom {
   position: relative;
-
   min-height: 45rem;
-
   overflow: hidden;
-
   background: #211b18;
-
   color: #fff;
 }
 
 .showroom > img {
   position: absolute;
-
   inset: 0;
-
   width: 100%;
   height: 100%;
-
   object-fit: cover;
-
-  filter:
-    saturate(0.75)
-    contrast(1.04);
+  filter: saturate(0.75) contrast(1.04);
 }
 
 .showroomOverlay {
   position: absolute;
-
   inset: 0;
-
-  background:
-    linear-gradient(
-      90deg,
-      rgb(25 18 15 / 84%),
-      rgb(25 18 15 / 42%) 60%,
-      rgb(25 18 15 / 15%)
-    );
+  background: linear-gradient(
+    90deg,
+    rgb(25 18 15 / 84%),
+    rgb(25 18 15 / 42%) 60%,
+    rgb(25 18 15 / 15%)
+  );
 }
 
 .showroomContent {
   position: relative;
-
   z-index: 2;
-
   width: min(100% - 3rem, 86rem);
-
   margin: 0 auto;
-
-  padding:
-    9rem
-    0;
+  padding: 9rem 0;
 }
 
 .showroomEyebrow {
   margin: 0 0 1.5rem;
-
   color: #e0a2af;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.58rem;
-
   font-weight: 700;
-
   letter-spacing: 0.2em;
 }
 
 .showroomContent h2 {
   max-width: 10ch;
-
   margin: 0;
-
   color: #fff;
-
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
-  font-size:
-    clamp(4rem, 6vw, 7rem);
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: clamp(4rem, 6vw, 7rem);
   font-weight: 500;
-
   letter-spacing: -0.04em;
-
   line-height: 0.9;
 }
 
 .showroomContent h2 em {
   color: #e0a2af;
-
   font-style: normal;
 }
 
 .showroomContent > p:not(.showroomEyebrow) {
   max-width: 35rem;
-
-  margin:
-    2rem
-    0
-    0;
-
+  margin: 2rem 0 0;
   color: rgb(255 255 255 / 76%);
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.82rem;
-
   line-height: 1.8;
 }
 
 .showroomButton {
   display: inline-flex;
-
   align-items: center;
-
   gap: 0.7rem;
-
   margin-top: 2rem;
-
-  padding:
-    0
-    1.6rem;
-
+  padding: 0 1.6rem;
   min-height: 2.9rem;
-
   border-radius: 999px;
-
   background: #92253d;
-
   color: #fff;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.58rem;
-
   font-weight: 700;
-
   letter-spacing: 0.1em;
-
   text-decoration: none;
 }
 
 .showroomButton span {
-  font-family:
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    sans-serif;
-
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-style: normal;
 }
@@ -1626,21 +966,15 @@
 
   .heroCopy {
     width: 45%;
-
-    padding:
-      10rem
-      3rem
-      4rem;
+    padding: 10rem 3rem 4rem;
   }
 
   .heroCopy h1 {
-    font-size:
-      clamp(3.6rem, 6vw, 5.5rem);
+    font-size: clamp(3.6rem, 6vw, 5.5rem);
   }
 
   .categoryGrid {
-    grid-template-columns:
-      repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .about {
@@ -1650,6 +984,17 @@
   .featuresIntro,
   .categoriesIntro {
     grid-template-columns: 1fr 0.7fr;
+  }
+
+  /* DEĞİŞTİ: yeni eklendi */
+  .categoriesIntro > .categoryCard {
+    grid-column: 1 / -1;
+    min-height: 24rem;
+  }
+
+  /* DEĞİŞTİ: yeni eklendi */
+  .projectSideText {
+    display: none;
   }
 }
 
@@ -1662,60 +1007,42 @@
 
   .hero {
     min-height: 0;
-
     display: block;
   }
 
   .heroGrid {
     display: flex;
-
     min-height: 0;
-
     flex-direction: column;
   }
 
   .heroVisual {
     position: absolute;
-
     inset: 0;
   }
 
   .heroImageShade {
     inset: 0;
-
-    background:
-      linear-gradient(
-        180deg,
-        rgb(20 16 13 / 20%),
-        rgb(20 16 13 / 74%)
-      );
+    background: linear-gradient(
+      180deg,
+      rgb(20 16 13 / 20%),
+      rgb(20 16 13 / 74%)
+    );
   }
 
   .heroCopy {
     position: relative;
-
     z-index: 4;
-
     width: 100%;
-
-    min-height:
-      52rem;
-
+    min-height: 52rem;
     justify-content: flex-end;
-
-    padding:
-      7rem
-      1.5rem
-      4rem;
-
-    background:
-      linear-gradient(
-        180deg,
-        transparent 15%,
-        rgb(20 16 13 / 5%) 35%,
-        rgb(20 16 13 / 76%) 100%
-      );
-
+    padding: 7rem 1.5rem 4rem;
+    background: linear-gradient(
+      180deg,
+      transparent 15%,
+      rgb(20 16 13 / 5%) 35%,
+      rgb(20 16 13 / 76%) 100%
+    );
     color: #fff;
   }
 
@@ -1725,11 +1052,8 @@
 
   .heroCopy h1 {
     max-width: 9ch;
-
     color: #fff;
-
-    font-size:
-      clamp(3.6rem, 15vw, 5.5rem);
+    font-size: clamp(3.6rem, 15vw, 5.5rem);
   }
 
   .heroLine {
@@ -1738,7 +1062,6 @@
 
   .heroLead {
     max-width: 30rem;
-
     color: rgb(255 255 255 / 78%);
   }
 
@@ -1761,21 +1084,14 @@
 
   .metrics {
     width: 100%;
-
     margin: 0;
-
-    grid-template-columns:
-      repeat(2, 1fr);
-
+    grid-template-columns: repeat(2, 1fr);
     border-top: 0;
   }
 
   .metrics article {
     min-height: 7rem;
-
-    border-bottom:
-      1px solid
-      #d8cec5;
+    border-bottom: 1px solid #d8cec5;
   }
 
   .metrics article:nth-child(2) {
@@ -1783,23 +1099,17 @@
   }
 
   .categories {
-    padding:
-      6rem
-      1rem
-      6rem;
+    padding: 6rem 1rem 6rem;
   }
 
   .categoriesIntro {
     grid-template-columns: 1fr;
-
     gap: 2rem;
-
     margin-bottom: 3rem;
   }
 
   .categoriesIntro h2 {
-    font-size:
-      clamp(3.4rem, 14vw, 5rem);
+    font-size: clamp(3.4rem, 14vw, 5rem);
   }
 
   .categoriesDescription {
@@ -1808,7 +1118,6 @@
 
   .categoryGrid {
     grid-template-columns: 1fr;
-
     gap: 0.6rem;
   }
 
@@ -1825,14 +1134,11 @@
   }
 
   .aboutContent {
-    padding:
-      5rem
-      1.5rem;
+    padding: 5rem 1.5rem;
   }
 
   .aboutContent h2 {
-    font-size:
-      clamp(3.5rem, 14vw, 5rem);
+    font-size: clamp(3.5rem, 14vw, 5rem);
   }
 
   .projectBanner {
@@ -1841,15 +1147,11 @@
 
   .projectContent {
     width: auto;
-
-    padding:
-      6rem
-      1.5rem;
+    padding: 6rem 1.5rem;
   }
 
   .projectContent h2 {
-    font-size:
-      clamp(3.8rem, 14vw, 5.5rem);
+    font-size: clamp(3.8rem, 14vw, 5.5rem);
   }
 
   .projectSideText {
@@ -1857,22 +1159,17 @@
   }
 
   .features {
-    padding:
-      6rem
-      1rem;
+    padding: 6rem 1rem;
   }
 
   .featuresIntro {
     grid-template-columns: 1fr;
-
     gap: 2rem;
-
     margin-bottom: 3rem;
   }
 
   .featuresIntro h2 {
-    font-size:
-      clamp(3.3rem, 13vw, 5rem);
+    font-size: clamp(3.3rem, 13vw, 5rem);
   }
 
   .featuresIntro > p {
@@ -1881,16 +1178,9 @@
 
   .featureItem {
     min-height: 0;
-
-    grid-template-columns:
-      2.5rem
-      1fr;
-
+    grid-template-columns: 2.5rem 1fr;
     gap: 1rem;
-
-    padding:
-      2.2rem
-      0;
+    padding: 2.2rem 0;
   }
 
   .featureItem:hover {
@@ -1907,15 +1197,11 @@
 
   .showroomContent {
     width: auto;
-
-    padding:
-      6rem
-      1.5rem;
+    padding: 6rem 1.5rem;
   }
 
   .showroomContent h2 {
-    font-size:
-      clamp(3.8rem, 14vw, 5.5rem);
+    font-size: clamp(3.8rem, 14vw, 5.5rem);
   }
 }
 
@@ -1936,7 +1222,6 @@
 
   .heroActions {
     flex-direction: column;
-
     align-items: flex-start;
   }
 
@@ -1945,9 +1230,7 @@
   }
 
   .featureItem {
-    grid-template-columns:
-      2rem
-      1fr;
+    grid-template-columns: 2rem 1fr;
   }
 }
 

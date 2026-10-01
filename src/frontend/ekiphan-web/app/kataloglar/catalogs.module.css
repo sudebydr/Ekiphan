@@ -10,7 +10,6 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.34fr);
   width: min(100% - 5rem, 98rem);
-  min-height: clamp(27rem, 43vw, 38rem);
   margin: 0 auto;
   padding: clamp(5rem, 8vw, 8rem) 0 clamp(4rem, 7vw, 6.5rem);
   border-bottom: 1px solid rgba(38, 34, 31, 0.16);
@@ -71,8 +70,9 @@
 }
 
 .heroSide {
-  align-self: end;
+  align-self: start;
   justify-self: end;
+  margin-top: 0;
   width: min(100%, 18rem);
   padding: 1.25rem 0 0;
   border-top: 1px solid rgba(38, 34, 31, 0.16);
@@ -410,6 +410,7 @@
   .hero,
   .catalogSection { width: min(100% - 3rem, 94rem); }
   .hero { grid-template-columns: minmax(0, 1fr) minmax(12rem, .4fr); }
+  .heroSide { align-self: end; }
   .catalogGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 

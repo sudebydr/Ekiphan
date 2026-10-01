@@ -1,28 +1,124 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { CatalogNavigation } from "../../lib/catalog-types";
-import styles from "./catalog.module.css";
+import { optionHref } from "./catalog-filter-links";
+import styles from "./catalog-list.module.css";
 
 type Category = CatalogNavigation["categories"][number];
 
-export function CatalogCategoryFilter({ categories, selectedSlug }: { categories: Category[]; selectedSlug: string }) {
+export function CatalogCategoryFilter({
+  categories,
+  selectedSlug,
+  baseQuery
+}: {
+  categories: Category[];
+  selectedSlug: string;
+  baseQuery: string;
+}) {
   const roots = categories.filter((item) => item.parentId === null);
-  const children = new Map<string, Category[]>();
-  for (const item of categories) if (item.parentId) children.set(item.parentId, [...(children.get(item.parentId) ?? []), item]);
-  const [open, setOpen] = useState(() => new Set(roots.filter(root => root.slug === selectedSlug || children.get(root.id)?.some(child => child.slug === selectedSlug)).map(root => root.id)));
-  const href = (slug?: string) => slug ? `/katalog?category=${encodeURIComponent(slug)}` : "/katalog";
-  return <nav className={styles.categoryFilter} aria-label="Kategoriler">
-    <h3>Kategoriler</h3>
-    <Link className={!selectedSlug ? styles.categorySelected : ""} href={href()}>Tüm kategoriler</Link>
-    {roots.map(root => {
-      const groups = children.get(root.id) ?? [];
-      const expanded = open.has(root.id);
-      return <div key={root.id} className={styles.categoryRoot}>
-        <div><Link className={selectedSlug === root.slug ? styles.categorySelected : ""} href={href(root.slug)}>{root.name}</Link>{groups.length > 0 && <button type="button" aria-expanded={expanded} aria-controls={`category-${root.id}`} onClick={() => setOpen(current => { const next = new Set(current); expanded ? next.delete(root.id) : next.add(root.id); return next; })}>{expanded ? "⌄" : "›"}</button>}</div>
-        {groups.length > 0 && expanded && <div id={`category-${root.id}`} className={styles.categoryGroups}>{groups.map(group => <Link key={group.id} className={selectedSlug === group.slug ? styles.categorySelected : ""} href={href(group.slug)}>{group.name}</Link>)}</div>}
-      </div>;
-    })}
-  </nav>;
+  const childrenByParent = new Map<string, Category[]>();
+  for (const item of categories) {
+    if (item.parentId) {
+      childrenByParent.set(item.parentId, [...(childrenByParent.get(item.parentId) ?? []), item]);
+    }
+  }
+
+  const selectedRootId = roots.find(
+    (root) =>
+      root.slug === selectedSlug ||
+      (childrenByParent.get(root.id) ?? []).some((child) => child.slug === selectedSlug)
+  )?.id;
+  const selectedName = categories.find((item) => item.slug === selectedSlug)?.name;
+
+  const [open, setOpen] = useState<Set<string>>(
+    () => new Set(selectedRootId ? [selectedRootId] : [])
+  );
+
+  // Bir kategoriye tıklanınca alt kategorileri otomatik açılsın.
+  useEffect(() => {
+    if (!selectedRootId) return;
+    setOpen((current) => (current.has(selectedRootId) ? current : new Set(current).add(selectedRootId)));
+  }, [selectedRootId]);
+
+  const optionClass = (selected: boolean) =>
+    `${styles.option} ${selected ? styles.optionSelected : ""}`;
+
+  return (
+    <details className={styles.filterGroup} open={Boolean(selectedSlug)}>
+      <summary>
+        <span>Kategoriler</span>
+        {selectedName && <span className={styles.filterCurrent}>{selectedName}</span>}
+      </summary>
+      <ul className={styles.optionList}>
+        <li>
+          <Link
+            className={optionClass(!selectedSlug)}
+            href={optionHref(baseQuery, "category", "")}
+            aria-current={!selectedSlug ? "true" : undefined}
+            scroll={false}
+            prefetch={false}
+          >
+            Tüm kategoriler
+          </Link>
+        </li>
+        {roots.map((root) => {
+          const groups = childrenByParent.get(root.id) ?? [];
+          const expanded = open.has(root.id);
+          return (
+            <li key={root.id}>
+              <div className={styles.categoryRow}>
+                <Link
+                  className={optionClass(selectedSlug === root.slug)}
+                  href={optionHref(baseQuery, "category", root.slug)}
+                  aria-current={selectedSlug === root.slug ? "true" : undefined}
+                  scroll={false}
+                  prefetch={false}
+                >
+                  {root.name}
+                </Link>
+                {groups.length > 0 && (
+                  <button
+                    type="button"
+                    className={styles.categoryToggle}
+                    aria-expanded={expanded}
+                    aria-controls={`category-${root.id}`}
+                    aria-label={`${root.name} alt kategorileri`}
+                    onClick={() =>
+                      setOpen((current) => {
+                        const next = new Set(current);
+                        if (expanded) next.delete(root.id);
+                        else next.add(root.id);
+                        return next;
+                      })
+                    }
+                  >
+                    <span className={styles.chevron} aria-hidden="true" />
+                  </button>
+                )}
+              </div>
+              {groups.length > 0 && expanded && (
+                <ul id={`category-${root.id}`} className={styles.subList}>
+                  {groups.map((group) => (
+                    <li key={group.id}>
+                      <Link
+                        className={optionClass(selectedSlug === group.slug)}
+                        href={optionHref(baseQuery, "category", group.slug)}
+                        aria-current={selectedSlug === group.slug ? "true" : undefined}
+                        scroll={false}
+                        prefetch={false}
+                      >
+                        {group.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </details>
+  );
 }

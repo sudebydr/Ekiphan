@@ -18,6 +18,16 @@ public sealed class PublicMediaUrlResolverTests
             result);
     }
 
+    [Fact]
+    public void SafeStorageKeyIsResolvedBelowLocalHttpBasePath()
+    {
+        var resolver = new PublicMediaUrlResolver("http://localhost:5175/");
+
+        Assert.Equal(
+            "http://localhost:5175/media/products/default.webp",
+            resolver.Resolve("media/products/default.webp"));
+    }
+
     [Theory]
     [InlineData("http://cdn.example.com")]
     [InlineData("https://cdn.example.com/media?token=secret")]

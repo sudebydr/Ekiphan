@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import type { CatalogFacet } from "../../lib/catalog-types";
-import styles from "./catalog.module.css";
+import { FilterOptionGroup } from "./catalog-filter-group";
+import { attributeOptionHref } from "./catalog-filter-links";
+import styles from "./catalog-list.module.css";
 
 function selectedValue(selected: string[], attributeId: string): string {
   const prefix = `${attributeId}:`;
@@ -42,33 +44,45 @@ function NumericFacet({
 
 export function DynamicCatalogFilters({
   facets,
-  selected
+  selected,
+  baseQuery
 }: {
   facets: CatalogFacet[];
   selected: string[];
+  baseQuery: string;
 }) {
   if (facets.length === 0) return null;
   return (
     <div className={styles.dynamicFilters}>
-      <h3>Teknik özellikler</h3>
       {facets.map((facet) => {
         const current = selectedValue(selected, facet.attributeId);
         if (facet.dataType === 2) {
-          return <NumericFacet key={facet.attributeId} facet={facet} initial={current} />;
+          return (
+            <details className={styles.filterGroup} key={facet.attributeId} open={Boolean(current)}>
+              <summary><span>{facet.name}</span></summary>
+              <NumericFacet facet={facet} initial={current} />
+            </details>
+          );
         }
         return (
-          <div className={styles.field} key={facet.attributeId}>
-            <label htmlFor={`facet-${facet.attributeId}`}>{facet.name}</label>
-            <select id={`facet-${facet.attributeId}`} name="attribute"
-              defaultValue={current ? `${facet.attributeId}:${current}` : ""}>
-              <option value="">Tümü</option>
-              {facet.options.map((option) => (
-                <option value={`${facet.attributeId}:${option.value}`} key={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <FilterOptionGroup
+            key={facet.attributeId}
+            title={facet.name}
+            options={[
+              {
+                value: "",
+                label: "Tümü",
+                href: attributeOptionHref(baseQuery, facet.attributeId, ""),
+                selected: !current
+              },
+              ...facet.options.map((option) => ({
+                value: option.value,
+                label: option.label,
+                href: attributeOptionHref(baseQuery, facet.attributeId, option.value),
+                selected: current === option.value
+              }))
+            ]}
+          />
         );
       })}
     </div>

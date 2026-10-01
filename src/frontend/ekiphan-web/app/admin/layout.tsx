@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { AdminSessionGuard } from "./admin-session-guard";
+import styles from "./admin-theme.module.css";
 
 export const metadata: Metadata = {
   robots: {
@@ -14,7 +15,7 @@ export default function AdminLayout({
   children
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <div className="admin-scope">
+    <div className={`${styles.theme} admin-scope`}>
       <AdminSessionGuard>{children}</AdminSessionGuard>
     </div>
   );

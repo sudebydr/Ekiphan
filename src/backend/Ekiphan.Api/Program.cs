@@ -12,6 +12,7 @@ using Ekiphan.Api.Media;
 using Ekiphan.Api.Quotes;
 using Ekiphan.Api.Content;
 using Ekiphan.Api.Seo;
+using Ekiphan.Application.Deployments;
 using Ekiphan.Application.Identity;
 using Ekiphan.Infrastructure;
 using Ekiphan.Infrastructure.Identity;
@@ -34,12 +35,24 @@ builder.Logging.AddJsonConsole();
 builder.Services.AddProblemDetails();
 builder.Services.AddResponseCompression(options => { options.EnableForHttps = true; });
 builder.Services.AddControllers();
+var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
+if (string.IsNullOrWhiteSpace(redisConnectionString))
+{
+    if (builder.Environment.IsProduction())
+    {
+        throw new InvalidOperationException(
+            "Missing required configuration: ConnectionStrings:Redis.");
+    }
+
+    redisConnectionString = "localhost:6379";
+}
+
 builder.Services.AddHealthChecks()
     .AddCheck<DatabaseReadinessHealthCheck>(
         "database",
         tags: ["ready"])
-    .AddRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379", tags: ["ready"]);
-builder.Services.AddInfrastructure(builder.Configuration);
+    .AddRedis(redisConnectionString, tags: ["ready"]);
+builder.Services.AddInfrastructure(builder.Configuration, redisConnectionString);
 builder.Services.Configure<FormOptions>(
     options => options.MultipartBodyLengthLimit =
         Math.Max(Ekiphan.Application.Media.MediaUploadLimits.MaximumRequestBytes,
@@ -430,6 +443,12 @@ if (jwtSettings.IsConfigured)
 }
 
 var app = builder.Build();
+
+if (app.Environment.IsProduction())
+{
+    app.Services.GetRequiredService<IConfigurationValidationService>()
+        .ValidateStartupConfiguration();
+}
 
 app.UseResponseCompression();
 // app.UseMiddleware<RequestPerformanceMiddleware>();

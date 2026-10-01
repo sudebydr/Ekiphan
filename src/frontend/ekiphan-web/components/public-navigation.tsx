@@ -80,7 +80,7 @@ export function PublicNavigation({
 
           return (
             <HoverProductsMenu
-              className={`${styles.productsMenu} ${styles.productsMenuMega}`}
+              className={`${styles.productsMenu} ${styles.productsMenuMega} ${styles.galleryMenu}`}
               key={item.href}
             >
               <summary

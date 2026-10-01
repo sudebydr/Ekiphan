@@ -87,7 +87,7 @@ internal static class PublicMediaEndpoints
         storageKey = string.Empty;
         if (string.IsNullOrWhiteSpace(path) ||
             path.Length > 494 ||
-            !(path.StartsWith(StorageKeyPrefix, StringComparison.OrdinalIgnoreCase) || path.StartsWith("catalogs/", StringComparison.OrdinalIgnoreCase)) ||
+            path.StartsWith("media/", StringComparison.OrdinalIgnoreCase) ||
             path.StartsWith('/') ||
             path.Contains('\\') ||
             path.Contains("..", StringComparison.Ordinal) ||
@@ -99,7 +99,9 @@ internal static class PublicMediaEndpoints
             return false;
         }
 
-        storageKey = path.StartsWith("catalogs/", StringComparison.OrdinalIgnoreCase) ? path : StorageKeyPrefix + path;
+        storageKey = path.StartsWith("catalogs/", StringComparison.OrdinalIgnoreCase)
+            ? path
+            : StorageKeyPrefix + path;
         return true;
     }
 

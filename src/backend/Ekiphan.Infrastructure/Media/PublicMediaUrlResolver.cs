@@ -14,7 +14,7 @@ public sealed class PublicMediaUrlResolver : IPublicMediaUrlResolver
         }
 
         if (!Uri.TryCreate(baseUrl.Trim(), UriKind.Absolute, out var parsed) ||
-            parsed.Scheme != Uri.UriSchemeHttps ||
+            (parsed.Scheme != Uri.UriSchemeHttps && !IsLocalHttp(parsed)) ||
             string.IsNullOrWhiteSpace(parsed.Host) ||
             !string.IsNullOrEmpty(parsed.Query) ||
             !string.IsNullOrEmpty(parsed.Fragment))
@@ -49,5 +49,10 @@ public sealed class PublicMediaUrlResolver : IPublicMediaUrlResolver
         storageKey.All(
             character =>
                 char.IsLetterOrDigit(character) ||
-                character is '/' or '-' or '_' or '.');
+            character is '/' or '-' or '_' or '.');
+
+    // Local development commonly serves the API over HTTP. Keep non-loopback
+    // public media endpoints HTTPS-only so a deployment cannot be downgraded.
+    private static bool IsLocalHttp(Uri uri) =>
+        uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback;
 }

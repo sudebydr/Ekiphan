@@ -21,6 +21,7 @@ const groups = [
       { href: "/katalog", label: "Tüm Ürünler" },
       { href: "/endustriyel-mutfak", label: "Endüstriyel Mutfak" },
       { href: "/kataloglar", label: "Kataloglar" },
+      { href: "/showroom", label: "Showroom" },
     ],
   },
   {
@@ -28,7 +29,6 @@ const groups = [
     links: [
       { href: "/iletisim", label: "İletişim" },
       { href: "/teklif-listem", label: "Teklif Al" },
-      { href: "/showroom", label: "Showroom" },
     ],
   },
 ];

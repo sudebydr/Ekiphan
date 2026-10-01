@@ -1,654 +1,146 @@
-.page {
-  --cream: #f3eee7;
-  --paper: #f8f4ee;
-  --ink: #211e1b;
-  --muted: #756f69;
-  --line: rgba(33, 30, 27, 0.15);
-  --burgundy: #9f263f;
-  --dark: #181513;
-
-  width: 100%;
-  min-height: 100vh;
-  overflow: hidden;
-  background: var(--paper);
-  color: var(--ink);
+.page { min-height: 100vh; margin: 0; padding: 0 0 5rem; color: #18242d; font-family: Arial,Helvetica,sans-serif; }
+.hero { position: relative; display: grid; color: #fff; }
+.heroCopy>p, .intro>p, .categories header p, .project p { margin: 0 0 1rem; color: #ba1b3d; font-size: .72rem; font-weight: 850; letter-spacing: .18em; }
+.hero h1 { margin: 0; font-family: Georgia,'Times New Roman',serif; }
+.heroCopy>span { display: block; max-width: 37rem; margin-top: 1.6rem; color: rgb(255 255 255/.8); font-size: 1rem; line-height: 1.75; }
+.heroCopy>div { display: flex; gap: .7rem; margin-top: 2rem; }
+.heroCopy a, .project a { display: inline-flex; min-height: 3rem; align-items: center; justify-content: center; padding: 0 1.25rem; border: 1px solid rgb(255 255 255/.55); border-radius: .45rem; color: #fff; font-size: .78rem; font-weight: 800; text-decoration: none; }
+.heroCopy a:first-child, .project a { border-color: #a91836; background: #a91836; }
+.intro, .categories, .project, .benefits { margin-inline: auto; }
+.intro { display: grid; grid-template-columns: .8fr 1.2fr; padding: 5rem 0 4rem; }
+.intro p { grid-column: 1; }
+.intro h2 { grid-column: 1; max-width: 13ch; margin: -3.5rem 0 0; font-size: clamp(2.4rem,4vw,4.5rem); letter-spacing: -.055em; line-height: .98; }
+.intro span { grid-column: 2; max-width: 39rem; color: #65716f; font-size: 1.05rem; line-height: 1.8; }
+.categories { padding: 1rem 0 5rem; }
+.categories header { display: flex; align-items: end; justify-content: space-between; gap: 2rem; }
+.categories h2 { max-width: 18ch; margin: 0; font-size: clamp(2.15rem,3.2vw,3.5rem); letter-spacing: -.05em; line-height: 1; }
+.categoryGrid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
+.categoryCard { display: flex; flex-direction: column; color: inherit; text-decoration: none; transition: transform .2s ease,box-shadow .2s ease; }
+.categoryPhoto { display: block; background: linear-gradient(0deg,rgb(9 14 16/.18),transparent),url('/images/industrial-kitchen-premium.png') center/cover; }
+.categoryCard h3 { letter-spacing: -.03em; }
+.categoryCard p { margin: 0; font-size: .85rem; line-height: 1.55; }
+.categoryCard b { display: flex; justify-content: space-between; color: #9c1532; font-size: .75rem; }
+.categoryCard i, .project i { font-style: normal; font-size: 1.1rem; }
+.project { display: grid; grid-template-columns: 1.05fr .95fr; overflow: hidden; }
+.projectImage { min-height: 27rem; background: url('/images/feature-kitchen-triptych-v1.png') center/cover; }
+.project>div:last-child { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: clamp(2rem,5vw,5rem); }
+.project h2 { max-width: 11ch; margin: 0; font-size: clamp(2.3rem,3.7vw,4.2rem); letter-spacing: -.06em; line-height: .96; }
+.project span { margin-top: 1.5rem; color: #596464; line-height: 1.75; }
+.project a { gap: .9rem; margin-top: 2rem; }
+.benefits { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; padding-top: 4rem; }
+.benefits article { padding: 1.5rem; border-top: 1px solid rgb(24 36 45/.14); }
+.benefits b { color: #a91836; font-size: .75rem; letter-spacing: .12em; }
+.benefits h3 { margin: 1.4rem 0 .6rem; font-size: 1.1rem; }
+.benefits p { margin: 0; color: #65716f; font-size: .84rem; line-height: 1.6; }
+@media(max-width:64rem) {
+  .hero { min-height: 38rem; padding-top: 9rem; }
+  .intro { grid-template-columns: 1fr; gap: 1rem; }
+  .intro p, .intro h2, .intro span { grid-column: auto; }
+  .intro h2 { margin: 0; }
+  .categoryGrid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .project { grid-template-columns: 1fr; }
+  .projectImage { min-height: 20rem; }
+  .benefits { grid-template-columns: repeat(2,1fr); }
 }
 
-.hero {
-  display: grid;
-  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
-  min-height: min(44rem, calc(100vh - 7rem));
-  background: var(--cream);
+@media(max-width:48rem) {
+  .hero, .intro, .categories, .project, .benefits { width: calc(100% - 2rem); }
+  .hero { min-height: 36rem; padding: 8rem 1.4rem 2.5rem; }
+  .hero h1 { font-size: clamp(3rem,12vw,4.3rem); }
+  .heroCopy>div { flex-direction: column; align-items: flex-start; }
+  .categoryGrid { grid-template-columns: 1fr; }
+  .projectImage { min-height: 17rem; }
+  .benefits { gap: 0; }
+  .benefits article { padding: 1.2rem 0; }
+  .project>div:last-child { padding: 2rem; }
+  .intro { padding: 3.5rem 0; }
+  .categories { padding-bottom: 3.5rem; }
 }
 
-.heroCopy {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  justify-content: center;
-  padding: clamp(4rem, 7vw, 7rem) clamp(2rem, 5vw, 6.2rem);
+.page { background: #f8f5f0; }
+.hero h1, .intro h2, .categories h2, .project h2, .categoryCard h3, .benefits h3 { font-family: Arial, Helvetica, sans-serif; }
+.hero h1 { letter-spacing: -.055em; }
+.intro h2, .categories h2, .project h2 { font-weight: 700; letter-spacing: -.05em; }
+.categoryCard { border-color: rgb(24 36 45 / 7%); }
+.project { background: #e7e0d6; border-radius: 1.75rem; }
+.benefits article { border-top-color: rgb(24 36 45 / 9%); }
+.hero { place-items: center; background: linear-gradient(90deg, rgb(15 14 13 / 38%), rgb(15 14 13 / 22%) 48%, rgb(15 14 13 / 34%)), url('/images/industrial-kitchen-hero.jpg') center / cover no-repeat; }
+.heroCopy > p { margin-bottom: 1rem; }
+.heroCopy > span { max-width: 44rem; margin-inline: auto; }
+.heroCopy > div { justify-content: center; }
+@media (max-width: 48rem) {
+  .page { padding-top: 7.8rem; }
+  .hero { width: calc(100% - 2rem); border-radius: 1.1rem; background-position: center; }
+  .heroCopy > div { align-items: center; }
 }
 
-.eyebrowRow {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  margin-bottom: 2rem;
-}
-
-.eyebrowRow > span {
-  color: var(--burgundy);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-}
-
-.eyebrowRow > i {
-  width: 3.6rem;
-  height: 1px;
-  background: var(--burgundy);
-}
-
-.eyebrowRow p,
-.sectionKicker {
-  margin: 0;
-  color: var(--burgundy);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
-.hero h1 {
-  max-width: 11ch;
-  margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(3.8rem, 5.65vw, 6.9rem);
-  font-weight: 500;
-  letter-spacing: -0.065em;
-  line-height: 0.88;
-}
-
-.hero h1 em,
-.intro h2 em,
-.projectCopy h2 em,
-.benefits h2 em {
-  color: var(--burgundy);
-  font-style: italic;
-  font-weight: 400;
-}
-
-.heroLead {
-  max-width: 38rem;
-  margin: 2rem 0 0;
-  color: #5f5954;
-  font-size: clamp(0.98rem, 1.25vw, 1.12rem);
-  line-height: 1.72;
-}
-
-.heroActions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1.15rem;
-  margin-top: 2rem;
-}
-
-.primaryAction,
-.secondaryAction,
-.projectAction {
-  display: inline-flex;
-  min-height: 3.35rem;
-  align-items: center;
-  justify-content: center;
-  gap: 1.2rem;
-  text-decoration: none;
-  transition: transform 180ms ease, background-color 180ms ease, color 180ms ease;
-}
-
-.primaryAction {
-  padding: 0 1.45rem;
-  background: var(--burgundy);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-
-.secondaryAction {
-  color: var(--burgundy);
-  border-bottom: 1px solid rgba(159, 38, 63, 0.7);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-
-.primaryAction:hover,
-.secondaryAction:hover,
-.projectAction:hover {
-  transform: translateY(-2px);
-}
-
-.heroMeta {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-top: auto;
-  padding-top: 3.5rem;
-  color: #7b746d;
-  font-size: 0.64rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-}
-
-.heroMeta i {
-  width: 1px;
-  height: 0.8rem;
-  background: rgba(33, 30, 27, 0.24);
-}
-
-.heroVisual {
-  position: relative;
-  min-height: 36rem;
-  overflow: hidden;
-  background: var(--dark);
-}
-
-.heroVisual img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center center;
-}
-
-.heroVisualShade {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, rgba(17, 14, 12, 0.16), transparent 26%),
-    linear-gradient(180deg, transparent 55%, rgba(17, 14, 12, 0.24));
-}
-
-.verticalLabel {
-  position: absolute;
-  top: 50%;
-  left: 1.8rem;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.58rem;
-  font-weight: 600;
-  letter-spacing: 0.36em;
-  writing-mode: vertical-rl;
-  transform: translateY(-50%) rotate(180deg);
-}
-
-.heroSlide {
-  position: absolute;
-  right: 1.8rem;
-  bottom: 1.8rem;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.64rem;
-  letter-spacing: 0.16em;
-}
-
-.intro,
-.categories,
-.project,
-.benefits {
-  width: min(calc(100% - 4rem), 92rem);
-  margin-inline: auto;
-}
-
-.intro {
-  display: grid;
-  grid-template-columns: 5rem minmax(0, 1.15fr) minmax(24rem, 0.78fr);
-  gap: clamp(1.75rem, 4vw, 4.5rem);
-  align-items: start;
-  padding: clamp(5rem, 8vw, 8.5rem) 0 clamp(4rem, 7vw, 6rem);
-}
-
-.introHeading {
-  min-width: 0;
-}
-
-.introIndex,
-.projectIndex,
-.benefitsHeading > span {
-  color: var(--burgundy);
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-}
-
-.introHeading h2,
-.projectCopy h2,
-.benefitsHeading h2 {
-  max-width: 12ch;
-  margin: 0.85rem 0 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2.55rem, 4.15vw, 4.9rem);
-  font-weight: 500;
-  letter-spacing: -0.055em;
-  line-height: 0.96;
-  overflow-wrap: normal;
-  word-break: normal;
-}
-
-.introHeading h2 em {
-  white-space: normal;
-}
-
-.introCopy {
-  max-width: 31rem;
-  margin: 4.15rem 0 0;
-  color: var(--muted);
-  font-size: clamp(0.95rem, 1.05vw, 1.02rem);
-  line-height: 1.9;
-  position: relative;
-  z-index: 1;
-}
-
-.categories {
-  padding: 0 0 clamp(6rem, 10vw, 10rem);
-}
-
-.sectionTopline {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 2rem;
-  padding-top: 1.2rem;
-  border-top: 1px solid var(--line);
-}
-
-.sectionTopline > div {
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
-}
-
-.sectionNumber {
-  color: var(--burgundy);
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-}
-
-.sectionNote {
-  max-width: 25rem;
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.82rem;
-  line-height: 1.6;
-  text-align: right;
-}
-
-.sectionTitle {
-  margin: 1.8rem 0 3rem;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2.8rem, 5vw, 5.8rem);
-  font-weight: 500;
-  letter-spacing: -0.06em;
-  line-height: 0.9;
-}
-
-.categoryGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-top: 1px solid var(--line);
-}
-
-.categoryCard {
-  min-width: 0;
-  padding: 1.25rem 1.2rem 1.45rem;
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  color: inherit;
-  text-decoration: none;
-  transition: background-color 180ms ease;
-}
-
-.categoryCard:nth-child(3n + 1) {
-  border-left: 1px solid var(--line);
-}
-
-.categoryCard:hover {
-  background: #eee8e0;
-}
-
-.categoryPhoto {
-  position: relative;
-  height: clamp(13rem, 21vw, 18.5rem);
-  overflow: hidden;
-  background-position: center;
-  background-size: cover;
-}
-
-.categoryPhoto span {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  z-index: 1;
-  color: #fff;
-  font-size: 0.66rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
-}
-
-.categoryPhoto::after {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(20, 17, 14, 0.02), rgba(20, 17, 14, 0.18));
-  content: "";
-}
-
-.hazirlik { background-image: url("/images/feature-consultation.png"); background-position: center 55%; }
-.pisirme { background-image: url("/images/industrial-kitchen-premium.png"); background-position: 42% center; }
-.sogutma { background-image: url("/images/feature-selection.png"); background-position: center; }
-.yikama { background-image: url("/images/feature-quality-natural-v2.png"); background-position: center; }
-.saklama { background-image: url("/images/feature-solutions-natural-v2.png"); background-position: center; }
-.havalandirma { background-image: url("/images/feature-kitchen-triptych-v1.png"); background-position: 82% center; }
-
-.categoryBody h3 {
-  margin: 1.2rem 0 0.45rem;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1.5rem, 2vw, 2rem);
-  font-weight: 500;
-  letter-spacing: -0.045em;
-  line-height: 1;
-}
-
-.categoryBody p {
-  max-width: 27rem;
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.84rem;
-  line-height: 1.65;
-}
-
-.categoryLink {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 1.4rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--line);
-  color: var(--burgundy);
-  font-size: 0.67rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.categoryLink i {
-  font-size: 1rem;
-  font-style: normal;
-}
-
-.project {
-  display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-  margin-bottom: clamp(6rem, 10vw, 10rem);
-  background: #e5ded4;
-}
-
-.projectImage {
-  min-height: 32rem;
-  overflow: hidden;
-}
-
-.projectImage img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.projectCopy {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: clamp(3rem, 7vw, 6.5rem);
-}
-
-.projectIndex {
-  margin-bottom: 2.2rem;
-}
-
-.projectCopy h2 {
-  max-width: 10ch;
-  font-size: clamp(2.8rem, 4vw, 5rem);
-}
-
-.projectCopy > p:not(.sectionKicker) {
-  max-width: 31rem;
-  margin: 1.75rem 0 0;
-  color: #69615b;
-  line-height: 1.8;
-}
-
-.projectAction {
-  align-self: flex-start;
-  margin-top: 2rem;
-  padding-bottom: 0.45rem;
-  border-bottom: 1px solid var(--burgundy);
-  color: var(--burgundy);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.benefits {
-  display: grid;
-  grid-template-columns: minmax(18rem, 0.85fr) minmax(0, 1.15fr);
-  gap: clamp(3rem, 7vw, 8rem);
-  padding-bottom: clamp(6rem, 10vw, 11rem);
-}
-
-.benefitsHeading h2 {
-  max-width: 11ch;
-  margin-top: 1rem;
-}
-
-.benefitGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  border-top: 1px solid var(--line);
-}
-
-.benefitGrid article {
-  min-height: 12rem;
-  padding: 1.25rem 1.4rem 1.8rem;
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-
-.benefitGrid article:nth-child(odd) {
-  border-left: 1px solid var(--line);
-}
-
-.benefitGrid article > span {
-  color: var(--burgundy);
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-}
-
-.benefitGrid h3 {
-  margin: 3rem 0 0.75rem;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1.5rem, 2vw, 2.1rem);
-  font-weight: 500;
-  letter-spacing: -0.045em;
-  line-height: 1;
-}
-
-.benefitGrid p {
-  max-width: 18rem;
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.84rem;
-  line-height: 1.65;
-}
-
-@media (max-width: 74rem) {
-  .hero {
-    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-  }
-
-  .hero h1 {
-    font-size: clamp(3.4rem, 5.5vw, 5.7rem);
-  }
-
- .intro {
-    grid-template-columns: 3.2rem minmax(0, 1fr);
-  }
-
-  .introHeading h2 {
-    max-width: 11ch;
-    font-size: clamp(2.5rem, 6vw, 4.6rem);
-  }
-
-  .introCopy {
-    grid-column: 2;
-    margin-top: 1.2rem;
-  }
-}
-
-@media (max-width: 60rem) {
-  .hero {
-    grid-template-columns: 1fr;
-  }
-
-  .heroVisual {
-    min-height: 29rem;
-    order: -1;
-  }
-
-  .heroCopy {
-    padding-top: 4rem;
-    padding-bottom: 4.5rem;
-  }
-
-  .intro,
-  .benefits {
-    grid-template-columns: 1fr;
-  }
-
-  .introCopy {
-    grid-column: auto;
-    margin-top: 0.5rem;
-    max-width: 36rem;
-  }
-
-  .categoryGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .categoryCard:nth-child(3n + 1),
-  .categoryCard:nth-child(2n + 1) {
-    border-left: 1px solid var(--line);
-  }
-
-  .categoryCard:nth-child(2n) {
-    border-right: 1px solid var(--line);
-  }
-
-  .project {
-    grid-template-columns: 1fr;
-  }
-
-  .projectImage {
-    min-height: 24rem;
-  }
+.page { width: 100%; max-width: none; padding-top: 0; }
+.hero { width: min(calc(100% - 4rem), 105rem); min-height: 34.5rem; height: auto; margin: 1rem auto 0; padding: 3rem 2rem; align-items: center; justify-items: center; border-radius: 1.625rem; overflow: hidden; }
+.heroCopy { width: 100%; max-width: 59.375rem; margin: 0 auto; text-align: center; }
+.hero h1 { max-width: 62.5rem; margin-inline: auto; font-size: clamp(3rem, 4.5vw, 4.5rem); line-height: .99; font-weight: 750; }
+.heroCopy > span { margin-top: 1.9rem; }
+.heroCopy > div { gap: .9rem; margin-top: 2.1rem; }
+.intro, .categories, .project, .benefits { width: min(calc(100% - 4rem), 105rem); }
+@media (max-width: 64rem) {
+  .hero, .intro, .categories, .project, .benefits { width: calc(100% - 2rem); }
+  .hero { min-height: 32.5rem; }
 }
 
 @media (max-width: 48rem) {
-  .intro,
-  .categories,
-  .project,
-  .benefits {
-    width: min(calc(100% - 2rem), 92rem);
-  }
+  .hero { min-height: 30rem; margin-top: .75rem; padding: 2.5rem 1.25rem; }
+  .hero h1 { font-size: clamp(2.5rem, 11vw, 3.7rem); }
+  .heroCopy > span { margin-top: 1.5rem; }
+  .heroCopy > div { gap: .75rem; margin-top: 1.75rem; }
+}
 
-  .heroCopy {
-    padding: 3.5rem 1.5rem 3.75rem;
-  }
+.heroCopy > span { color: rgb(255 255 255 / 96%); font-weight: 500; text-shadow: 0 .12rem .7rem rgb(0 0 0 / 68%); }
+.categoryPhoto { position: relative; overflow: hidden; background-image: linear-gradient(135deg, rgb(255 255 255 / 14%), rgb(255 255 255 / 3%)), url('/images/industrial-kitchen-premium.png'); background-position: center; }
+.categoryPhoto::after { position: absolute; inset: 0; border: 1px solid rgb(255 255 255 / 30%); border-radius: inherit; content: ""; }
+.hazirlik { background-image: linear-gradient(135deg, rgb(255 255 255 / 16%), rgb(255 255 255 / 2%)), url('/images/feature-consultation.png'); background-position: center 55%; }
+.pisirme { background-image: linear-gradient(135deg, rgb(255 255 255 / 14%), rgb(255 255 255 / 2%)), url('/images/industrial-kitchen-premium.png'); background-position: 45% center; }
+.sogutma { background-image: linear-gradient(135deg, rgb(255 255 255 / 14%), rgb(255 255 255 / 2%)), url('/images/feature-selection.png'); background-position: center; }
+.yikama { background-image: linear-gradient(135deg, rgb(255 255 255 / 16%), rgb(255 255 255 / 2%)), url('/images/feature-quality-natural-v2.png'); background-position: center; }
+.saklama { background-image: linear-gradient(135deg, rgb(255 255 255 / 14%), rgb(255 255 255 / 2%)), url('/images/feature-solutions-natural-v2.png'); background-position: center; }
+.havalandirma { background-image: linear-gradient(135deg, rgb(255 255 255 / 14%), rgb(255 255 255 / 2%)), url('/images/feature-kitchen-triptych-v1.png'); background-position: 80% center; }
+.categoryCard h3 { margin: 1.15rem .2rem .45rem; }
+.categoryCard p { margin-inline: .2rem; }
+.categoryCard b { margin: auto .2rem .15rem; }
+.intro { gap: clamp(1.5rem, 2.5vw, 2.75rem); padding-top: 2rem; padding-bottom: 1rem; }
+.intro h2 { margin-top: -2.1rem; }
+.intro span { align-self: center; }
+.categories { padding-bottom: 3.5rem; }
+.categories header { margin-bottom: 1rem; }
+@media (max-width: 64rem) {
+  .intro { padding-top: 1.75rem; padding-bottom: .75rem; }
+  .intro h2 { margin-top: 0; }
+}
 
-  .hero h1 {
-    max-width: 9ch;
-    font-size: clamp(3.2rem, 12vw, 5.2rem);
-  }
+@media (max-width: 48rem) {
+  .intro { padding-top: 2rem; padding-bottom: .75rem; }
+}
 
-  .heroLead {
-    margin-top: 1.5rem;
-    font-size: 0.94rem;
-  }
+.categoryGrid { gap: 1.25rem; }
+.categoryCard { min-height: 20.25rem; padding: 1.1rem; border: 1px solid rgb(24 36 45 / 8%); background: linear-gradient(145deg, #fffefa 0%, #f6f1ea 100%); box-shadow: 0 .8rem 2rem rgb(32 29 25 / 8%), inset 0 1px 0 rgb(255 255 255 / 82%); }
+.categoryPhoto { height: 10.75rem; filter: saturate(.88) contrast(.96) brightness(1.02); }
+.categoryCard h3 { margin-top: 1.15rem; font-size: 1.2rem; }
+.categoryCard p { color: #687270; }
+.categoryCard b { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgb(24 36 45 / 10%); }
+.categoryCard:hover { transform: translateY(-.35rem); border-color: rgb(169 24 54 / 20%); box-shadow: 0 1.25rem 2.5rem rgb(32 29 25 / 13%), inset 0 1px 0 rgb(255 255 255 / 90%); }
+@media (max-width: 48rem) {
+  .categoryGrid { gap: 1rem; }
+  .categoryCard { min-height: 0; padding: .9rem; }
+  .categoryPhoto { height: 10rem; }
+}
 
-  .heroActions {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 1rem;
-  }
+.categoryCard { border-radius: 2rem .85rem 2rem .85rem; }
+.categoryPhoto { border-radius: 1.35rem .5rem 1.35rem .5rem; }
+@media (max-width: 48rem) {
+  .categoryCard { border-radius: 1.6rem .75rem 1.6rem .75rem; }
+  .categoryPhoto { border-radius: 1.05rem .45rem 1.05rem .45rem; }
+}
 
-  .heroMeta {
-    padding-top: 2.5rem;
-  }
-
-  .heroVisual {
-    min-height: 24rem;
-  }
-
-  .sectionTopline {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .sectionNote {
-    max-width: 19rem;
-    text-align: left;
-  }
-
-  .categoryGrid,
-  .benefitGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .categoryCard,
-  .categoryCard:nth-child(2n),
-  .categoryCard:nth-child(3n + 1) {
-    border-left: 1px solid var(--line);
-    border-right: 1px solid var(--line);
-  }
-
-  .categoryPhoto {
-    height: 14rem;
-  }
-
-  .project {
-    width: calc(100% - 2rem);
-  }
-
-  .projectImage {
-    min-height: 18rem;
-  }
-
-  .projectCopy {
-    padding: 2.8rem 1.5rem 3.5rem;
-  }
-
-  .benefitsHeading h2 {
-    max-width: 12ch;
-  }
-
-  .benefitGrid article {
-    min-height: 10rem;
-    border-left: 1px solid var(--line);
-    border-right: 1px solid var(--line);
-  }
+.heroCopy > p { color: #ff4d69; font-weight: 900; text-shadow: 0 .1rem .6rem rgb(0 0 0 / 82%); }
+.categories { padding-top: .9rem; }
+@media (max-width: 48rem) {
+  .categories { padding-top: .9rem; }
 }

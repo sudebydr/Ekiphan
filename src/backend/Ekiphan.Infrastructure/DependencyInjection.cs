@@ -1,5 +1,6 @@
 using Ekiphan.Application.Administration;
 using Ekiphan.Application.Catalog;
+using Ekiphan.Application.Deployments;
 using Ekiphan.Application.DataImport;
 using Ekiphan.Application.Quotes;
 using Ekiphan.Application.Media;
@@ -7,6 +8,7 @@ using Ekiphan.Application.Identity;
 using Ekiphan.Application.Content;
 using Ekiphan.Infrastructure.Administration;
 using Ekiphan.Infrastructure.Catalog;
+using Ekiphan.Infrastructure.Deployments;
 using Ekiphan.Infrastructure.DataImport;
 using Ekiphan.Infrastructure.Quotes;
 using Ekiphan.Infrastructure.Media;
@@ -44,8 +46,10 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        string redisConnectionString)
     {
+        services.AddSingleton<IConfigurationValidationService, ConfigurationValidationService>();
         services.AddDataProtection().SetApplicationName("Ekiphan.Admin.Security");
         services.AddMemoryCache();
         services.AddOptions<AdminSecurityOptions>().Bind(configuration.GetSection(AdminSecurityOptions.SectionName))
@@ -350,7 +354,8 @@ public static class DependencyInjection
         services.AddSingleton(TimeProvider.System);
 
         // Performance & Caching
-        services.AddSingleton<IConnectionMultiplexer>(sp => ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis") ?? "localhost:6379"));
+        services.AddSingleton<IConnectionMultiplexer>(
+            _ => ConnectionMultiplexer.Connect(redisConnectionString));
         services.AddSingleton<IApplicationCache, RedisApplicationCache>();
         services.AddSingleton<ICacheKeyFactory, DefaultCacheKeyFactory>();
         services.AddSingleton<IDistributedLockService, RedisDistributedLockService>();

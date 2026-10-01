@@ -233,11 +233,8 @@
 ========================================================= */
 
 .productsMenuMega {
-  /*
-   * static olması önemli.
-   * Mega panel header'a göre hizalanıyor.
-   */
-  position: static;
+  /* Mega paneli kendi tetikleyicisine göre konumlandırır. */
+  position: relative;
 }
 
 
@@ -255,7 +252,7 @@
 
   top: 100% !important;
 
-  left: 50% !important;
+  left: 0 !important;
 
   width: calc(100vw - 72px) !important;
 
@@ -283,7 +280,6 @@
   pointer-events: none;
 
   transform:
-    translateX(-50%)
     translateY(-10px);
 
   transition:
@@ -306,7 +302,6 @@
   pointer-events: auto;
 
   transform:
-    translateX(-50%)
     translateY(0);
 }
 
@@ -784,7 +779,7 @@
     position: absolute !important;
 
     top: calc(100% + 1px) !important;
-    left: 50% !important;
+    left: 0 !important;
 
     z-index: 1200 !important;
 
@@ -802,7 +797,12 @@
     box-shadow:
       0 18px 45px rgba(39, 31, 25, 0.12) !important;
 
-    transform: translateX(-50%) !important;
+  }
+
+  /* Geniş GALERİ panelini kendi trigger'ının sağ kenarına bağlar. */
+  .mainNav .galleryMenu .productsMegaPanel {
+    right: 0 !important;
+    left: auto !important;
   }
 
   .mainNav .productsSubmenu a,

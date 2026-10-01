@@ -18,31 +18,51 @@ public class ConfigurationValidationService : IConfigurationValidationService
 
     public void ValidateStartupConfiguration()
     {
-        var sqlConnection = _configuration.GetConnectionString("DefaultConnection");
-        if (string.IsNullOrWhiteSpace(sqlConnection))
+        if (!_environment.IsProduction())
         {
-            throw new InvalidOperationException("CRITICAL: SQL Server connection string is missing.");
+            return;
         }
 
-        if (_environment.IsProduction())
+        RequireValue(_configuration.GetConnectionString("EkiphanDatabase"), "ConnectionStrings:EkiphanDatabase");
+        RequireValue(_configuration.GetConnectionString("Redis"), "ConnectionStrings:Redis");
+
+        var jwtSigningKey = RequireValue(_configuration["Authentication:Jwt:SigningKey"], "Authentication:Jwt:SigningKey");
+        if (jwtSigningKey.Length < 32)
         {
-            var redisConnection = _configuration.GetConnectionString("Redis");
-            if (string.IsNullOrWhiteSpace(redisConnection))
-            {
-                throw new InvalidOperationException("CRITICAL: Redis connection string is missing in Production environment.");
-            }
+            throw new InvalidOperationException("Invalid required configuration: Authentication:Jwt:SigningKey (minimum 32 characters).");
+        }
 
-            var jwtKey = _configuration["JwtSettings:SigningKey"];
-            if (string.IsNullOrWhiteSpace(jwtKey) || jwtKey.Length < 32)
-            {
-                throw new InvalidOperationException("CRITICAL: JWT Signing Key is missing or too short in Production environment.");
-            }
+        RequireValue(_configuration["Authentication:Jwt:Issuer"], "Authentication:Jwt:Issuer");
+        RequireValue(_configuration["Authentication:Jwt:Audience"], "Authentication:Jwt:Audience");
 
-            var allowedOrigins = _configuration["Cors:AllowedOrigins"];
-            if (allowedOrigins == "*")
-            {
-                throw new InvalidOperationException("CRITICAL: Wildcard CORS is not allowed in Production environment.");
-            }
+        var mediaProvider = RequireValue(_configuration["MediaStorage:Provider"], "MediaStorage:Provider");
+        if (!string.Equals(mediaProvider, "S3", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Invalid required configuration: MediaStorage:Provider must be 'S3' in Production.");
+        }
+
+        RequireValue(_configuration["MediaStorage:S3:Bucket"], "MediaStorage:S3:Bucket");
+        RequireValue(_configuration["MediaStorage:S3:Region"], "MediaStorage:S3:Region");
+        ValidatePublicMediaBaseUrl(RequireValue(_configuration["PublicMedia:BaseUrl"], "PublicMedia:BaseUrl"));
+    }
+
+    private static string RequireValue(string? value, string key)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new InvalidOperationException($"Missing required configuration: {key}.");
+        }
+
+        return value;
+    }
+
+    private static void ValidatePublicMediaBaseUrl(string value)
+    {
+        if (!Uri.TryCreate(value, UriKind.Absolute, out var uri) ||
+            !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) ||
+            string.IsNullOrWhiteSpace(uri.Host))
+        {
+            throw new InvalidOperationException("Invalid required configuration: PublicMedia:BaseUrl must be an absolute HTTPS URL in Production.");
         }
     }
 }

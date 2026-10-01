@@ -1,20 +1,11 @@
-import styles from "./catalog.module.css";
+import styles from "./catalog-list.module.css";
 import { PublicHeader } from "../../components/public-header";
 
 export default function CatalogLoading() {
   return (
     <main className={styles.page} data-public-page aria-busy="true">
       <PublicHeader currentPath="/katalog" />
-      <section className={styles.hero}>
-        <div>
-          <p className={styles.eyebrow}>PROFESYONEL EKİPMAN</p>
-          <h1>Katalog hazırlanıyor…</h1>
-        </div>
-        <p className={styles.heroText}>
-          Ürünler ve filtre seçenekleri hazırlanıyor.
-        </p>
-      </section>
-      <div className={styles.loadingLayout} aria-hidden="true">
+      <div className={styles.catalogLayout} aria-hidden="true">
         <aside className={styles.loadingFilters}>
           <span />
           <span />

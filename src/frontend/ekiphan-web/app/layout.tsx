@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import type { ReactNode } from "react";
-import { Inter } from "next/font/google";
+import type { CSSProperties, ReactNode } from "react";
+import "@fontsource-variable/inter";
 
 import { PublicFooter } from "../components/public-footer";
 import { getPublicSettings } from "../lib/public-settings";
@@ -9,11 +9,9 @@ import { defaultSocialImage } from "../lib/social-metadata";
 
 import "./styles.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
+const interVariable = {
+  "--font-inter": '"Inter Variable", Inter, Arial, Helvetica, sans-serif',
+} as CSSProperties;
 
 export const metadata: Metadata = {
   metadataBase: getSiteOrigin() ?? undefined,
@@ -58,7 +56,7 @@ export default async function RootLayout({
 
   return (
     <html lang="tr">
-      <body className={inter.variable}>
+      <body style={interVariable}>
         {children}
         <PublicFooter settings={settings} />
       </body>

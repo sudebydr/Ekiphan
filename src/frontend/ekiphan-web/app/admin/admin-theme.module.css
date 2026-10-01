@@ -1,0 +1,81 @@
+.theme {
+  --ek-background: #d8d2c8;
+  --ek-surface: #ece7df;
+  --ek-primary: #901f3b;
+  --ek-text: #1f1f1f;
+  --ek-secondary: #6f6b66;
+  --ek-border: #e2ded8;
+  --ek-off-white: #f5f2ec;
+  --ek-gold: #b99563;
+  box-sizing: border-box;
+  min-height: 100vh;
+  background: #f4f1ed;
+  color: #171a1d;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.theme *,
+.theme *::before,
+.theme *::after {
+  box-sizing: inherit;
+}
+
+.theme :is(button, input, select, textarea) {
+  font: inherit;
+}
+
+.theme main {
+  color: #171a1d;
+  background-color: #f4f1ed;
+}
+
+.theme [class*="eyebrow"] {
+  color: #88051f;
+}
+
+.theme :is(h1, h2, h3) {
+  font-family: Arial, Helvetica, sans-serif;
+  letter-spacing: -0.035em;
+}
+
+.theme [class*="hero"] {
+  border-radius: 0;
+  background:
+    linear-gradient(90deg, rgb(9 12 15 / 93%), rgb(9 12 15 / 67%)),
+    url("/images/ekiphan-kitchen-hero.png") center / cover;
+  box-shadow: none;
+}
+
+.theme :is(
+  [class*="panel"],
+  [class*="card"],
+  [class*="metric"],
+  [class*="editor"]
+) {
+  border-radius: 0;
+  border-color: #ddd8d2;
+  background-color: #fff;
+  box-shadow: none;
+}
+
+.theme :is(input, textarea, select, button) {
+  border-radius: 0 !important;
+}
+
+.theme button:not([class*="danger"]):not([class*="textButton"]) {
+  background-color: #88051f;
+}
+
+.theme a {
+  color: #78051c;
+}
+
+.theme [class*="nav"] a {
+  text-decoration-color: #b9828e;
+  text-underline-offset: 0.25rem;
+}
+
+.theme :is(input, textarea, select):focus-visible,
+.theme :is(button, a):focus-visible {
+  outline-color: #d4ae52 !important;
+}

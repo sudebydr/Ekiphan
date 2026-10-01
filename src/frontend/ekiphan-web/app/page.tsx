@@ -94,6 +94,8 @@ export default async function HomePage() {
 
   const heroTitleAccent =
     heroTitleAccentParts.join(",").trim();
+  const [featuredCategory, ...remainingCategories] =
+    navigation?.sections ?? [];
 
   return (
     <main className={styles.page}>
@@ -216,8 +218,7 @@ export default async function HomePage() {
           PRODUCT CATEGORIES
       ===================================================== */}
 
-      {navigation &&
-        navigation.sections.length > 0 && (
+      {featuredCategory && (
           <section
             className={styles.categories}
             aria-labelledby="categories-title"
@@ -250,14 +251,39 @@ export default async function HomePage() {
                   <span aria-hidden="true">→</span>
                 </Link>
               </div>
+
+              <Link
+                href="/kataloglar"
+                className={styles.categoryCard}
+              >
+                <div className={styles.categoryImage}>
+                  <img
+                    src={categoryImages[0]}
+                    alt=""
+                    loading="lazy"
+                  />
+                </div>
+
+                <div className={styles.categoryContent}>
+                  <span>{featuredCategory.code}</span>
+
+                  <h3>{featuredCategory.name}</h3>
+
+                  <small>
+                    KATALOĞU KEŞFET
+                    <i aria-hidden="true">→</i>
+                  </small>
+                </div>
+              </Link>
             </div>
 
-            <div className={styles.categoryGrid}>
-              {navigation.sections.map(
+            {remainingCategories.length > 0 && (
+              <div className={styles.categoryGrid}>
+                {remainingCategories.map(
                 (section, index) => {
                   const image =
                     categoryImages[
-                      index % categoryImages.length
+                      (index + 1) % categoryImages.length
                     ];
 
                   return (
@@ -299,8 +325,9 @@ export default async function HomePage() {
                     </Link>
                   );
                 },
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </section>
         )}
 

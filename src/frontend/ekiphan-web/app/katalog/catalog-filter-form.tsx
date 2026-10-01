@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import type { FormEvent, ReactNode } from "react";
-import { useRef, useTransition } from "react";
+import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 type CatalogFilterFormProps = {
@@ -9,15 +9,18 @@ type CatalogFilterFormProps = {
   className: string;
 };
 
+/**
+ * Yalnızca metin araması ve sayısal aralık filtrelerini gönderir.
+ * Seçenek listeleri (grup, kategori, marka, etiket, sıralama) bağlantı olduğundan
+ * mevcut seçimler formda gizli alanlarla taşınır.
+ */
 export function CatalogFilterForm({ children, className }: CatalogFilterFormProps) {
   const router = useRouter();
-  const formRef = useRef<HTMLFormElement>(null);
   const [isPending, startTransition] = useTransition();
 
   const applyFilters = (form: HTMLFormElement) => {
-    const formData = new FormData(form);
     const query = new URLSearchParams();
-    for (const [key, rawValue] of formData.entries()) {
+    for (const [key, rawValue] of new FormData(form).entries()) {
       const value = String(rawValue).trim();
       if (value) query.append(key, value);
     }
@@ -31,25 +34,10 @@ export function CatalogFilterForm({ children, className }: CatalogFilterFormProp
 
   return (
     <form
-      ref={formRef}
       className={className}
       onSubmit={(event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         applyFilters(event.currentTarget);
-      }}
-      onChange={(event) => {
-        const target = event.target;
-        if (
-          target instanceof HTMLSelectElement &&
-          target.dataset.quickFilter === "true"
-        ) {
-          applyFilters(event.currentTarget);
-        }
-      }}
-      onReset={(event) => {
-        event.preventDefault();
-        event.currentTarget.reset();
-        startTransition(() => router.replace("/katalog", { scroll: false }));
       }}
       aria-busy={isPending}
     >
@@ -57,4 +45,3 @@ export function CatalogFilterForm({ children, className }: CatalogFilterFormProp
     </form>
   );
 }
-

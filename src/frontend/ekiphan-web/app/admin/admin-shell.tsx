@@ -51,10 +51,6 @@ export function AdminShell({
   );
 
   useEffect(() => {
-    setCollapsed(window.localStorage.getItem("ekiphan-admin-sidebar") === "1");
-  }, []);
-
-  useEffect(() => {
     setDrawerOpen(false);
   }, [pathname]);
 
@@ -97,11 +93,7 @@ export function AdminShell({
   }, [drawerOpen]);
 
   function toggleCollapsed() {
-    setCollapsed((value) => {
-      const next = !value;
-      window.localStorage.setItem("ekiphan-admin-sidebar", next ? "1" : "0");
-      return next;
-    });
+    setCollapsed((value) => !value);
   }
 
   async function signOut() {

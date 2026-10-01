@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicHeader } from "../../components/public-header";
-import { AddToQuoteButton } from "../../components/add-to-quote-button";
 import { QuoteListIndicator } from "../../components/quote-list-indicator";
-import { PublicNavigation } from "../../components/public-navigation";
 import {
   CatalogApiError,
   getCatalogFacets,
@@ -19,7 +17,10 @@ import { defaultSocialImage } from "../../lib/social-metadata";
 import { DynamicCatalogFilters } from "./dynamic-catalog-filters";
 import { CatalogFilterForm } from "./catalog-filter-form";
 import { CatalogCategoryFilter } from "./catalog-category-filter";
-import styles from "./catalog.module.css";
+import { FilterOptionGroup, type FilterOption } from "./catalog-filter-group";
+import { optionHref } from "./catalog-filter-links";
+import { CatalogProductCard } from "./catalog-product-card";
+import styles from "./catalog-list.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -92,13 +93,72 @@ function filterHref(query: URLSearchParams, key: string, value?: string): string
   return queryString ? `/katalog?${queryString}` : "/katalog";
 }
 
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toLocaleUpperCase("tr-TR");
+/** Filtre bağlantılarının temeli: şu anki tüm seçimler (sayfa hariç). */
+function baseFilterQuery(params: SearchParams): string {
+  const query = new URLSearchParams();
+  for (const key of ["q", "section", "category", "brand", "tag", "sort"]) {
+    const value = one(params[key]).trim();
+    if (value) query.set(key, value);
+  }
+  for (const value of many(params.attribute)) query.append("attribute", value);
+  if (one(params.view) === "list") query.set("view", "list");
+  return query.toString();
+}
+
+function buildOptions(
+  baseQuery: string,
+  key: "section" | "brand" | "tag",
+  allLabel: string,
+  items: { slug: string | null; name: string }[],
+  selected: string
+): FilterOption[] {
+  return [
+    { value: "", label: allLabel, href: optionHref(baseQuery, key, ""), selected: !selected },
+    ...items
+      .filter((item): item is { slug: string; name: string } => Boolean(item.slug))
+      .map((item) => ({
+        value: item.slug,
+        label: item.name,
+        href: optionHref(baseQuery, key, item.slug),
+        selected: selected === item.slug
+      }))
+  ];
+}
+
+type CatalogView = "grid" | "list";
+
+function viewHref(params: SearchParams, view: CatalogView): string {
+  const next = new URLSearchParams();
+  for (const [key, raw] of Object.entries(params)) {
+    if (key === "view" || key === "page") continue;
+    for (const value of Array.isArray(raw) ? raw : raw ? [raw] : []) {
+      if (value) next.append(key, value);
+    }
+  }
+  if (view === "list") next.set("view", "list");
+  const queryString = next.toString();
+  return queryString ? `/katalog?${queryString}` : "/katalog";
+}
+
+function GridIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <rect x="2" y="2" width="7" height="7" rx="1.2" />
+      <rect x="11" y="2" width="7" height="7" rx="1.2" />
+      <rect x="2" y="11" width="7" height="7" rx="1.2" />
+      <rect x="11" y="11" width="7" height="7" rx="1.2" />
+    </svg>
+  );
+}
+
+function ListIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <rect x="2" y="3" width="16" height="3.4" rx="1.2" />
+      <rect x="2" y="8.3" width="16" height="3.4" rx="1.2" />
+      <rect x="2" y="13.6" width="16" height="3.4" rx="1.2" />
+    </svg>
+  );
 }
 
 export default async function CatalogPage({
@@ -108,6 +168,10 @@ export default async function CatalogPage({
 }) {
   const params = await searchParams;
   const query = productQuery(params);
+  const view: CatalogView = one(params.view) === "list" ? "list" : "grid";
+  // Sayfa/filtre bağlantılarında görünüm tercihi korunur; API sorgusuna eklenmez.
+  const linkQuery = new URLSearchParams(query);
+  if (view === "list") linkQuery.set("view", "list");
   let navigation: CatalogNavigation | null = null;
   let facets: CatalogFacet[] = [];
   let products: CatalogPagedResult | null = null;
@@ -194,82 +258,80 @@ export default async function CatalogPage({
   ].filter((item): item is { key: string; label: string; value?: string } =>
     item !== null);
 
-  const selectedCategories = many(params.category);
-  const selectedBrands = many(params.brand);
-  const selectedTags = many(params.tag);
-  const selectedColors = many(params.color);
-  const selectedSizes = many(params.size);
-  const categoryRoots = navigation?.categories.filter((item) => item.parentId === null) ?? [];
-  const subcategories = navigation?.categories.filter((item) => item.parentId !== null) ?? [];
+  const baseQuery = baseFilterQuery(params);
+  const sectionValue = one(params.section).trim();
+  const brandValue = one(params.brand).trim();
+  const tagValue = one(params.tag).trim();
+  const sortValue = one(params.sort).trim() || "Name";
+  const sectionOptions = buildOptions(baseQuery, "section", "Tüm gruplar", navigation?.sections ?? [], sectionValue);
+  const brandOptions = buildOptions(baseQuery, "brand", "Tüm markalar", navigation?.brands ?? [], brandValue);
+  const tagOptions = buildOptions(baseQuery, "tag", "Tüm etiketler", navigation?.tags ?? [], tagValue);
+  const sortOptions: FilterOption[] = [
+    { value: "Name", label: "Ada göre A–Z" },
+    { value: "NameDescending", label: "Ada göre Z–A" },
+    { value: "Newest", label: "En güncel" }
+  ].map((item) => ({
+    ...item,
+    href: optionHref(baseQuery, "sort", item.value),
+    selected: sortValue === item.value
+  }));
+  const searchValue = one(params.q).trim();
 
   return (
-    <main className={`${styles.page} ${styles.catalogPage}`} data-public-page>
+    <main className={styles.page} data-public-page>
       <PublicHeader currentPath="/katalog" />
+      <h1 className={styles.srOnly}>Ürün Kataloğu</h1>
 
       <div className={styles.catalogLayout}>
         <CatalogFilterForm className={styles.filters}>
+          {(["section", "category", "brand", "tag", "sort"] as const).map((key) => {
+            const value = one(params[key]).trim();
+            return value ? <input key={key} type="hidden" name={key} value={value} /> : null;
+          })}
+          {attributeFilters
+            .filter((value) => !value.slice(value.indexOf(":") + 1).startsWith("n:"))
+            .map((value) => <input key={value} type="hidden" name="attribute" value={value} />)}
+          {view === "list" && <input type="hidden" name="view" value="list" />}
           <details className={styles.filterPanel} open>
             <summary><span className={styles.filterLabel}>Filtrele</span>{activeFilters.length > 0 && <span>{activeFilters.length} aktif</span>}</summary>
             <div className={styles.filterDrawer}>
               <div className={styles.simpleFilterFields}>
-                <div className={styles.field}>
-                  <label htmlFor="catalog-search">{"\u00dcr\u00fcn ara"}</label>
-                  <input id="catalog-search" name="q" type="search" minLength={2} maxLength={100} defaultValue={one(params.q)} placeholder={"\u00dcr\u00fcn ad\u0131 veya kodu"} />
-                </div>
-                <div className={styles.field}>
-                  <label htmlFor="section">{"\u00dcr\u00fcn grubu"}</label>
-                  <select id="section" name="section" defaultValue={one(params.section)}>
-                    <option value="">{"T\u00fcm gruplar"}</option>
-                    {navigation?.sections.map((item) => <option key={item.id} value={item.slug}>{item.name}</option>)}
-                  </select>
-                </div>
-                {navigation && <CatalogCategoryFilter categories={navigation.categories} selectedSlug={one(params.category)} />}
-                <div className={styles.field}>
-                  <label htmlFor="brand">Marka</label>
-                  <select id="brand" name="brand" defaultValue={one(params.brand)}>
-                    <option value="">{"T\u00fcm markalar"}</option>
-                    {navigation?.brands.filter((item) => item.slug).map((item) => <option key={item.id} value={item.slug ?? ""}>{item.name}</option>)}
-                  </select>
-                </div>
-                <div className={styles.field}>
-                  <label htmlFor="tag">{"Kullan\u0131m etiketi"}</label>
-                  <select id="tag" name="tag" defaultValue={one(params.tag)}>
-                    <option value="">{"T\u00fcm etiketler"}</option>
-                    {navigation?.tags.map((item) => <option key={item.id} value={item.slug}>{item.name}</option>)}
-                  </select>
-                </div>
-                <DynamicCatalogFilters facets={facets} selected={attributeFilters} />
-                <div className={styles.field}>
-                  <label htmlFor="sort">{"S\u0131ralama"}</label>
-                  <select id="sort" name="sort" defaultValue={one(params.sort)}>
-                    <option value="Name">{"Ada g\u00f6re A\u2013Z"}</option>
-                    <option value="NameDescending">{"Ada g\u00f6re Z\u2013A"}</option>
-                    <option value="Newest">{"En g\u00fcncel"}</option>
-                  </select>
-                </div>
+                <details className={styles.filterGroup} open={Boolean(searchValue)}>
+                  <summary><span>Ürün ara</span></summary>
+                  <div className={styles.field}>
+                    <label htmlFor="catalog-search">Ürün ara</label>
+                    <input key={searchValue} id="catalog-search" name="q" type="search" minLength={2} maxLength={100} defaultValue={searchValue} placeholder="Ürün adı veya kodu" />
+                  </div>
+                </details>
+                <FilterOptionGroup title="Ürün grubu" options={sectionOptions} />
+                {navigation && <CatalogCategoryFilter categories={navigation.categories} selectedSlug={one(params.category).trim()} baseQuery={baseQuery} />}
+                <FilterOptionGroup title="Marka" options={brandOptions} />
+                <FilterOptionGroup title="Kullanım etiketi" options={tagOptions} />
+                <DynamicCatalogFilters facets={facets} selected={attributeFilters} baseQuery={baseQuery} />
+                <FilterOptionGroup title="Sıralama" options={sortOptions} open={Boolean(one(params.sort).trim())} />
                 <div className={styles.filterActions}>
-                  <button className={styles.primaryButton} type="submit">{"Sonu\u00e7lar\u0131 g\u00f6ster"}</button>
-                  <button className={styles.secondaryButton} type="reset">Filtreleri temizle</button>
+                  <button className={styles.primaryButton} type="submit">Ara / uygula</button>
+                  <Link className={styles.secondaryButton} href="/katalog">Filtreleri temizle</Link>
                 </div>
               </div>
             </div>
           </details>
         </CatalogFilterForm>
-        <div className={styles.catalogToolbar}>
-          <span className={styles.productCount}>{products ? `${products.totalCount.toLocaleString("tr-TR")} \u00fcr\u00fcn bulundu` : "\u00dcr\u00fcnler"}</span>
-          <div className={styles.viewActions} aria-label="G\u00f6r\u00fcn\u00fcm se\u00e7imi">
-            <button type="button" className={styles.viewButton} aria-label="Grid g\u00f6r\u00fcn\u00fcm\u00fc" aria-pressed="true">{"▦"}</button>
-            <button type="button" className={styles.viewButton} aria-label="Liste g\u00f6r\u00fcn\u00fcm\u00fc" aria-pressed="false">{"☷"}</button>
-          </div>
-        </div>
-        <section aria-labelledby="results-title">
-          <div className={styles.resultsHeader}>
-            <h2 id="results-title">Ürünler</h2>
-            <p>
-              {products
-                ? `${products.totalCount.toLocaleString("tr-TR")} ürün`
-                : "Sonuç alınamadı"}
-            </p>
+
+        <section className={styles.results} aria-labelledby="results-title">
+          <h2 id="results-title" className={styles.srOnly}>Ürünler</h2>
+
+          <div className={styles.catalogToolbar}>
+            <span className={styles.productCount}>
+              {products ? `${products.totalCount.toLocaleString("tr-TR")} ürün bulundu` : "Ürünler"}
+            </span>
+            <div className={styles.toolbarActions}>
+              <div className={styles.viewActions} role="group" aria-label="Görünüm seçimi">
+                <Link className={styles.viewButton} href={viewHref(params, "grid")} aria-label="Grid görünümü" aria-current={view === "grid" ? "true" : undefined} scroll={false}><GridIcon /></Link>
+                <Link className={styles.viewButton} href={viewHref(params, "list")} aria-label="Liste görünümü" aria-current={view === "list" ? "true" : undefined} scroll={false}><ListIcon /></Link>
+              </div>
+              <QuoteListIndicator className={styles.quoteLink} />
+            </div>
           </div>
 
           {activeFilters.length > 0 && (
@@ -278,8 +340,8 @@ export default async function CatalogPage({
               {activeFilters.map((filter) => (
                 <Link
                   className={styles.activeFilter}
-                  href={filterHref(query, filter.key, filter.value)}
-                  key={filter.key}
+                  href={filterHref(linkQuery, filter.key, filter.value)}
+                  key={`${filter.key}-${filter.value ?? ""}`}
                   aria-label={`${filter.label} filtresini kaldır`}
                 >
                   {filter.label} <span aria-hidden="true">×</span>
@@ -302,62 +364,8 @@ export default async function CatalogPage({
               <p>Arama kelimenizi azaltın veya filtreleri temizleyin.</p>
             </div>
           ) : (
-            <div className={styles.productGrid}>
-              {products?.items.map((product) => (
-                <article className={styles.productCard} key={product.id}>
-                  <Link className={styles.productCardMain} href={`/katalog/${encodeURIComponent(product.slug)}`}>
-                  <div
-                    className={styles.productVisual}
-                    aria-hidden={product.image ? undefined : "true"}
-                  >
-                    {product.image ? (
-                      <img
-                        src={product.image.url}
-                        alt={product.image.altText}
-                        width={640}
-                        height={480}
-                        loading="lazy"
-                      />
-                    ) : (
-                      initials(product.name)
-                    )}
-                  </div>
-                  <div className={styles.productBody}>
-                    <span className={styles.meta}>
-                      {product.primaryCategory?.name ??
-                        product.brand?.name ??
-                        "Profesyonel ürün"}
-                    </span>
-                    <h3>{product.name}</h3>
-                    {product.brand && <p className={styles.productBrand}>{product.brand.name}</p>}
-                    {product.shortDescription && (
-                      <p>{product.shortDescription}</p>
-                    )}
-                    <span className={styles.sku}>Kod: {product.sku}</span>
-                  </div>
-                  </Link>
-                  <div className={styles.productActions}>
-                      <Link
-                        className={styles.productDetailLink}
-                        href={`/katalog/${encodeURIComponent(product.slug)}`}
-                      >
-                        {"Detay\u0131 \u0130ncele \u2192"}
-                      </Link>
-                      <AddToQuoteButton
-                        productId={product.id}
-                        slug={product.slug}
-                        name={product.name}
-                        sku={product.sku}
-                        brandName={product.brand?.name ?? null}
-                        imageUrl={product.image?.url ?? null}
-                        className={styles.productQuoteButton}
-                        showQuantityControl
-                        quantityClassName={styles.quoteQuantity}
-                        compactQuantityControl
-                      />
-                    </div>
-                </article>
-              ))}
+            <div className={styles.productGrid} data-view={view}>
+              {products?.items.map((product) => <CatalogProductCard key={product.id} product={product} />)}
             </div>
           )}
 
@@ -366,7 +374,7 @@ export default async function CatalogPage({
               {products.page > 1 ? (
                 <Link
                   className={styles.secondaryButton}
-                  href={pageHref(query, products.page - 1)}
+                  href={pageHref(linkQuery, products.page - 1)}
                 >
                   Önceki
                 </Link>
@@ -379,7 +387,7 @@ export default async function CatalogPage({
               {products.page < pageCount ? (
                 <Link
                   className={styles.secondaryButton}
-                  href={pageHref(query, products.page + 1)}
+                  href={pageHref(linkQuery, products.page + 1)}
                 >
                   Sonraki
                 </Link>
@@ -390,7 +398,6 @@ export default async function CatalogPage({
           )}
         </section>
       </div>
-      <QuoteListIndicator className={styles.floatingQuoteButton} />
     </main>
   );
 }
