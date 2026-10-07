@@ -24,6 +24,8 @@ internal static class AdminMediaEndpoints
             library.MapGet("", AuthenticationUnavailable);
             library.MapPost("/external-video", AuthenticationUnavailable);
             library.MapPut("/assets/{id:guid}", AuthenticationUnavailableForId);
+            library.MapDelete("/assets/{id:guid}", AuthenticationUnavailableForId);
+            library.MapPut("/assets/{id:guid}/status", AuthenticationUnavailableForId);
             library.MapPut("/assignments", AuthenticationUnavailable);
             library.MapDelete(
                 "/assignments/{targetType}/{targetId:guid}/{mediaAssetId:guid}/{role}",
@@ -45,6 +47,11 @@ internal static class AdminMediaEndpoints
             .RequireRateLimiting("catalog-admin-write");
         library.MapPut("/assets/{id:guid}", UpdateAssetAsync)
             .WithMetadata(new RequestSizeLimitAttribute(24 * 1024))
+            .RequireRateLimiting("catalog-admin-write");
+        library.MapDelete("/assets/{id:guid}", DeletePdfAsync)
+            .RequireRateLimiting("catalog-admin-write");
+        library.MapPut("/assets/{id:guid}/status", SetPdfStatusAsync)
+            .WithMetadata(new RequestSizeLimitAttribute(4 * 1024))
             .RequireRateLimiting("catalog-admin-write");
         library.MapPut("/assignments", SaveAssignmentAsync)
             .WithMetadata(new RequestSizeLimitAttribute(24 * 1024))
@@ -129,6 +136,29 @@ internal static class AdminMediaEndpoints
                     Map(request.Translations),
                     request.Archive),
                 cancellationToken);
+            return value is null ? Results.NotFound() : Results.Ok(value);
+        });
+
+    private static Task<IResult> DeletePdfAsync(
+        Guid id,
+        HttpResponse response,
+        IAdminMediaService service,
+        CancellationToken cancellationToken) =>
+        Execute(response, async () =>
+            await service.DeletePdfAsync(id, cancellationToken)
+                ? Results.NoContent()
+                : Results.NotFound());
+
+    private static Task<IResult> SetPdfStatusAsync(
+        Guid id,
+        SetAssetStatusRequest request,
+        HttpResponse response,
+        IAdminMediaService service,
+        CancellationToken cancellationToken) =>
+        Execute(response, async () =>
+        {
+            var value = await service.SetPdfStatusAsync(
+                id, new SetAdminMediaStatusCommand(request.Active), cancellationToken);
             return value is null ? Results.NotFound() : Results.Ok(value);
         });
 
@@ -232,12 +262,17 @@ internal static class AdminMediaEndpoints
         }
 
         var file = form.Files[0];
-        if (file.Length <= 0 ||
-            file.Length > 50L * 1024 * 1024)
+        var maximumLength = assetType switch
+        {
+            MediaAssetType.Image => 4L * 1024 * 1024,
+            MediaAssetType.Pdf => 500L * 1024 * 1024,
+            _ => 50L * 1024 * 1024,
+        };
+        if (file.Length <= 0 || file.Length > maximumLength)
         {
             return Problem(
                 StatusCodes.Status400BadRequest,
-                "File size must be between 1 byte and 50 MB.");
+                $"File size must be between 1 byte and {maximumLength / 1024 / 1024} MB.");
         }
 
         var altText = form.TryGetValue("altText", out var rawAltText)
@@ -382,6 +417,8 @@ internal static class AdminMediaEndpoints
     private sealed record SaveAssetRequest(
         bool Archive,
         IReadOnlyList<TranslationRequest>? Translations);
+
+    private sealed record SetAssetStatusRequest(bool Active);
 
     private sealed record SaveAssignmentRequest(
         string TargetType,

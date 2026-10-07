@@ -44,7 +44,11 @@ export function CatalogGallery({ catalogs }: { catalogs: Catalog[] }) {
         <div className={styles.catalogGrid} id="catalog-grid">
           {visibleCatalogs.map((catalog, index) => (
             <button className={styles.catalogCard} key={catalog.id} onClick={() => setSelected(catalog)} type="button">
-              <span className={styles.cover} style={{ backgroundImage: `url(${catalog.image})` }} aria-hidden="true" />
+              <span className={styles.cover} aria-hidden="true">
+                {catalog.image === "/images/catalog-placeholder.webp"
+                  ? <span className={styles.coverPlaceholder}>PDF</span>
+                  : <img src={catalog.image} alt="" />}
+              </span>
               <span className={styles.cardOverlay} aria-hidden="true" />
               <span className={styles.cardContent}>
                 <small>{catalog.eyebrow}</small>

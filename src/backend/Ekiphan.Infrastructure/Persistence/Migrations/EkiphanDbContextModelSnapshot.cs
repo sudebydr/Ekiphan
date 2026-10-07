@@ -2927,7 +2927,8 @@ namespace Ekiphan.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("SourceSha256Checksum")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[IsDryRun] = 0 AND [Status] IN (3, 5, 6)");
 
                     b.HasIndex("CreatedByUserId", "CreatedAt");
 

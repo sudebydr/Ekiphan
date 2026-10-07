@@ -88,8 +88,8 @@ public sealed class MediaAsset : Entity
 
         var maximumSize = assetType switch
         {
-            MediaAssetType.Image => 25L * 1024 * 1024,
-            MediaAssetType.Pdf => 300L * 1024 * 1024,
+            MediaAssetType.Image => 4L * 1024 * 1024,
+            MediaAssetType.Pdf => 500L * 1024 * 1024,
             _ => 50L * 1024 * 1024,
         };
 
@@ -236,6 +236,13 @@ public sealed class MediaAsset : Entity
         Status = MediaStatus.Archived;
         ArchivedAt = archivedAt;
         ProcessingStatus = MediaProcessingStatus.Archived;
+    }
+
+    public void Activate()
+    {
+        Status = MediaStatus.Active;
+        ArchivedAt = null;
+        ProcessingStatus = MediaProcessingStatus.Completed;
     }
 
     public void BeginProcessing(Guid? userId = null)

@@ -20,7 +20,11 @@ const pageSize = 20;
 async function readError(response: Response): Promise<string> {
   try {
     const problem = (await response.json()) as ProblemDetails;
-    return problem.detail ?? problem.title ?? "İşlem tamamlanamadı.";
+    const message = problem.detail ?? problem.title;
+    return message === "An error occurred while processing your request." ||
+      message === "Internal Server Error"
+      ? "İsteğiniz işlenirken bir hata oluştu."
+      : message ?? "İşlem tamamlanamadı.";
   } catch {
     return "İşlem tamamlanamadı.";
   }

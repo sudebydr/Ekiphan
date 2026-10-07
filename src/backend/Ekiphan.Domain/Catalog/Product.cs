@@ -17,8 +17,8 @@ public sealed class Product : Entity
     public Product(Guid id, string sku, Guid? brandId = null)
         : base(id)
     {
-        SKU = CatalogGuard.Required(sku, 100, nameof(sku)).ToUpperInvariant();
-        NormalizedSku = SKU.Trim().ToUpperInvariant();
+        SKU = SkuNormalizer.Normalize(CatalogGuard.Required(sku, 100, nameof(sku)));
+        NormalizedSku = SKU;
         BrandId = brandId;
         WorkflowStatus = ProductWorkflowStatus.Draft;
         VersionNumber = 1;
@@ -132,7 +132,8 @@ public sealed class Product : Entity
 
     public void UpdateIdentity(string sku, Guid? brandId)
     {
-        SKU = CatalogGuard.Required(sku, 100, nameof(sku)).ToUpperInvariant();
+        SKU = SkuNormalizer.Normalize(CatalogGuard.Required(sku, 100, nameof(sku)));
+        NormalizedSku = SKU;
         BrandId = brandId;
     }
 

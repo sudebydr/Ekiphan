@@ -251,6 +251,13 @@
 /* Restore pointer-led zoom: the enlarged area follows the cursor position. */
 @media(min-width:48.0625rem){.galleryColumn :global(.productGalleryMain img){transform-origin:var(--zoom-origin,50% 50%)!important;transition:transform 300ms ease-out}.galleryColumn :global(.productGalleryMainButton.productGalleryZoomed img){transform:scale(2.2)!important}}
 
+/* Single source of truth for the product-detail main-image viewport. */
+.galleryColumn :global(.productGalleryDetailViewport){position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;min-width:0!important;overflow:hidden!important;transform:none!important}
+.galleryColumn :global(.productGalleryDetailViewport > .productGalleryMainButton){position:relative!important;display:flex!important;width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;transform:none!important}
+.galleryColumn :global(.productGalleryDetailViewport > .productGalleryMainButton > img){display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center!important;transform:none!important;transform-origin:center center!important}
+.galleryColumn :global(.productGalleryDetailViewport > .productGalleryMainButton.productGalleryZoomed > img){transform:scale(2.2)!important;transform-origin:var(--zoom-origin,50% 50%)!important}
+
+
 /* Compact, balanced typography for the related-products carousel only. */
 .relatedSection {
   padding-block: clamp(3rem, 5vw, 4.5rem) !important;

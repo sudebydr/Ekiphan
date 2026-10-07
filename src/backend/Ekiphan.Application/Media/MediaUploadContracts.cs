@@ -4,7 +4,7 @@ namespace Ekiphan.Application.Media;
 
 public static class MediaUploadLimits
 {
-    public const long MaximumRequestBytes = 50L * 1024 * 1024 + 64 * 1024;
+    public const long MaximumRequestBytes = 500L * 1024 * 1024 + 64 * 1024;
 }
 
 public sealed record UploadMediaCommand(

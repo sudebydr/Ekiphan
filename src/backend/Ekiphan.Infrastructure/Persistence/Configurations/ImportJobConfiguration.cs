@@ -17,7 +17,9 @@ internal sealed class ImportJobConfiguration
             .IsUnicode(false)
             .IsRequired();
         builder.Property(job => job.FailureReason).HasMaxLength(2000);
-        builder.HasIndex(job => job.SourceSha256Checksum).IsUnique();
+        builder.HasIndex(job => job.SourceSha256Checksum)
+            .IsUnique()
+            .HasFilter("[IsDryRun] = 0 AND [Status] IN (3, 5, 6)");
         builder.HasIndex(job => new
         {
             job.Status,

@@ -1,6 +1,10 @@
 using System.IO.Compression;
 using System.Text;
+using Ekiphan.Domain.Media;
 using Ekiphan.Infrastructure.CatalogPdfImport;
+using Ekiphan.Infrastructure.Media;
+using Ekiphan.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace Ekiphan.UnitTests.Media;
 
@@ -52,17 +56,19 @@ public sealed class CatalogPdfImportServiceTests
     }
 
     [Fact]
-    public async Task PreviewRejectsMissingCatalogs()
+    public async Task PreviewAcceptsAnyValidCatalogSubset()
     {
         await using var zip = CreateZip([CatalogPdfImportService.Manifest[0].FileName]);
-        await Assert.ThrowsAsync<ArgumentException>(() => Service().PreviewAsync(zip, "catalogs.zip", zip.Length));
+        var result = await Service().PreviewAsync(zip, "catalogs.zip", zip.Length);
+        Assert.Single(result.Files);
     }
 
     [Fact]
-    public async Task PreviewRejectsAnUnmatchedPdf()
+    public async Task PreviewAcceptsANewDynamicCatalog()
     {
         await using var zip = CreateManifestZip((archive) => Add(archive, "new-catalog.pdf", "%PDF-new"));
-        await Assert.ThrowsAsync<ArgumentException>(() => Service().PreviewAsync(zip, "catalogs.zip", zip.Length));
+        var result = await Service().PreviewAsync(zip, "catalogs.zip", zip.Length);
+        Assert.Contains(result.Files, item => item.FileName == "new-catalog.pdf" && item.Status == "Matched");
     }
 
     [Fact]
@@ -75,7 +81,106 @@ public sealed class CatalogPdfImportServiceTests
         await Assert.ThrowsAsync<ArgumentException>(() => Service().PreviewAsync(zip, "catalogs.zip", zip.Length));
     }
 
+    [Fact]
+    public async Task ExecuteRestoresMissingStoredPdfForExistingMediaAsset()
+    {
+        await using var db = CreateContext();
+        var root = Path.Combine(Path.GetTempPath(), $"ekiphan-catalog-test-{Guid.NewGuid():N}");
+        try
+        {
+            var storage = new LocalMediaFileStorage(root);
+            foreach (var item in CatalogPdfImportService.Manifest)
+            {
+                var key = CatalogPdfImportService.StorageKey(item.Slug);
+                var asset = MediaAsset.CreateFile(Guid.NewGuid(), MediaAssetType.Pdf, item.FileName, key,
+                    "application/pdf", 10, new string('A', 64), "Local");
+                asset.AddTranslation("tr", item.Title);
+                db.MediaAssets.Add(asset);
+                if (item.Slug != "bar")
+                    await storage.SaveAsync(key, new MemoryStream([1]));
+            }
+            await db.SaveChangesAsync();
+            await using var zip = CreateManifestZip();
+
+            var result = await new CatalogPdfImportService(db, storage)
+                .ExecuteAsync(zip, "catalogs.zip", zip.Length);
+
+            Assert.Equal(1, result.Uploaded);
+            Assert.Equal(0, result.Created);
+            Assert.Equal(11, result.Skipped);
+            Assert.Equal(0, result.Failed);
+            Assert.True(File.Exists(Path.Combine(root, "catalogs", "bar", "bar.pdf")));
+            Assert.Equal(12, await db.MediaAssets.CountAsync());
+        }
+        finally
+        {
+            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task SingleUploadRejectsNonPdfAndFilesOver500Mb()
+    {
+        await using var db = CreateContext();
+        var service = new CatalogPdfImportService(db, new LocalMediaFileStorage(Path.GetTempPath()));
+        await Assert.ThrowsAsync<ArgumentException>(() => service.UploadSingleAsync(new MemoryStream("%PDF-"u8.ToArray()),
+            "catalog.txt", 5, "Catalog"));
+        await Assert.ThrowsAsync<ArgumentException>(() => service.UploadSingleAsync(new MemoryStream("%PDF-"u8.ToArray()),
+            "catalog.pdf", 500L * 1024 * 1024 + 1, "Catalog"));
+    }
+
+    [Fact]
+    public async Task SingleUploadPersistsPdfAndReturnsCoverFallbackWhenRenderingFails()
+    {
+        await using var db = CreateContext();
+        var root = Path.Combine(Path.GetTempPath(), $"ekiphan-single-catalog-{Guid.NewGuid():N}");
+        try
+        {
+            var bytes = Encoding.ASCII.GetBytes("%PDF-invalid-body");
+            var result = await new CatalogPdfImportService(db, new LocalMediaFileStorage(root))
+                .UploadSingleAsync(new MemoryStream(bytes), "yeni-katalog.pdf", bytes.Length, "Yeni Katalog");
+
+            Assert.NotNull(result.Warning);
+            Assert.Equal("/images/catalog-placeholder.webp", result.CoverUrl);
+            Assert.True(File.Exists(Path.Combine(root, "catalogs", "yeni-katalog", "yeni-katalog.pdf")));
+            var asset = Assert.Single(await db.MediaAssets.Where(item => item.AssetType == MediaAssetType.Pdf).ToListAsync());
+            Assert.Equal(MediaStatus.Active, asset.Status);
+        }
+        finally
+        {
+            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task SingleUploadGeneratesAndPersistsWebpCover()
+    {
+        await using var db = CreateContext();
+        var root = Path.Combine(Path.GetTempPath(), $"ekiphan-single-cover-{Guid.NewGuid():N}");
+        try
+        {
+            var bytes = Encoding.ASCII.GetBytes("%PDF-test");
+            var service = new CatalogPdfImportService(db, new LocalMediaFileStorage(root), new StubCoverRenderer());
+            var result = await service.UploadSingleAsync(new MemoryStream(bytes), "kapakli.pdf", bytes.Length, null);
+
+            Assert.Null(result.Warning);
+            Assert.EndsWith("-cover.webp", result.CoverUrl);
+            Assert.Equal(2, await db.MediaAssets.CountAsync());
+            var cover = await db.MediaAssets.SingleAsync(item => item.AssetType == MediaAssetType.Image);
+            Assert.Equal("image/webp", cover.MimeType);
+            Assert.True(File.Exists(Path.Combine(root, "catalogs", "kapakli", "kapakli-cover.webp")));
+        }
+        finally
+        {
+            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+        }
+    }
+
     private static CatalogPdfImportService Service() => new(null!, null!);
+    private static EkiphanDbContext CreateContext() =>
+        new(new DbContextOptionsBuilder<EkiphanDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString("N"))
+            .Options);
     private static MemoryStream CreateManifestZip(Action<ZipArchive>? add = null)
     {
         var stream = CreateZip(CatalogPdfImportService.Manifest.Select(x => x.FileName));
@@ -97,5 +202,10 @@ public sealed class CatalogPdfImportServiceTests
     {
         using var writer = new StreamWriter(archive.CreateEntry(name).Open(), Encoding.ASCII);
         writer.Write(content);
+    }
+
+    private sealed class StubCoverRenderer : IPdfCoverRenderer
+    {
+        public void Render(Stream output, Stream pdf) => output.Write("RIFFxxxxWEBP"u8);
     }
 }

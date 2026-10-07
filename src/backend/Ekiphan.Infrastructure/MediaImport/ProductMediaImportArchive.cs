@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using Ekiphan.Application.Media;
 using Ekiphan.Application.MediaImport;
 using Ekiphan.Domain.Media;
+using Ekiphan.Domain.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -49,8 +50,76 @@ public sealed class ProductMediaSkuParser : IProductMediaSkuParser
         stem = stem.Trim(' ', '-', '_');
         return string.IsNullOrWhiteSpace(stem)
             ? new(null, ProductMediaDetectedPosition.Unknown, order, primary)
-            : new(stem.ToUpperInvariant(), position, order, primary);
+            : new(SkuNormalizer.Normalize(stem), position, order, primary);
+}
+}
+
+public sealed class ProductMediaSkuResolver : IProductMediaSkuResolver
+{
+    private static readonly Regex[] ImageSuffixes =
+    [
+        new(@"(?:[._-]logo)$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
+        new(@"(?:[._-]l)$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
+        new(@"(?:[._-]l-\d+)$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
+        new(@"(?:[_-](?:main|detail|front|back|side))$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
+        new(@"\s*\(\d+\)$", RegexOptions.Compiled | RegexOptions.CultureInvariant),
+        new(@"L$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
+        new(@"(?:[_-]\d+)$", RegexOptions.Compiled | RegexOptions.CultureInvariant)
+    ];
+
+    public IReadOnlyList<string> GetCandidateSkus(string fileName)
+    {
+        var stem = Path.GetFileNameWithoutExtension(fileName).Trim();
+        if (string.IsNullOrWhiteSpace(stem)) return [];
+        var candidates = new List<string>();
+        while (!string.IsNullOrWhiteSpace(stem))
+        {
+            candidates.Add(SkuNormalizer.Normalize(stem));
+            var suffix = ImageSuffixes.Select(pattern => pattern.Match(stem)).FirstOrDefault(match => match.Success);
+            if (suffix is null) break;
+            stem = stem[..suffix.Index].Trim(' ', '-', '_', '.');
+        }
+        return candidates.Distinct(StringComparer.Ordinal).ToArray();
     }
+
+    public ProductMediaSkuResolution Resolve(string fileName, IReadOnlyCollection<ProductMediaProductMatch> products)
+    {
+        foreach (var candidate in GetCandidateSkus(fileName))
+        {
+            var matches = products.Where(product => SkuNormalizer.Normalize(product.Sku) == candidate)
+                .GroupBy(product => product.Id).Select(group => group.First()).ToArray();
+            if (matches.Length == 1) return new(matches[0], false);
+            if (matches.Length > 1) return new(null, true);
+        }
+        return new(null, false);
+    }
+}
+
+public readonly record struct ProductMediaImageFormat(string Extension, string ContentType);
+
+public static class ProductMediaImageFormatDetector
+{
+    public static bool TryDetect(ReadOnlySpan<byte> content, out ProductMediaImageFormat format)
+    {
+        if (content.Length >= 8 && content[..8].SequenceEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }))
+        { format = new(".png", "image/png"); return true; }
+        if (content.Length >= 12 && content[..4].SequenceEqual("RIFF"u8) && content.Slice(8, 4).SequenceEqual("WEBP"u8))
+        { format = new(".webp", "image/webp"); return true; }
+        if (content.Length >= 3 && content[..3].SequenceEqual(new byte[] { 0xFF, 0xD8, 0xFF }))
+        { format = new(".jpg", "image/jpeg"); return true; }
+        format = default; return false;
+    }
+
+    public static bool IsDeclaredImageExtension(string extension) =>
+        extension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
+        extension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+        extension.Equals(".jfif", StringComparison.OrdinalIgnoreCase) ||
+        extension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
+        extension.Equals(".webp", StringComparison.OrdinalIgnoreCase);
+
+    public static bool MatchesDeclaredExtension(string extension, ProductMediaImageFormat format) =>
+        extension.Equals(format.Extension, StringComparison.OrdinalIgnoreCase) ||
+        (format.Extension == ".jpg" && (extension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) || extension.Equals(".jfif", StringComparison.OrdinalIgnoreCase)));
 }
 
 public sealed class Sha256ProductMediaDuplicateDetector : IProductMediaDuplicateDetector
@@ -120,7 +189,6 @@ public sealed class ZipProductMediaImportArchiveReader(
     IMediaFileSignatureValidator signatureValidator,
     ILogger<ZipProductMediaImportArchiveReader> logger) : IProductMediaImportArchiveReader
 {
-    private static readonly HashSet<string> Extensions = new(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".webp" };
     public async Task<ProductMediaArchiveReadResult> ReadAsync(string containerId, Stream content, string fileName,
         string contentType, long length, CancellationToken cancellationToken = default)
     {
@@ -147,18 +215,18 @@ public sealed class ZipProductMediaImportArchiveReader(
             foreach (var entry in archive.Entries)
             {
                 cancellationToken.ThrowIfCancellationRequested(); total++;
-                ValidateEntryPath(entry.FullName);
-                if (string.IsNullOrEmpty(entry.Name) || IsHidden(entry.FullName)) continue;
-                var extension = Path.GetExtension(entry.Name).ToLowerInvariant();
+                if (IsUnsafeEntryPath(entry.FullName))
+                { result.Add(SkippedEntry(entry, "UNSAFE_ARCHIVE_ENTRY", "Güvenli olmayan arşiv yolu nedeniyle atlandı.")); continue; }
+                if (string.IsNullOrEmpty(entry.Name))
+                { result.Add(SkippedEntry(entry, "SYSTEM_METADATA", "Arşiv dizini nedeniyle atlandı.")); continue; }
+                if (IsSystemMetadata(entry.FullName))
+                { result.Add(SkippedEntry(entry, "SYSTEM_METADATA", "Sistem dosyası nedeniyle atlandı.")); continue; }
+                var declaredExtension = Path.GetExtension(entry.Name).ToLowerInvariant();
                 if (entry.Name.Length > 260 || entry.FullName.Length > 500)
-                { result.Add(InvalidEntry(entry, extension, ProductMediaPreviewFileStatus.SecurityRejected, "FILE_NAME_TOO_LONG", "The ZIP entry name is too long.")); continue; }
-                if (extension == ".zip") throw new ProductMediaImportSecurityException("Nested ZIP files are not allowed.");
-                if (!Extensions.Contains(extension))
-                {
-                    result.Add(InvalidEntry(entry, extension, ProductMediaPreviewFileStatus.Unsupported, "UNSUPPORTED_TYPE", "The file type is not supported.")); continue;
-                }
-                if (entry.Length <= 0 || entry.Length > Math.Min(limits.MaxSingleImageBytes, 20L * 1024 * 1024))
-                { result.Add(InvalidEntry(entry, extension, ProductMediaPreviewFileStatus.Invalid, "IMAGE_SIZE", "Image size limit exceeded.")); continue; }
+                { result.Add(InvalidEntry(entry, declaredExtension, ProductMediaPreviewFileStatus.SecurityRejected, "FILE_NAME_TOO_LONG", "The ZIP entry name is too long.")); continue; }
+                if (declaredExtension == ".zip") throw new ProductMediaImportSecurityException("Nested ZIP files are not allowed.");
+                if (entry.Length <= 0 || entry.Length > limits.MaxSingleImageBytes)
+                { result.Add(InvalidEntry(entry, declaredExtension, ProductMediaPreviewFileStatus.Invalid, "IMAGE_SIZE", "Image size limit exceeded.")); continue; }
                 extracted = checked(extracted + entry.Length);
                 if (extracted > limits.MaxExtractedBytes) throw new ProductMediaImportSecurityException("Extracted size limit exceeded.");
                 if (entry.CompressedLength == 0 || entry.Length / Math.Max(1d, entry.CompressedLength) > limits.MaxCompressionRatio)
@@ -168,26 +236,44 @@ public sealed class ZipProductMediaImportArchiveReader(
                 await using var buffer = new MemoryStream((int)entry.Length);
                 await source.CopyToAsync(buffer, cancellationToken);
                 if (buffer.Length != entry.Length) throw new ProductMediaImportSecurityException("ZIP entry length changed while reading.");
-                var mime = Mime(extension); buffer.Position = 0;
-                if (!signatureValidator.IsValid(buffer, MediaAssetType.Image, mime, entry.Name) || !TryReadDimensions(buffer, extension, out var width, out var height) || (long)width * height > 100_000_000)
-                { result.Add(InvalidEntry(entry, extension, ProductMediaPreviewFileStatus.Invalid, "INVALID_IMAGE", "Image signature or dimensions are invalid.")); continue; }
-                var bytes = buffer.ToArray(); var hash = duplicateDetector.ComputeHash(bytes); buffer.Position = 0;
+                var bytes = buffer.ToArray();
+                if (!ProductMediaImageFormatDetector.TryDetect(bytes, out var format))
+                {
+                    var code = ProductMediaImageFormatDetector.IsDeclaredImageExtension(declaredExtension)
+                        ? "INVALID_IMAGE" : "UNSUPPORTED_MEDIA_ENTRY";
+                    var status = code == "INVALID_IMAGE" ? ProductMediaPreviewFileStatus.Invalid : ProductMediaPreviewFileStatus.Skipped;
+                    result.Add(InvalidEntry(entry, declaredExtension, status, code,
+                        code == "INVALID_IMAGE" ? "Image signature or dimensions are invalid." : "Desteklenmeyen medya girdisi nedeniyle atlandı."));
+                    continue;
+                }
+                if (ProductMediaImageFormatDetector.IsDeclaredImageExtension(declaredExtension) &&
+                    !ProductMediaImageFormatDetector.MatchesDeclaredExtension(declaredExtension, format))
+                { result.Add(InvalidEntry(entry, declaredExtension, ProductMediaPreviewFileStatus.Invalid, "EXTENSION_CONTENT_MISMATCH", "The image extension does not match its content.")); continue; }
+                var normalizedName = ProductMediaImageFormatDetector.IsDeclaredImageExtension(declaredExtension)
+                    ? Path.GetFileName(entry.Name)
+                    : Path.GetFileName(entry.Name) + format.Extension;
+                buffer.Position = 0;
+                if (!signatureValidator.IsValid(buffer, MediaAssetType.Image, format.ContentType, normalizedName) ||
+                    !TryReadDimensions(buffer, format.Extension, out var width, out var height) || (long)width * height > 100_000_000)
+                { result.Add(InvalidEntry(entry, format.Extension, ProductMediaPreviewFileStatus.Invalid, "INVALID_IMAGE", "Image signature or dimensions are invalid.")); continue; }
+                buffer.Position = 0;
+                var hash = duplicateDetector.ComputeHash(bytes);
                 await temporaryStorage.StoreFileAsync(containerId, id, buffer, cancellationToken);
-                var parsed = skuParser.Parse(entry.Name);
-                result.Add(new(id, entry.FullName, Path.GetFileName(entry.Name), extension, mime, entry.Length,
+                var parsed = skuParser.Parse(normalizedName);
+                result.Add(new(id, entry.FullName, normalizedName, format.Extension, format.ContentType, entry.Length,
                     entry.CompressedLength, hash, parsed, parsed.Sku is null ? ProductMediaPreviewFileStatus.MissingSku : ProductMediaPreviewFileStatus.Ready,
-                    parsed.Sku is null ? "MISSING_SKU" : null, parsed.Sku is null ? "SKU could not be extracted from the file name." : null));
+                    parsed.Sku is null ? "SKU_RESOLUTION_FAILED" : null, parsed.Sku is null ? "A safe SKU could not be extracted from the file name." : null));
             }
         }
         catch (InvalidDataException ex) { logger.LogWarning(ex, "Product media ZIP security validation failed. FileName={FileName}", Path.GetFileName(fileName)); throw new ProductMediaImportSecurityException("ZIP is invalid, encrypted, or uses an unsupported compression method."); }
-        var duplicates = result.Where(x => x.Status == ProductMediaPreviewFileStatus.Ready).GroupBy(x => x.Sha256).Where(g => g.Count() > 1).SelectMany(g => g.Skip(1)).Select(x => x.TemporaryFileId).ToHashSet();
-        result = result.Select(x => duplicates.Contains(x.TemporaryFileId) ? x with { Status = ProductMediaPreviewFileStatus.Duplicate, ErrorCode = "DUPLICATE_CONTENT", ErrorMessage = "Duplicate content in the ZIP." } : x).ToList();
         return new(containerId, Path.GetFileName(fileName), length, zipHash, total, result);
     }
 
     private static ProductMediaArchiveEntry InvalidEntry(ZipArchiveEntry e, string ext, ProductMediaPreviewFileStatus status, string code, string message) =>
         new(Guid.NewGuid().ToString("N"), e.FullName, Path.GetFileName(e.Name), ext, "application/octet-stream", e.Length, e.CompressedLength, string.Empty,
             new(null, ProductMediaDetectedPosition.Unknown, 0, false), status, code, message);
+    private static ProductMediaArchiveEntry SkippedEntry(ZipArchiveEntry e, string code, string message) =>
+        InvalidEntry(e, Path.GetExtension(e.Name).ToLowerInvariant(), ProductMediaPreviewFileStatus.Skipped, code, message);
     private static bool HasZipSignature(Stream s) { Span<byte> b = stackalloc byte[4]; s.Position = 0; return s.Read(b) == 4 && b[0] == 0x50 && b[1] == 0x4B && b[2] is 0x03 or 0x05 or 0x07 && b[3] is 0x04 or 0x06 or 0x08; }
     private static bool HasEncryptedEntries(Stream stream)
     {
@@ -210,10 +296,10 @@ public sealed class ZipProductMediaImportArchiveReader(
         }
         stream.Position = 0; return false;
     }
-    private static bool IsHidden(string path) => path.Split('/', '\\').Any(x => x.StartsWith('.') || x.Equals("__MACOSX", StringComparison.OrdinalIgnoreCase) || x.Equals("Thumbs.db", StringComparison.OrdinalIgnoreCase));
-    private static void ValidateEntryPath(string path)
-    { if (Path.IsPathRooted(path) || path.Contains("..", StringComparison.Ordinal) || Regex.IsMatch(path, "^[A-Za-z]:") || path.Contains('\\')) throw new ProductMediaImportSecurityException("Unsafe ZIP entry path detected."); }
-    private static string Mime(string ext) => ext switch { ".jpg" or ".jpeg" => "image/jpeg", ".png" => "image/png", ".webp" => "image/webp", _ => "application/octet-stream" };
+    private static bool IsSystemMetadata(string path) => path.Split('/', '\\').Any(x => x.StartsWith('.') ||
+        x.Equals("__MACOSX", StringComparison.OrdinalIgnoreCase) || x.Equals("Thumbs.db", StringComparison.OrdinalIgnoreCase));
+    private static bool IsUnsafeEntryPath(string path) => Path.IsPathRooted(path) || path.Contains("..", StringComparison.Ordinal) ||
+        Regex.IsMatch(path, "^[A-Za-z]:") || path.Contains('\\');
     private static bool TryReadDimensions(Stream stream, string ext, out int width, out int height)
     {
         width = height = 0; stream.Position = 0; using var reader = new BinaryReader(stream, System.Text.Encoding.UTF8, true);

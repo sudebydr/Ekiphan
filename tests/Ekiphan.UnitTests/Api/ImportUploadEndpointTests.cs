@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Ekiphan.Application.DataImport;
+using Ekiphan.Domain.Catalog;
 using Ekiphan.Application.Identity;
 using Ekiphan.Domain.DataImport;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -71,7 +72,9 @@ public sealed class ImportUploadEndpointTests
             services =>
             {
                 services.RemoveAll<IImportJobRepository>();
+                services.RemoveAll<IImportReferenceResolver>();
                 services.AddSingleton<IImportJobRepository>(repository);
+                services.AddSingleton<IImportReferenceResolver>(new StubReferenceResolver());
             });
         using var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization =
@@ -86,13 +89,41 @@ public sealed class ImportUploadEndpointTests
         using var response = await client.PostAsync("/api/admin/imports", form);
         var body = await response.Content.ReadAsStringAsync();
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.True(response.IsSuccessStatusCode, body);
         using var json = JsonDocument.Parse(body);
         Assert.Equal(
             (int)ImportJobStatus.Completed,
             json.RootElement.GetProperty("status").GetInt32());
         Assert.Equal(1, repository.SaveCount);
         Assert.NotNull(repository.AddedJob);
+    }
+
+    [Fact]
+    public async Task AuthorizedDuplicateUploadReturnsControlledTurkishConflict()
+    {
+        var repository = new StubRepository { SourceExists = true };
+        await using var factory = CreateFactory(
+            JwtSettings(),
+            services =>
+            {
+                services.RemoveAll<IImportJobRepository>();
+                services.AddSingleton<IImportJobRepository>(repository);
+            });
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", CreateAccessToken());
+        using var form = new MultipartFormDataContent();
+        var file = new ByteArrayContent(Encoding.UTF8.GetBytes("SKU,Urun Adi\r\nABC-1,Tabak"));
+        file.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
+        form.Add(file, "file", "products.csv");
+        form.Add(new StringContent("false"), "isDryRun");
+
+        using var response = await client.PostAsync("/api/admin/imports", form);
+        var body = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Contains("Aynı import kaynağı", body);
+        Assert.DoesNotContain("An error occurred while processing your request.", body);
     }
 
     [Fact]
@@ -329,6 +360,8 @@ public sealed class ImportUploadEndpointTests
 
     private sealed class StubRepository : IImportJobRepository
     {
+        public bool SourceExists { get; init; }
+
         public int SaveCount { get; private set; }
 
         public ImportJob? AddedJob { get; private set; }
@@ -336,7 +369,7 @@ public sealed class ImportUploadEndpointTests
         public Task<bool> SourceExistsAsync(
             string sourceSha256Checksum,
             CancellationToken cancellationToken = default) =>
-            Task.FromResult(false);
+            Task.FromResult(SourceExists);
 
         public void Add(ImportJob job)
         {
@@ -349,6 +382,26 @@ public sealed class ImportUploadEndpointTests
             SaveCount++;
             return Task.CompletedTask;
         }
+    }
+
+    private sealed class StubReferenceResolver : IImportReferenceResolver
+    {
+        public Task<ImportReferenceResolution> ResolveAsync(
+            IReadOnlyCollection<string> brandNames,
+            IReadOnlyCollection<IReadOnlyList<string>> categoryPaths,
+            IReadOnlyCollection<string> materialNames,
+            IReadOnlyCollection<string> tagNames,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(
+                new ImportReferenceResolution(
+                    new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase),
+                    new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase),
+                    new HashSet<string>(StringComparer.OrdinalIgnoreCase),
+                    null,
+                    new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase),
+                    new HashSet<string>(StringComparer.OrdinalIgnoreCase),
+                    new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase),
+                    new HashSet<string>(StringComparer.OrdinalIgnoreCase)));
     }
 
     private sealed class StubQueryService : IImportQueryService
@@ -422,6 +475,12 @@ public sealed class ImportUploadEndpointTests
             Task.FromResult(
                 new HashSet<string>(StringComparer.OrdinalIgnoreCase));
 
+        public Task<IReadOnlyDictionary<string, Ekiphan.Domain.Catalog.Product>> GetProductsBySkusAsync(
+            IReadOnlyCollection<string> skus,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyDictionary<string, Ekiphan.Domain.Catalog.Product>>(
+                new Dictionary<string, Ekiphan.Domain.Catalog.Product>(StringComparer.OrdinalIgnoreCase));
+
         public void AddProduct(Ekiphan.Domain.Catalog.Product product)
         {
             Products.Add(product);
@@ -431,6 +490,31 @@ public sealed class ImportUploadEndpointTests
             Ekiphan.Domain.Catalog.ProductAttributeValue value)
         {
         }
+
+        public void AddIssue(Ekiphan.Domain.DataImport.ImportIssue issue)
+        {
+        }
+
+        public Task PrepareProductDataAsync(IReadOnlyCollection<Guid> productIds,
+            IReadOnlyCollection<string> attributeCodes, IReadOnlyCollection<Guid> materialAttributeIds,
+            CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task ReplaceImportedAttributesAsync(Guid productId, IReadOnlyDictionary<string, string[]> values,
+            CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public Task ReplaceMaterialAsync(Guid productId, Guid? attributeId, Guid? optionId, string? rawValue,
+            CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public Task UpsertVariantAsync(Product product, string variantKey, int sortOrder,
+            CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task<IReadOnlyList<string>> ApplyRelationsAsync(Guid sourceProductId,
+            IReadOnlyCollection<string> similarSkus, IReadOnlyCollection<string> complementarySkus,
+            CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<string>>([]);
+
+        public Task<IReadOnlyDictionary<Guid, IReadOnlyList<string>>> ApplyRelationsBatchAsync(
+            IReadOnlyCollection<ImportRelationRequest> requests,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyDictionary<Guid, IReadOnlyList<string>>>(
+                requests.ToDictionary(request => request.RowId, _ => (IReadOnlyList<string>)[]));
 
         public Task SaveChangesAsync(
             CancellationToken cancellationToken = default) =>

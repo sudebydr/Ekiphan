@@ -9,6 +9,7 @@ namespace Ekiphan.Infrastructure.Media;
 internal sealed class AdminMediaService(
     EkiphanDbContext dbContext,
     IPublicMediaUrlResolver mediaUrlResolver,
+    IMediaFileStorage storage,
     TimeProvider timeProvider)
     : IAdminMediaService
 {
@@ -281,6 +282,54 @@ internal sealed class AdminMediaService(
         }
 
         await SaveAsync(cancellationToken);
+        return await GetAssetAsync(asset.Id, cancellationToken);
+    }
+
+    public async Task<bool> DeletePdfAsync(
+        Guid mediaAssetId,
+        CancellationToken cancellationToken = default)
+    {
+        var asset = await dbContext.MediaAssets
+            .SingleOrDefaultAsync(item => item.Id == mediaAssetId, cancellationToken);
+        if (asset is null) return false;
+        if (asset.AssetType != MediaAssetType.Pdf)
+            throw new ArgumentException("Only PDF media can be deleted from this endpoint.");
+        if (await IsInUseAsync(mediaAssetId, cancellationToken))
+            throw new AdminMediaConflictException(
+                "PDF in use cannot be deleted. Remove every assignment first.");
+
+        await using var transaction = await dbContext.Database
+            .BeginTransactionAsync(cancellationToken);
+        dbContext.MediaAssets.Remove(asset);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        if (!string.IsNullOrWhiteSpace(asset.StorageKey))
+            await storage.DeleteAsync(asset.StorageKey, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return true;
+    }
+
+    public async Task<AdminMediaAssetDetail?> SetPdfStatusAsync(
+        Guid mediaAssetId,
+        SetAdminMediaStatusCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var asset = await dbContext.MediaAssets
+            .SingleOrDefaultAsync(item => item.Id == mediaAssetId, cancellationToken);
+        if (asset is null) return null;
+        if (asset.AssetType != MediaAssetType.Pdf)
+            throw new ArgumentException("Only PDF media status can be changed from this endpoint.");
+
+        if (command.Active)
+            asset.Activate();
+        else if (asset.Status != MediaStatus.Archived)
+        {
+            if (await IsInUseAsync(mediaAssetId, cancellationToken))
+                throw new AdminMediaConflictException(
+                    "PDF in use cannot be made inactive. Remove every assignment first.");
+            asset.Archive(timeProvider.GetUtcNow());
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
         return await GetAssetAsync(asset.Id, cancellationToken);
     }
 

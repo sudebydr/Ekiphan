@@ -51,6 +51,29 @@ public sealed class TabularImportFileReaderTests
     }
 
     [Fact]
+    public async Task ReadAsyncFindsHeadersAndImportsEveryProductSheet()
+    {
+        using var workbook = new XLWorkbook();
+        workbook.AddWorksheet("Cover").Cell(1, 1).Value = "Notes";
+        foreach (var item in new[] { (Name: "One", Sku: "A-1"), (Name: "Two", Sku: "B-1") })
+        {
+            var sheet = workbook.AddWorksheet(item.Name);
+            sheet.Cell(3, 1).Value = "Stok Kodu";
+            sheet.Cell(3, 2).Value = "Urun Adi";
+            sheet.Cell(4, 1).Value = item.Sku;
+            sheet.Cell(4, 2).Value = "Product";
+        }
+        var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        stream.Position = 0;
+
+        var document = await _reader.ReadAsync(stream, "products.xlsx");
+
+        Assert.Equal(2, document.Sheets.Count);
+        Assert.All(document.Sheets, sheet => Assert.Equal(4, Assert.Single(sheet.Rows).RowNumber));
+    }
+
+    [Fact]
     public async Task ReadAsyncRejectsPathInFileName()
     {
         await using var stream = Utf8("anything");

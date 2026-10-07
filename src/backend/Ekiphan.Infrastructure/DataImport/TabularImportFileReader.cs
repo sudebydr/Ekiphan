@@ -115,25 +115,37 @@ public sealed class TabularImportFileReader : ITabularImportFileReader
         foreach (var worksheet in workbook.Worksheets)
         {
             var lastRow = worksheet.LastRowUsed();
-            var lastColumn = worksheet.LastColumnUsed();
-            if (lastRow is null || lastColumn is null || lastRow.RowNumber() < 2)
+            if (lastRow is null || lastRow.RowNumber() < 2)
             {
                 continue;
             }
 
-            if (lastColumn.ColumnNumber() > limits.MaximumColumns)
+            var headerRowNumber = FindProductHeaderRow(worksheet, lastRow.RowNumber(), limits.MaximumColumns);
+            if (!headerRowNumber.HasValue)
+            {
+                continue;
+            }
+
+            var headerRow = worksheet.Row(headerRowNumber.Value);
+            var lastHeaderCell = headerRow.LastCellUsed();
+            if (lastHeaderCell is null)
+            {
+                continue;
+            }
+
+            if (lastHeaderCell.Address.ColumnNumber > limits.MaximumColumns)
             {
                 throw new ImportFileReadException(
                     $"Column count exceeds the limit of {limits.MaximumColumns}.");
             }
 
-            var headerValues = Enumerable.Range(1, lastColumn.ColumnNumber())
-                .Select(column => worksheet.Cell(1, column).GetFormattedString())
+            var headerValues = Enumerable.Range(1, lastHeaderCell.Address.ColumnNumber)
+                .Select(column => worksheet.Cell(headerRowNumber.Value, column).GetFormattedString())
                 .ToArray();
             var headers = ValidateHeaders(headerValues, limits);
             var rows = new List<TabularImportRow>();
 
-            for (var rowNumber = 2;
+            for (var rowNumber = headerRowNumber.Value + 1;
                  rowNumber <= lastRow.RowNumber();
                  rowNumber++)
             {
@@ -165,6 +177,34 @@ public sealed class TabularImportFileReader : ITabularImportFileReader
         }
 
         return new TabularImportDocument(sheets);
+    }
+
+    private static int? FindProductHeaderRow(
+        IXLWorksheet worksheet,
+        int lastRowNumber,
+        int maximumColumns)
+    {
+        var scanLimit = Math.Min(lastRowNumber, 50);
+        for (var rowNumber = 1; rowNumber <= scanLimit; rowNumber++)
+        {
+            var row = worksheet.Row(rowNumber);
+            var lastCell = row.LastCellUsed();
+            if (lastCell is null || lastCell.Address.ColumnNumber > maximumColumns)
+            {
+                continue;
+            }
+
+            var headers = Enumerable.Range(1, lastCell.Address.ColumnNumber)
+                .Select(column => worksheet.Cell(rowNumber, column).GetFormattedString())
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .ToArray();
+            if (ProductImportNormalizer.IsProductHeader(headers))
+            {
+                return rowNumber;
+            }
+        }
+
+        return null;
     }
 
     private static List<List<string>> ParseCsv(

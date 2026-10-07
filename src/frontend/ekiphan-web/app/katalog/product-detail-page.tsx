@@ -47,9 +47,9 @@ function groupedAttributes(attributes: CatalogAttribute[]) {
   }, {});
 }
 
-function RelatedProducts({ products }: { products: CatalogProductSummary[] }) {
+function RelatedProducts({ products, title, sectionId }: { products: CatalogProductSummary[]; title: string; sectionId: string }) {
   if (products.length === 0) return null;
-  return <section className={styles.relatedSection} aria-labelledby="related-products-title"><div className={styles.sectionHeading}><div><p className={styles.sectionEyebrow}>ÜRÜN ÖNERİLERİ</p><h2 id="related-products-title">Bunları da inceleyin</h2></div><Link href="/katalog">Tüm ürünler <span aria-hidden="true">→</span></Link></div><RelatedProductsCarousel items={products.map(product=>({id:product.id,slug:product.slug,name:product.name,sku:product.sku,category:product.primaryCategory?.name ?? "—",brand:product.brand?.name ?? "Ekiphan",image:product.image}))}/></section>;
+  return <section className={styles.relatedSection} aria-labelledby={sectionId}><div className={styles.sectionHeading}><div><p className={styles.sectionEyebrow}>ÜRÜN ÖNERİLERİ</p><h2 id={sectionId}>{title}</h2></div><Link href="/katalog">Tüm ürünler <span aria-hidden="true">→</span></Link></div><RelatedProductsCarousel items={products.map(product=>({id:product.id,slug:product.slug,name:product.name,sku:product.sku,category:product.primaryCategory?.name ?? "",brand:product.brand?.name ?? "",image:product.image}))}/></section>;
 }
 export async function generateMetadata({ params, searchParams }: {
   params: Promise<{ slug: string }>;
@@ -105,9 +105,8 @@ function ErrorState({ caught }: { caught: unknown }) {
 function quickSpecifications(product: CatalogProductDetail) {
   const fromAttributes = product.attributes.slice(0, 4).map((attribute) => ({ label: attribute.name, value: attributeValue(attribute) }));
   const fallbacks = [
-    { label: "Kategori", value: product.categories[0]?.name ?? "—" },
-    { label: "Marka", value: product.brand?.name ?? "Ekiphan" },
-    { label: "Seri", value: product.tags[0]?.name ?? "Profesyonel seri" },
+    ...(product.categories[0] ? [{ label: "Kategori", value: product.categories[0].name }] : []),
+    ...(product.brand ? [{ label: "Marka", value: product.brand.name }] : []),
     { label: "Ürün kodu", value: product.sku }
   ];
   return [...fromAttributes, ...fallbacks].slice(0, 4);
@@ -130,18 +129,14 @@ export default async function ProductDetailPage({ params, searchParams }: {
   const category = product.categories[0]?.name ?? "—";
   const specs = quickSpecifications(product);
   const groups = groupedAttributes(product.attributes);
-  const related = uniqueProducts([...product.similarProducts, ...product.complementaryProducts]);
-  const applicationAreas = Array.from(new Set([
-    ...product.tags.map((tag) => tag.name),
-    ...product.categories.map((item) => item.name),
-    "Profesyonel mutfaklar",
-    "Otel ve restoran projeleri"
-  ])).slice(0, 6);
+  const similar = uniqueProducts(product.similarProducts);
+  const complementary = uniqueProducts(product.complementaryProducts);
+  const applicationAreas = product.attributes
+    .filter(attribute => attribute.name.toLocaleLowerCase("tr-TR").includes("kullanım alan"))
+    .map(attributeValue).filter(value => value !== "—");
   const overviewItems = Array.from(new Set([
     ...product.tags.map((tag) => tag.name),
-    ...product.categories.map((item) => item.name),
-    "Yoğun kullanıma uygun",
-    "Profesyonel servis desteği"
+    ...product.categories.map((item) => item.name)
   ])).slice(0, 4);
 
   const detailSpecificationGroups = Object.entries(groups).map(([name, attributes]) => ({
@@ -168,13 +163,12 @@ export default async function ProductDetailPage({ params, searchParams }: {
           <div className={styles.productInfo}>
             <p className={styles.categoryLabel}>{category}</p>
             <div className={styles.brandLine}>
-              <strong>{product.brand?.name ?? "Ekiphan"}</strong>
+              {product.brand && <strong>{product.brand.name}</strong>}
             </div>
             <h1 id="product-title">{product.name}</h1>
             <p className={styles.modelLine}><span>Ürün Kodu: {product.sku}</span></p>
-            <p className={styles.lead}>{product.shortDescription ?? "Profesyonel kullanım için Ekiphan ürün kataloğundan seçilen, proje ihtiyaçlarına uyumlu ürün çözümü."}</p>
+            {product.shortDescription && <p className={styles.lead}>{product.shortDescription}</p>}
             <dl className={styles.quickSpecs}>{specs.map((spec) => <div key={`${spec.label}-${spec.value}`}><dt>{spec.label}</dt><dd>{spec.value}</dd></div>)}</dl>
-            <div className={styles.statusList} aria-label="Ürün durumu"><span>Profesyonel Seri</span><span>Proje kullanımına uygun</span><span>Bilgi için iletişime geçin</span></div>
             <div className={styles.primaryAction}>
               <AddToQuoteButton productId={product.id} slug={product.slug} name={product.name} sku={product.sku} brandName={product.brand?.name ?? null} imageUrl={product.images[0]?.url ?? null} className={styles.quoteButton} showQuantityControl quantityClassName={styles.quantityControl} />
               <Link href="/iletisim">Teklif al <span aria-hidden="true">→</span></Link>
@@ -182,14 +176,16 @@ export default async function ProductDetailPage({ params, searchParams }: {
             <div className={styles.secondaryActions}><Link href="/kataloglar">↓ Ürün kataloğu</Link><Link href="/iletisim">↓ Teknik doküman talep et</Link></div>
           </div>
         </section>
-      </div>`r`n<ProductDetailSections
+      </div>
+      <ProductDetailSections
         productName={product.name}
         category={category}
-        description={product.longDescription ?? product.shortDescription ?? "Ürün, profesyonel mutfak ve servis projelerinin operasyonel ihtiyaçları için seçilmiştir."}
+        description={product.longDescription ?? product.shortDescription ?? ""}
         features={overviewItems}
         specificationGroups={detailSpecificationGroups}
         applicationAreas={applicationAreas}
-        afterOverview={<RelatedProducts products={related} />}
+        afterOverview={<><RelatedProducts products={similar} title="Benzer ürünler" sectionId="similar-products-title" />
+          <RelatedProducts products={complementary} title="Tamamlayıcı ürünler" sectionId="complementary-products-title" /></>}
       />
 
       <div className={styles.mobileQuoteBar}>

@@ -88,14 +88,15 @@ export function getBrands(): Promise<CatalogBrandListItem[]> {
   return getJson("/api/catalog/tr/brands");
 }
 
-export type CatalogPdfDocument = { slug: string; url: string };
+export type CatalogPdfDocument = { id: string; slug: string; title: string; fileName: string; url: string; coverUrl: string; createdAt: string };
 
 export async function getCatalogPdfDocuments(): Promise<CatalogPdfDocument[]> {
   try {
     const documents = await getJson<CatalogPdfDocument[]>("/api/catalogs/documents");
     return documents.map((document) => ({
       ...document,
-      url: document.url.startsWith("/") ? `${apiBaseUrl()}${document.url}` : document.url
+      url: document.url.startsWith("/") ? `${apiBaseUrl()}${document.url}` : document.url,
+      coverUrl: document.coverUrl.startsWith("/media/") ? `${apiBaseUrl()}${document.coverUrl}` : document.coverUrl
     }));
   } catch {
     return [];

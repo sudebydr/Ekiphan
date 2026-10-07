@@ -9,24 +9,13 @@ export const metadata: Metadata = {
   description: "Ekiphan profesyonel mutfak çözümleri katalogları."
 };
 
-const catalogs = [
-  { id: "acik-bufe", category: "Ekiphan katalogları", eyebrow: "EKİPHAN · 2026", title: "Ekiphan açık büfe", description: "Açık büfe sunum çözümleri.", image: "/images/catalog-product-worlds-ai.png", pdfUrl: "/catalogs/Ekiphan-açık büfe.pdf" },
-  { id: "bar", category: "Ekiphan katalogları", eyebrow: "EKİPHAN · 2026", title: "Ekiphan bar", description: "Bar ve servis alanı seçkileri.", image: "/images/catalog-products-hero-v2.png", pdfUrl: "/catalogs/Ekiphan-bar.pdf" },
-  { id: "cihazlar", category: "Ekiphan katalogları", eyebrow: "EKİPHAN · 2026", title: "Ekiphan cihazlar", description: "Profesyonel mutfak ekipmanları.", image: "/images/industrial-kitchen-premium.png", pdfUrl: "/catalogs/Ekiphan-cihazlar.pdf" },
-  { id: "restaurant", category: "Ekiphan katalogları", eyebrow: "EKİPHAN · 2026", title: "Restaurant malzemeleri", description: "Restoran kullanımına yönelik ürün seçkileri.", image: "/images/feature-selection.png", pdfUrl: "/catalogs/Ekiphan_Restaurant Malzemeleri.pdf" },
-  { id: "klasik", category: "Ekiphan katalogları", eyebrow: "EKİPHAN · 2026", title: "Klasik seçki", description: "Zamansız servis ve sunum ürünleri.", image: "/images/catalog-product-worlds-ai.png", pdfUrl: "/catalogs/Ekiphan_catal_kasik_2026.pdf" },
-  { id: "kutahya", category: "Marka katalogları", eyebrow: "MARKA KATALOĞU · 2026", title: "Kütahya Porselen", description: "Porselen ürün seçkileri.", image: "/images/feature-selection.png", pdfUrl: "/catalogs/Kütahya-Porselen-2026.pdf" },
-  { id: "bonna", category: "Marka katalogları", eyebrow: "MARKA KATALOĞU · 2026", title: "Bonna", description: "Profesyonel porselen koleksiyonu.", image: "/images/catalog-products-hero-v2.png", pdfUrl: "/catalogs/bonna-katalog-2026.pdf" },
-  { id: "esma", category: "Marka katalogları", eyebrow: "MARKA KATALOĞU · 2026", title: "Esmadereboy", description: "Masa üstü ürün seçkileri.", image: "/images/catalog-product-worlds-ai.png", pdfUrl: "/catalogs/esmadereboy-2026.pdf" },
-  { id: "fabrika", category: "Marka katalogları", eyebrow: "MARKA KATALOĞU · 2026", title: "Fabrika", description: "Mutfak çözümleri kataloğu.", image: "/images/industrial-kitchen-premium.png", pdfUrl: "/catalogs/fabrika-2026.pdf" },
-  { id: "nude", category: "Marka katalogları", eyebrow: "MARKA KATALOĞU · 2026", title: "Nude", description: "Cam ve sunum ürünleri.", image: "/images/feature-selection.png", pdfUrl: "/catalogs/nude-2026.pdf" },
-  { id: "pasabahce", category: "Marka katalogları", eyebrow: "MARKA KATALOĞU · 2026", title: "Paşabahçe", description: "Servis ve bardak koleksiyonu.", image: "/images/catalog-products-hero-v2.png", pdfUrl: "/catalogs/paşabahçe-2026.pdf" },
-  { id: "selene", category: "Marka katalogları", eyebrow: "MARKA KATALOĞU · 2026", title: "Selene", description: "Seçili ürün katalogları.", image: "/images/catalog-product-worlds-ai.png", pdfUrl: "/catalogs/selene_11.06.26.pdf" }
-];
+export const dynamic = "force-dynamic";
 
 export default async function CatalogsPage() {
   const uploadedCatalogs = await getCatalogPdfDocuments();
-  const pdfUrls = new Map(uploadedCatalogs.map((catalog) => [catalog.slug, catalog.url]));
+  const catalogs = uploadedCatalogs.map((catalog) => ({ id: catalog.id,
+    category: "Katalog", eyebrow: "PDF KATALOĞU", title: catalog.title,
+    description: catalog.fileName, image: catalog.coverUrl, pdfUrl: catalog.url }));
 
   return (
     <main className={styles.page} data-public-page>
@@ -50,17 +39,14 @@ export default async function CatalogsPage() {
           </p>
         </div>
         <div className={styles.heroSide}>
-          <strong>12</strong>
+          <strong>{catalogs.length}</strong>
           <span>KATALOG</span>
           <div className={styles.heroLine} aria-hidden="true" />
           <p>PDF önizlemesi sayfadan ayrılmadan açılır.</p>
         </div>
       </section>
 
-      <CatalogGallery catalogs={catalogs.map((catalog) => ({
-        ...catalog,
-        pdfUrl: pdfUrls.get(catalog.id) ?? catalog.pdfUrl
-      }))} />
+      <CatalogGallery catalogs={catalogs} />
     </main>
   );
 }

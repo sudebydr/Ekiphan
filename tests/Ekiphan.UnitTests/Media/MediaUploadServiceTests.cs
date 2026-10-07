@@ -30,6 +30,8 @@ public sealed class MediaUploadServiceTests
                 "Beyaz servis tabağı"));
 
         Assert.NotNull(repository.Asset);
+        Assert.NotEqual(Guid.Empty, result.Id);
+        Assert.Equal(repository.Asset.Id, result.Id);
         Assert.Equal(result.StorageKey, storage.SavedKey);
         Assert.Matches(
             "^media/2026/07/[0-9a-f]{32}\\.jpg$",

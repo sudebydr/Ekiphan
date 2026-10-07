@@ -10,6 +10,8 @@ public sealed record SaveAdminMediaCommand(
     IReadOnlyList<AdminMediaTranslationInput> Translations,
     bool Archive);
 
+public sealed record SetAdminMediaStatusCommand(bool Active);
+
 public sealed record CreateExternalVideoCommand(
     string ExternalUrl,
     IReadOnlyList<AdminMediaTranslationInput> Translations);
@@ -71,6 +73,13 @@ public interface IAdminMediaService
     Task<AdminMediaAssetDetail?> UpdateAssetAsync(
         Guid mediaAssetId,
         SaveAdminMediaCommand command,
+        CancellationToken cancellationToken = default);
+    Task<bool> DeletePdfAsync(
+        Guid mediaAssetId,
+        CancellationToken cancellationToken = default);
+    Task<AdminMediaAssetDetail?> SetPdfStatusAsync(
+        Guid mediaAssetId,
+        SetAdminMediaStatusCommand command,
         CancellationToken cancellationToken = default);
     Task<AdminMediaAssignmentDetail> SaveAssignmentAsync(
         SaveMediaAssignmentCommand command,

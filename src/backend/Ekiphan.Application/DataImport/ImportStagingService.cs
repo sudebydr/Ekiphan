@@ -28,7 +28,7 @@ public sealed class ImportStagingService(
         var checksum = Convert.ToHexString(SHA256.HashData(content));
         content.Position = 0;
 
-        if (await repository.SourceExistsAsync(checksum, cancellationToken))
+        if (!command.IsDryRun && await repository.SourceExistsAsync(checksum, cancellationToken))
         {
             throw new DuplicateImportSourceException();
         }
@@ -61,7 +61,7 @@ public sealed class ImportStagingService(
                 }
             }
 
-            MarkDuplicateSkus(job);
+            SkipExactDuplicateRows(job);
             await ResolveReferencesAsync(
                 job,
                 referenceResolver,
@@ -94,13 +94,12 @@ public sealed class ImportStagingService(
             .Cast<string>()
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
-        var categoryNames = payloads.Values
-            .SelectMany(
-                payload => payload["categories"]?.AsArray()
-                    .Select(value => value?.GetValue<string>())
-                    .Where(value => !string.IsNullOrWhiteSpace(value))
-                    .Cast<string>() ?? [])
-            .Distinct(StringComparer.OrdinalIgnoreCase)
+        var categoryPaths = payloads.Values
+            .Select(payload => (IReadOnlyList<string>)(payload["categories"]?.AsArray()
+                .Select(value => value?.GetValue<string>())
+                .Where(value => !string.IsNullOrWhiteSpace(value)).Cast<string>().ToArray() ?? []))
+            .Where(path => path.Count > 0)
+            .GroupBy(ImportCategoryPath.Key, StringComparer.OrdinalIgnoreCase).Select(group => group.First())
             .ToArray();
         var materialNames = payloads.Values
             .Select(payload => payload["material"]?.GetValue<string>())
@@ -118,7 +117,7 @@ public sealed class ImportStagingService(
             .ToArray();
         var resolution = await referenceResolver.ResolveAsync(
             brandNames,
-            categoryNames,
+            categoryPaths,
             materialNames,
             tagNames,
             cancellationToken);
@@ -146,36 +145,35 @@ public sealed class ImportStagingService(
                 }
             }
 
+            var categoryNames = payload["categories"]?.AsArray()
+                .Select(value => value!.GetValue<string>()).ToArray() ?? [];
             var categoryIds = new List<Guid>();
-            foreach (var categoryName in payload["categories"]?.AsArray()
-                .Select(value => value!.GetValue<string>()) ?? [])
+            var categoryPathKey = ImportCategoryPath.Key(categoryNames);
+            if (categoryNames.Length > 0 && resolution.AmbiguousCategoryPaths.Contains(categoryPathKey))
             {
-                if (resolution.AmbiguousCategoryNames.Contains(categoryName))
-                {
-                    AddReferenceIssue(
-                        row,
-                        "AMBIGUOUS_CATEGORY",
-                        "Category name matches more than one Turkish category.",
-                        "categories",
-                        categoryName);
-                    hasError = true;
-                }
-                else if (resolution.CategoryIds.TryGetValue(
-                    categoryName,
-                    out var categoryId))
-                {
-                    categoryIds.Add(categoryId);
-                }
-                else
-                {
-                    AddReferenceIssue(
-                        row,
-                        "UNKNOWN_CATEGORY",
-                        "Category does not match an existing Turkish category.",
-                        "categories",
-                        categoryName);
-                    hasError = true;
-                }
+                AddReferenceIssue(row, "AMBIGUOUS_CATEGORY",
+                    "Category hierarchy matches more than one category path.", "categories", string.Join(" > ", categoryNames));
+                hasError = true;
+            }
+            else if (categoryNames.Length > 0 && resolution.CategoryPathIds.TryGetValue(categoryPathKey, out var resolvedPath))
+            {
+                categoryIds.AddRange(resolvedPath);
+            }
+            else if (categoryNames.Length == 1 && resolution.AmbiguousCategoryNames.Contains(categoryNames[0]))
+            {
+                AddReferenceIssue(row, "AMBIGUOUS_CATEGORY",
+                    "Category name matches more than one Turkish category.", "categories", categoryNames[0]);
+                hasError = true;
+            }
+            else if (categoryNames.Length == 1 && resolution.CategoryIds.TryGetValue(categoryNames[0], out var legacyCategoryId))
+            {
+                categoryIds.Add(legacyCategoryId);
+            }
+            else if (categoryNames.Length > 0)
+            {
+                AddReferenceIssue(row, "UNKNOWN_CATEGORY",
+                    "Category hierarchy does not match an existing category path.", "categories", string.Join(" > ", categoryNames));
+                hasError = true;
             }
 
             var materialName = payload["material"]?.GetValue<string>();
@@ -275,23 +273,25 @@ public sealed class ImportStagingService(
             columnName,
             rawValue);
 
-    private static void MarkDuplicateSkus(ImportJob job)
+    private static void SkipExactDuplicateRows(ImportJob job)
     {
-        var duplicateRows = job.Rows
-            .Where(row => !string.IsNullOrWhiteSpace(row.SKU))
-            .GroupBy(row => row.SKU!, StringComparer.OrdinalIgnoreCase)
-            .Where(group => group.Count() > 1)
-            .SelectMany(group => group);
+        var groups = job.Rows
+            .Where(row => row.Status == ImportRowStatus.Valid)
+            .GroupBy(row => row.NormalizedPayload!, StringComparer.Ordinal)
+            .Where(group => group.Count() > 1);
 
-        foreach (var row in duplicateRows)
+        foreach (var group in groups)
         {
-            row.AddIssue(
-                Guid.NewGuid(),
-                ImportIssueSeverity.Error,
-                "DUPLICATE_SKU_IN_SOURCE",
-                "SKU occurs more than once in the same import source.",
-                "sku",
-                row.SKU);
+            foreach (var duplicate in group.Skip(1))
+            {
+                duplicate.AddIssue(
+                    Guid.NewGuid(),
+                    ImportIssueSeverity.Warning,
+                    "DUPLICATE_ROW_SKIPPED",
+                    "Exact duplicate row was skipped.",
+                    "row");
+                duplicate.MarkSkipped();
+            }
         }
     }
 
@@ -320,7 +320,7 @@ public sealed class ImportStagingService(
         {
             row.AddIssue(
                 Guid.NewGuid(),
-                ImportIssueSeverity.Error,
+                issue.IsWarning ? ImportIssueSeverity.Warning : ImportIssueSeverity.Error,
                 issue.Code,
                 issue.Message,
                 issue.Column);
@@ -329,6 +329,10 @@ public sealed class ImportStagingService(
         if (normalization.IsValid)
         {
             row.MarkValid(JsonSerializer.Serialize(normalization.Values));
+            if (normalization.ShouldSkip)
+            {
+                row.MarkSkipped();
+            }
         }
     }
 

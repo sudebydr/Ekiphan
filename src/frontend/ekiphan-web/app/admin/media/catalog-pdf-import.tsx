@@ -8,6 +8,7 @@ type PreviewFile = {
   fileName: string;
   length: number;
   catalogSlug: string | null;
+  suggestedTitle: string;
   status: "Matched" | "Unmatched" | "Rejected" | "Ignored";
   error: string | null;
 };
@@ -24,8 +25,6 @@ type ExecutionResult = {
   skipped: number;
   failed: number;
 };
-
-const manifestCount = 12;
 
 async function readError(response: Response): Promise<string> {
   const responseText = await response.text();
@@ -54,6 +53,7 @@ export function CatalogPdfImport() {
   const [result, setResult] = useState<ExecutionResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [titles, setTitles] = useState<Record<string, string>>({});
 
   const summary = useMemo(() => {
     const files = preview?.files ?? [];
@@ -64,7 +64,6 @@ export function CatalogPdfImport() {
       pdfCount: preview?.pdfCount ?? 0,
       matched: count("Matched"),
       unmatched: count("Unmatched"),
-      missing: preview ? Math.max(0, manifestCount - count("Matched")) : 0,
       duplicates: 0,
       ignored: preview?.ignoredCount ?? count("Ignored"),
       invalidPdf: files.filter(
@@ -80,10 +79,8 @@ export function CatalogPdfImport() {
   }, [preview]);
 
   const canExecute = preview !== null &&
-    summary.pdfCount === manifestCount &&
-    summary.matched === manifestCount &&
+    summary.pdfCount > 0 && summary.matched === summary.pdfCount &&
     summary.unmatched === 0 &&
-    summary.missing === 0 &&
     summary.duplicates === 0 &&
     summary.invalidPdf === 0 &&
     summary.unsafePath === 0 &&
@@ -106,7 +103,9 @@ export function CatalogPdfImport() {
       });
 
       if (!response.ok) throw new Error(await readError(response));
-      setPreview((await response.json()) as PreviewResult);
+      const next = (await response.json()) as PreviewResult;
+      setPreview(next);
+      setTitles(Object.fromEntries(next.files.map((item) => [item.entryPath, item.suggestedTitle])));
     } catch (reason) {
       setError(
         reason instanceof Error
@@ -129,6 +128,7 @@ export function CatalogPdfImport() {
       const form = new FormData();
       form.set("file", file);
       form.set("confirmed", "true");
+      form.set("titles", JSON.stringify(titles));
       const response = await fetch("/api/admin/catalog-pdf-import/execute", {
         method: "POST",
         body: form
@@ -151,8 +151,8 @@ export function CatalogPdfImport() {
     <section className={styles.editor} aria-labelledby="catalog-pdf-import-title">
       <h2 id="catalog-pdf-import-title">Katalog PDF Import</h2>
       <p>
-        ZIP yalnızca doğrulanır ve 12 katalog kartıyla eşleştirilir. Bu adım
-        S3'e veya veritabanına yazmaz.
+        ZIP içindeki geçerli PDF katalogları önizlenir. Maksimum ZIP 1,5 GB,
+        açılmış içerik 2 GB ve her PDF 500 MB olabilir.
       </p>
 
       {error && <div className={styles.error} role="alert">{error}</div>}
@@ -181,9 +181,15 @@ export function CatalogPdfImport() {
           <h3>Önizleme sonucu</h3>
           <p>
             PDF Count: <strong>{summary.pdfCount}</strong> · Matched: <strong>{summary.matched}</strong> ·
-            Unmatched: <strong>{summary.unmatched}</strong> · Missing: <strong>{summary.missing}</strong> ·
+            Unmatched: <strong>{summary.unmatched}</strong> ·
             Duplicates: <strong>{summary.duplicates}</strong>
           </p>
+          {preview.files.filter((item) => item.status === "Matched").map((item) =>
+            <label key={item.entryPath}>Katalog başlığı · {item.fileName}
+              <input maxLength={250} value={titles[item.entryPath] ?? ""}
+                onChange={(event) => setTitles((current) => ({ ...current, [item.entryPath]: event.target.value }))} />
+              <small>{(item.length / 1024 / 1024).toFixed(1)} MB · Kapak: PDF ilk sayfa</small>
+            </label>)}
           <p>
             Ignored: <strong>{summary.ignored}</strong> · Invalid PDF: <strong>{summary.invalidPdf}</strong> ·
             Unsafe Path: <strong>{summary.unsafePath}</strong> · Size Errors: <strong>{summary.sizeErrors}</strong>
@@ -201,4 +207,50 @@ export function CatalogPdfImport() {
       )}
     </section>
   );
+}
+
+export function SingleCatalogPdfUpload({ onUploaded }: { onUploaded: () => Promise<void> }) {
+  const [file, setFile] = useState<File | null>(null);
+  const [title, setTitle] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const suggest = (name: string) => name.replace(/\.pdf$/i, "").replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ").trim().replace(/\b\p{L}/gu, value => value.toLocaleUpperCase("tr-TR"));
+
+  async function upload() {
+    if (!file) return;
+    if (!/\.pdf$/i.test(file.name) || (file.type && file.type !== "application/pdf")) {
+      setError("Yalnız PDF dosyası yüklenebilir."); return;
+    }
+    if (file.size <= 0 || file.size > 500 * 1024 * 1024) {
+      setError("PDF en fazla 500 MB olabilir."); return;
+    }
+    setBusy(true); setError(null); setMessage(null);
+    try {
+      const form = new FormData(); form.set("file", file); form.set("title", title.trim());
+      const response = await fetch("/api/admin/catalog-pdf-import/single", { method: "POST", body: form });
+      if (!response.ok) throw new Error(await readError(response));
+      const result = await response.json() as { warning?: string | null };
+      setMessage(result.warning ?? "Katalog PDF ve WebP kapağı yüklendi.");
+      setFile(null); setTitle(""); await onUploaded();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Katalog PDF yüklenemedi.");
+    } finally { setBusy(false); }
+  }
+
+  return <section className={styles.editor} aria-labelledby="single-catalog-title">
+    <h2 id="single-catalog-title">Tek Katalog PDF Yükle</h2>
+    {error && <div className={styles.error} role="alert">{error}</div>}
+    {message && <div className={styles.success} role="status">{message}</div>}
+    <label>PDF dosyası<input type="file" accept=".pdf,application/pdf" disabled={busy}
+      onChange={event => { const selected = event.target.files?.[0] ?? null; setFile(selected);
+        setTitle(selected ? suggest(selected.name) : ""); setError(null); setMessage(null); }} /></label>
+    <label>Katalog başlığı<input required maxLength={250} value={title}
+      onChange={event => setTitle(event.target.value)} /></label>
+    <button type="button" disabled={busy || !file || !title.trim()} onClick={() => void upload()}>
+      {busy ? "Yükleniyor…" : "Yükle"}
+    </button>
+    <small>Yalnız PDF · Maksimum 500 MB · İlk sayfadan WebP kapak üretilir.</small>
+  </section>;
 }

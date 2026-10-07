@@ -1,5 +1,6 @@
 using Ekiphan.Application.DataImport;
 using Ekiphan.Domain.Catalog;
+using Ekiphan.Domain.Common;
 using Ekiphan.Domain.DataImport;
 using Ekiphan.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +19,7 @@ internal sealed class ProductImportRepository(EkiphanDbContext db) : IProductImp
     public async Task<IReadOnlySet<string>> GetExistingSkusAsync(IEnumerable<string> skus, CancellationToken cancellationToken = default) =>
         (await db.Products.IgnoreQueryFilters().AsNoTracking()
             .Where(x => skus.Contains(x.SKU)).Select(x => x.SKU).ToListAsync(cancellationToken))
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            .Select(SkuNormalizer.Normalize).ToHashSet(StringComparer.Ordinal);
     public async Task<IReadOnlyDictionary<string, Guid>> GetBrandsAsync(IEnumerable<string> names, CancellationToken cancellationToken = default) =>
         (await db.Brands.AsNoTracking().Where(x => names.Contains(x.Name)).Select(x => new { x.Name, x.Id }).ToListAsync(cancellationToken))
             .ToDictionary(x => x.Name, x => x.Id, StringComparer.OrdinalIgnoreCase);

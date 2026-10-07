@@ -16,7 +16,8 @@ function problem(status: number, detail: string) {
 function allowed(parts: string[], method: Method) {
   if (parts.length === 0) return method === "GET";
   if (parts.length === 1 && parts[0] === "external-video") return method === "POST";
-  if (parts.length === 2 && parts[0] === "assets" && guid.test(parts[1] ?? "")) return method === "PUT";
+  if (parts.length === 2 && parts[0] === "assets" && guid.test(parts[1] ?? "")) return method === "PUT" || method === "DELETE";
+  if (parts.length === 3 && parts[0] === "assets" && guid.test(parts[1] ?? "") && parts[2] === "status") return method === "PUT";
   if (parts.length === 1 && parts[0] === "assignments") return method === "PUT";
   return parts.length === 5 && parts[0] === "assignments" &&
     word.test(parts[1] ?? "") && guid.test(parts[2] ?? "") &&

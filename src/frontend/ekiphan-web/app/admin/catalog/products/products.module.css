@@ -45,6 +45,20 @@
 .selected { border-color: rgba(59, 86, 130, 0.4); background: rgba(59, 86, 130, 0.03); box-shadow: 0 0 0 1px rgba(59, 86, 130, 0.4); }
 .product span, .selected span { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.75rem; color: #64748b; }
 .product strong, .selected strong { font-size: 0.85rem; color: #1e293b; font-weight: 600; }
+.pdfCard { position: relative; display: grid; gap: 0.75rem; padding: 0.9rem; border: 1px solid rgba(30, 41, 59, 0.1); border-radius: 10px; background: #fff; }
+.pdfCardSelected { border-color: rgba(59, 86, 130, 0.5); box-shadow: 0 0 0 1px rgba(59, 86, 130, 0.35); }
+.pdfCardMain { min-width: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.3rem 0.65rem; padding: 0; text-align: left; border: 0; background: transparent; color: inherit; cursor: pointer; }
+.pdfBadge { grid-row: 1 / span 2; align-self: start; padding: 0.3rem 0.45rem; border-radius: 5px; background: #b42318; color: #fff; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em; }
+.pdfCardMain strong { overflow: hidden; color: #1e293b; font-size: 0.9rem; text-overflow: ellipsis; white-space: nowrap; }
+.pdfFileName { overflow: hidden; color: #475569; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.76rem; text-overflow: ellipsis; white-space: nowrap; }
+.pdfMeta, .pdfDate { grid-column: 1 / -1; color: #64748b; font-size: 0.74rem; }
+.pdfActions { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; }
+.pdfStatus, .pdfDelete { padding: 0.45rem 0.7rem; border-radius: 6px; font-size: 0.78rem; font-weight: 600; }
+.pdfStatus { border: 1px solid #cbd5e1; background: #fff; color: #334155; cursor: pointer; }
+.pdfStatus:hover { background: #f8fafc; }
+.pdfDelete { padding: 0.45rem 0.7rem; border: 1px solid #fecaca; border-radius: 6px; background: #fff; color: #b91c1c; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+.pdfDelete:hover { background: #fef2f2; }
+.pdfDelete:disabled { cursor: not-allowed; opacity: 0.55; }
 .page input, .page textarea, .page select { width: 100%; min-height: 2.75rem; padding: 0.65rem 0.85rem; border: 1px solid rgba(30, 41, 59, 0.15); border-radius: 8px; background: #ffffff; color: #1e293b; font: inherit; font-size: 0.875rem; transition: border-color 0.2s, box-shadow 0.2s; }
 .page textarea { min-height: 6rem; resize: vertical; }
 .page button:not(.pagination button):not(.categoryOrder button) { min-height: 2.75rem; padding: 0.65rem 1.25rem; border: 0; border-radius: 8px; background: #1e293b; color: #ffffff; font: inherit; font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: background 0.2s; }

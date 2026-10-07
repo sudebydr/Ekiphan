@@ -36,22 +36,17 @@ builder.Services.AddProblemDetails();
 builder.Services.AddResponseCompression(options => { options.EnableForHttps = true; });
 builder.Services.AddControllers();
 var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
-if (string.IsNullOrWhiteSpace(redisConnectionString))
-{
-    if (builder.Environment.IsProduction())
-    {
-        throw new InvalidOperationException(
-            "Missing required configuration: ConnectionStrings:Redis.");
-    }
 
-    redisConnectionString = "localhost:6379";
-}
-
-builder.Services.AddHealthChecks()
+var healthChecks = builder.Services.AddHealthChecks()
     .AddCheck<DatabaseReadinessHealthCheck>(
         "database",
-        tags: ["ready"])
-    .AddRedis(redisConnectionString, tags: ["ready"]);
+        tags: ["ready"]);
+
+if (!string.IsNullOrWhiteSpace(redisConnectionString))
+{
+    healthChecks.AddRedis(redisConnectionString, tags: ["ready"]);
+}
+
 builder.Services.AddInfrastructure(builder.Configuration, redisConnectionString);
 builder.Services.Configure<FormOptions>(
     options => options.MultipartBodyLengthLimit =

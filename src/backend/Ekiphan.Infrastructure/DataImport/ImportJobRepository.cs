@@ -12,7 +12,10 @@ internal sealed class ImportJobRepository(EkiphanDbContext dbContext)
         string sourceSha256Checksum,
         CancellationToken cancellationToken = default) =>
         dbContext.ImportJobs.AnyAsync(
-            job => job.SourceSha256Checksum == sourceSha256Checksum,
+            job => !job.IsDryRun && job.SourceSha256Checksum == sourceSha256Checksum &&
+                (job.Status == ImportJobStatus.ReadyToPublish ||
+                 job.Status == ImportJobStatus.Publishing ||
+                 job.Status == ImportJobStatus.Completed),
             cancellationToken);
 
     public void Add(ImportJob job)

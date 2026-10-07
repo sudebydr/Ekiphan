@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using Ekiphan.Application.DataImport;
 using Ekiphan.Domain.DataImport;
 
@@ -30,7 +31,7 @@ public sealed class ImportStagingServiceTests
     }
 
     [Fact]
-    public async Task StageAsyncRecordsRequiredFieldIssues()
+    public async Task StageAsyncSkipsRowWhenProductIdentityIsIncomplete()
     {
         var repository = new StubRepository();
         var service = CreateService(
@@ -38,21 +39,42 @@ public sealed class ImportStagingServiceTests
             Document(
                 new Dictionary<string, string?>
                 {
-                    ["Marka"] = "Ekiphan"
+                    ["Urun Adi"] = "Product"
                 }));
 
         var job = await service.StageAsync(Command("source-b"));
 
-        Assert.Equal(ImportJobStatus.ValidationFailed, job.Status);
-        Assert.Equal(1, job.InvalidRowCount);
-        Assert.Equal(
-            ["SKU_REQUIRED", "PRODUCT_NAME_REQUIRED"],
-            Assert.Single(job.Rows).Issues.Select(issue => issue.Code));
+        Assert.Equal(ImportJobStatus.Completed, job.Status);
+        Assert.Equal(0, job.InvalidRowCount);
+        var row = Assert.Single(job.Rows);
+        Assert.Equal(ImportRowStatus.Skipped, row.Status);
+        Assert.Contains(row.Issues, issue => issue.Code == "INCOMPLETE_PRODUCT_ROW_SKIPPED" &&
+            issue.Severity == ImportIssueSeverity.Warning);
         Assert.Equal(1, repository.SaveCount);
     }
 
     [Fact]
-    public async Task StageAsyncRejectsDuplicateBeforeReadingOrSaving()
+    public async Task StageAsyncKeepsOtherValidationErrorsInvalidWhenProductIdentityExists()
+    {
+        var repository = new StubRepository();
+        var service = CreateService(
+            repository,
+            Document(new Dictionary<string, string?>
+            {
+                ["SKU"] = "SKU-1",
+                ["Urun Adi"] = "Product",
+                ["Marka"] = "Unknown brand"
+            }));
+
+        var job = await service.StageAsync(Command("unknown-brand"));
+
+        Assert.Equal(ImportJobStatus.ValidationFailed, job.Status);
+        Assert.Equal(1, job.InvalidRowCount);
+        Assert.Contains(Assert.Single(job.Rows).Issues, issue => issue.Code == "UNKNOWN_BRAND");
+    }
+
+    [Fact]
+    public async Task StageAsyncRejectsDuplicatePublishBeforeReadingOrSaving()
     {
         var repository = new StubRepository
         {
@@ -67,11 +89,27 @@ public sealed class ImportStagingServiceTests
             TimeProvider.System);
 
         await Assert.ThrowsAsync<DuplicateImportSourceException>(
-            () => service.StageAsync(Command("same-content")));
+            () => service.StageAsync(Command("same-content", isDryRun: false)));
 
         Assert.Equal(0, reader.ReadCount);
         Assert.Equal(0, repository.SaveCount);
         Assert.Null(repository.AddedJob);
+    }
+
+    [Fact]
+    public async Task StageAsyncAllowsRepeatedDryRunForSameSource()
+    {
+        var repository = new StubRepository { SourceExists = true };
+        var service = CreateService(repository, Document(new Dictionary<string, string?>
+        {
+            ["SKU"] = "DRY-1", ["Ürün Adı"] = "Dry Run"
+        }));
+
+        var job = await service.StageAsync(Command("same-content", isDryRun: true));
+
+        Assert.True(job.IsDryRun);
+        Assert.Equal(ImportJobStatus.Completed, job.Status);
+        Assert.Equal(1, repository.SaveCount);
     }
 
     [Fact]
@@ -106,16 +144,49 @@ public sealed class ImportStagingServiceTests
             });
 
         var first = await CreateService(firstRepository, document)
-            .StageAsync(Command("stable"));
+            .StageAsync(Command("stable", isDryRun: false));
         var second = await CreateService(secondRepository, document)
-            .StageAsync(Command("stable"));
+            .StageAsync(Command("stable", isDryRun: false));
 
         Assert.Equal(first.SourceSha256Checksum, second.SourceSha256Checksum);
         Assert.Equal(64, first.SourceSha256Checksum.Length);
     }
 
     [Fact]
-    public async Task StageAsyncMarksEveryDuplicateSkuRowInvalid()
+    public async Task StageAsyncKeepsTheSourceChecksumForRepeatedDryRuns()
+    {
+        var document = Document(new Dictionary<string, string?>
+        {
+            ["SKU"] = "DRY-2", ["Ürün Adı"] = "Dry Run"
+        });
+        var first = await CreateService(new StubRepository(), document).StageAsync(Command("same-dry-run"));
+        var second = await CreateService(new StubRepository(), document).StageAsync(Command("same-dry-run"));
+
+        Assert.Equal(first.SourceSha256Checksum, second.SourceSha256Checksum);
+        Assert.Equal(64, first.SourceSha256Checksum.Length);
+        Assert.Equal(64, second.SourceSha256Checksum.Length);
+    }
+
+    [Fact]
+    public async Task StageAsyncAllowsNonDryRunAfterDryRunWithSameChecksum()
+    {
+        var repository = new StubRepository();
+        var document = Document(new Dictionary<string, string?>
+        {
+            ["SKU"] = "DRY-THEN-REAL", ["Urun Adi"] = "Product"
+        });
+        var service = CreateService(repository, document);
+
+        var dryRun = await service.StageAsync(Command("same-source", isDryRun: true));
+        var nonDryRun = await service.StageAsync(Command("same-source", isDryRun: false));
+
+        Assert.Equal(dryRun.SourceSha256Checksum, nonDryRun.SourceSha256Checksum);
+        Assert.True(dryRun.IsDryRun);
+        Assert.False(nonDryRun.IsDryRun);
+    }
+
+    [Fact]
+    public async Task StageAsyncTreatsSameSkuWithDifferentProductDataAsValid()
     {
         var repository = new StubRepository();
         var document = new TabularImportDocument(
@@ -144,13 +215,64 @@ public sealed class ImportStagingServiceTests
         var job = await CreateService(repository, document)
             .StageAsync(Command("duplicate-source"));
 
-        Assert.Equal(ImportJobStatus.ValidationFailed, job.Status);
-        Assert.Equal(2, job.InvalidRowCount);
-        Assert.All(
-            job.Rows,
-            row => Assert.Contains(
-                row.Issues,
-                issue => issue.Code == "DUPLICATE_SKU_IN_SOURCE"));
+        Assert.Equal(ImportJobStatus.Completed, job.Status);
+        Assert.Equal(2, job.ValidRowCount);
+        Assert.All(job.Rows, row => Assert.DoesNotContain(row.Issues, issue => issue.Code == "PRODUCT_CONFLICT"));
+    }
+
+    [Fact]
+    public async Task StageAsyncSkipsExactDuplicateRowsWithWarning()
+    {
+        var values = new Dictionary<string, string?>
+        {
+            ["SKU"] = "DUP-1",
+            ["Ürün Adı"] = "Aynı Ürün",
+            ["Renk 1"] = "Kırmızı"
+        };
+        var document = new TabularImportDocument(
+            [new TabularImportSheet("Products", values.Keys.ToArray(),
+                [new TabularImportRow(2, values), new TabularImportRow(3, new Dictionary<string, string?>(values))])]);
+
+        var job = await CreateService(new StubRepository(), document)
+            .StageAsync(Command("exact-duplicate"));
+
+        Assert.Equal(ImportJobStatus.Completed, job.Status);
+        Assert.Equal(1, job.ValidRowCount);
+        var skipped = Assert.Single(job.Rows, row => row.Status == ImportRowStatus.Skipped);
+        Assert.Contains(skipped.Issues, issue => issue.Severity == ImportIssueSeverity.Warning && issue.Code == "DUPLICATE_ROW_SKIPPED");
+    }
+
+    [Fact]
+    public async Task StageAsyncSkipsEffectivelyEmptyProductRowWithoutFailingJob()
+    {
+        var job = await CreateService(new StubRepository(), Document(
+                new Dictionary<string, string?>
+                {
+                    ["SKU"] = "CONTEXT-ONLY",
+                    ["Marka"] = "Ekiphan",
+                    ["Kategori"] = "Servis"
+                }))
+            .StageAsync(Command("effectively-empty"));
+
+        Assert.Equal(ImportJobStatus.Completed, job.Status);
+        Assert.Equal(0, job.InvalidRowCount);
+        var skipped = Assert.Single(job.Rows, row => row.Status == ImportRowStatus.Skipped);
+        Assert.Contains(skipped.Issues, issue => issue.Severity == ImportIssueSeverity.Warning && issue.Code == "EFFECTIVELY_EMPTY_PRODUCT_ROW");
+    }
+
+    [Fact]
+    public async Task StageAsyncAcceptsSameSkuWithDifferentColors()
+    {
+        var rows = new List<string> { "Red", "Blue" }.Select((color, index) => new TabularImportRow(index + 2,
+            new Dictionary<string, string?> { ["SKU"] = "VAR-1", ["Urun Adi"] = "Product", ["Renk 1"] = color })).ToArray();
+        var document = new TabularImportDocument([new TabularImportSheet("Products", ["SKU", "Urun Adi", "Renk 1"], rows)]);
+
+        var job = await CreateService(new StubRepository(), document).StageAsync(Command("variants"));
+
+        Assert.Equal(ImportJobStatus.Completed, job.Status);
+        Assert.Equal(2, job.ValidRowCount);
+        Assert.Equal(2, job.Rows.Select(row => JsonDocument.Parse(row.NormalizedPayload!).RootElement
+            .GetProperty("variantKey").GetString()).Distinct().Count());
     }
 
     [Fact]
@@ -356,11 +478,11 @@ public sealed class ImportStagingServiceTests
             new StubReferenceResolver(),
             TimeProvider.System);
 
-    private static StageImportFileCommand Command(string content) =>
+    private static StageImportFileCommand Command(string content, bool isDryRun = true) =>
         new(
             new MemoryStream(Encoding.UTF8.GetBytes(content)),
             "products.csv",
-            IsDryRun: true);
+            IsDryRun: isDryRun);
 
     private static TabularImportDocument Document(
         IReadOnlyDictionary<string, string?> values) =>
@@ -437,7 +559,7 @@ public sealed class ImportStagingServiceTests
     {
         public Task<ImportReferenceResolution> ResolveAsync(
             IReadOnlyCollection<string> brandNames,
-            IReadOnlyCollection<string> categoryNames,
+            IReadOnlyCollection<IReadOnlyList<string>> categoryPaths,
             IReadOnlyCollection<string> materialNames,
             IReadOnlyCollection<string> tagNames,
             CancellationToken cancellationToken = default) =>

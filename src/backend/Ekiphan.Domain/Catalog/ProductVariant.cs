@@ -20,7 +20,7 @@ public sealed class ProductVariant : Entity
         : base(id)
     {
         ProductId = productId;
-        SKU = CatalogGuard.Required(sku, 100, nameof(sku)).ToUpperInvariant();
+        SKU = SkuNormalizer.Normalize(CatalogGuard.Required(sku, 100, nameof(sku)));
         SortOrder = sortOrder;
         MediaAssetId = mediaAssetId;
 
@@ -51,7 +51,7 @@ public sealed class ProductVariant : Entity
         int sortOrder,
         Guid? mediaAssetId = null)
     {
-        SKU = CatalogGuard.Required(sku, 100, nameof(sku)).ToUpperInvariant();
+        SKU = SkuNormalizer.Normalize(CatalogGuard.Required(sku, 100, nameof(sku)));
         SortOrder = sortOrder;
         MediaAssetId = mediaAssetId;
         foreach (var selection in _selections)

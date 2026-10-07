@@ -1,5 +1,6 @@
 using Ekiphan.Application.MediaImport;
 using Ekiphan.Domain.Media;
+using Ekiphan.Domain.Common;
 using Ekiphan.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,8 +32,8 @@ internal sealed class ProductMediaImportRepository(EkiphanDbContext db) : IProdu
     public async Task<IReadOnlyList<ProductMediaProductMatch>> FindProductsAsync(IReadOnlyCollection<string> skus,
         IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken = default)
     {
-        var normalized = skus.Select(x => x.Trim().ToUpperInvariant()).Distinct().ToArray();
-        return await db.Products.AsNoTracking().Where(x => ids.Contains(x.Id) || normalized.Contains(x.SKU))
+        var normalized = skus.Select(SkuNormalizer.Normalize).Distinct(StringComparer.Ordinal).ToArray();
+        return await db.Products.AsNoTracking().Where(x => ids.Contains(x.Id) || normalized.Contains(x.NormalizedSku))
             .Select(x => new ProductMediaProductMatch(x.Id, x.SKU,
                 x.Translations.Where(t => t.LanguageCode == "tr").Select(t => t.Name).FirstOrDefault() ?? x.SKU,
                 x.IsDeleted, x.IsPublished, x.UpdatedAt,
@@ -40,9 +41,22 @@ internal sealed class ProductMediaImportRepository(EkiphanDbContext db) : IProdu
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlySet<string>> ExistingMediaHashesAsync(IReadOnlyCollection<string> hashes, CancellationToken cancellationToken = default) =>
+    public async Task<IReadOnlyDictionary<string, Guid>> FindMediaAssetsByHashesAsync(IReadOnlyCollection<string> hashes,
+        CancellationToken cancellationToken = default) =>
         (await db.MediaAssets.AsNoTracking().Where(x => x.Sha256Checksum != null && hashes.Contains(x.Sha256Checksum))
-            .Select(x => x.Sha256Checksum!).ToListAsync(cancellationToken)).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            .Select(x => new { Hash = x.Sha256Checksum!, x.Id }).ToListAsync(cancellationToken))
+            .GroupBy(x => x.Hash, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(x => x.Key, x => x.MinBy(asset => asset.Id)!.Id, StringComparer.OrdinalIgnoreCase);
+
+    public async Task<IReadOnlySet<ProductMediaContentLink>> FindProductMediaContentLinksAsync(
+        IReadOnlyCollection<Guid> productIds, IReadOnlyCollection<string> hashes,
+        CancellationToken cancellationToken = default) =>
+        (await (from link in db.ProductMedia.AsNoTracking()
+                join asset in db.MediaAssets.AsNoTracking() on link.MediaAssetId equals asset.Id
+                where productIds.Contains(link.ProductId) && link.Role == ProductMediaRole.GalleryImage &&
+                      asset.Sha256Checksum != null && hashes.Contains(asset.Sha256Checksum)
+                select new ProductMediaContentLink(link.ProductId, asset.Sha256Checksum!)).ToListAsync(cancellationToken))
+            .ToHashSet();
 
     public Task<ProductMediaImportBatch?> GetBatchAsync(Guid id, bool tracked, CancellationToken cancellationToken = default)
     {

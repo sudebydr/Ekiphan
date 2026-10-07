@@ -154,6 +154,50 @@ public sealed class AdminMediaEndpointTests
         Assert.Contains("no-store", response.Headers.CacheControl?.ToString());
     }
 
+    [Fact]
+    public async Task AuthorizedPdfDeleteUsesMediaService()
+    {
+        var media = new StubAdminMediaService();
+        await using var factory = CreateFactory(JwtSettings(), services =>
+        {
+            services.RemoveAll<IAdminMediaService>();
+            services.AddSingleton<IAdminMediaService>(media);
+        });
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Bearer", CreateAccessToken("media.manage"));
+        var id = Guid.NewGuid();
+
+        using var response = await client.DeleteAsync($"/api/admin/media-library/assets/{id}");
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        Assert.Equal(id, media.DeletedPdfId);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task AuthorizedPdfStatusChangeUsesMediaService(bool active)
+    {
+        var media = new StubAdminMediaService();
+        await using var factory = CreateFactory(JwtSettings(), services =>
+        {
+            services.RemoveAll<IAdminMediaService>();
+            services.AddSingleton<IAdminMediaService>(media);
+        });
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Bearer", CreateAccessToken("media.manage"));
+        var id = Guid.NewGuid();
+
+        using var response = await client.PutAsync(
+            $"/api/admin/media-library/assets/{id}/status",
+            new StringContent($"{{\"active\":{active.ToString().ToLowerInvariant()}}}", Encoding.UTF8, "application/json"));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal((id, active), media.StatusChange);
+    }
+
     private static MultipartFormDataContent CreateImageRequest()
     {
         var form = new MultipartFormDataContent();
@@ -271,6 +315,8 @@ public sealed class AdminMediaEndpointTests
     private sealed class StubAdminMediaService : IAdminMediaService
     {
         public (string?, string?, string?, int, int) Query { get; private set; }
+        public Guid? DeletedPdfId { get; private set; }
+        public (Guid Id, bool Active)? StatusChange { get; private set; }
 
         public Task<AdminMediaLibrary> GetAsync(
             string? search,
@@ -295,6 +341,26 @@ public sealed class AdminMediaEndpointTests
             SaveAdminMediaCommand command,
             CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
+
+        public Task<bool> DeletePdfAsync(
+            Guid mediaAssetId,
+            CancellationToken cancellationToken = default)
+        {
+            DeletedPdfId = mediaAssetId;
+            return Task.FromResult(true);
+        }
+
+        public Task<AdminMediaAssetDetail?> SetPdfStatusAsync(
+            Guid mediaAssetId,
+            SetAdminMediaStatusCommand command,
+            CancellationToken cancellationToken = default)
+        {
+            StatusChange = (mediaAssetId, command.Active);
+            return Task.FromResult<AdminMediaAssetDetail?>(new(
+                mediaAssetId, "Pdf", command.Active ? "Active" : "Archived",
+                "catalog.pdf", "application/pdf", 1, "/media/catalog.pdf", [],
+                DateTimeOffset.UtcNow));
+        }
 
         public Task<AdminMediaAssignmentDetail> SaveAssignmentAsync(
             SaveMediaAssignmentCommand command,

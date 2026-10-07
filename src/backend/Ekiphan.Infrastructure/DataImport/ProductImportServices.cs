@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Ekiphan.Application.DataImport;
 using Ekiphan.Domain.Catalog;
+using Ekiphan.Domain.Common;
 using Ekiphan.Domain.DataImport;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
@@ -100,12 +101,12 @@ internal sealed class ProductImportValidationService(
         string? Value(TabularImportRow row, string field) => map.TryGetValue(field, out var header) &&
             row.Values.TryGetValue(header, out var value) ? value?.Trim() : null;
         var candidates = rows.Select(row => new ProductImportNormalizedRow(row.RowNumber,
-            Value(row, ProductImportField.Sku)?.ToUpperInvariant(), Value(row, ProductImportField.ProductNameTr),
+            string.IsNullOrWhiteSpace(Value(row, ProductImportField.Sku)) ? null : SkuNormalizer.Normalize(Value(row, ProductImportField.Sku)!), Value(row, ProductImportField.ProductNameTr),
             Value(row, ProductImportField.MainCategory), Value(row, ProductImportField.Material),
             Value(row, ProductImportField.LongDescriptionTr), Value(row, ProductImportField.ShortDescriptionTr),
             Value(row, ProductImportField.Brand), Value(row, ProductImportField.Color), Value(row, ProductImportField.Size),
             Split(Value(row, ProductImportField.Tags)), null, null)).ToArray();
-        var duplicateSkus = candidates.Where(x => !string.IsNullOrWhiteSpace(x.Sku)).GroupBy(x => x.Sku!, StringComparer.OrdinalIgnoreCase)
+        var duplicateSkus = candidates.Where(x => !string.IsNullOrWhiteSpace(x.Sku)).GroupBy(x => x.Sku!, StringComparer.Ordinal)
             .Where(x => x.Count() > 1).Select(x => x.Key).Order().ToArray();
         var existing = await repository.GetExistingSkusAsync(candidates.Select(x => x.Sku).Where(x => x is not null)!, cancellationToken);
         var brands = await repository.GetBrandsAsync(candidates.Select(x => x.Brand).Where(x => x is not null)!, cancellationToken);
@@ -117,7 +118,7 @@ internal sealed class ProductImportValidationService(
             void Error(string field, string code, string message) => errors.Add(new(row.RowNumber, row.Sku, field, code, message));
             if (string.IsNullOrWhiteSpace(row.Sku)) Error(ProductImportField.Sku, "SKU_REQUIRED", "SKU zorunludur.");
             else if (row.Sku.Length > 100) Error(ProductImportField.Sku, "SKU_TOO_LONG", "SKU 100 karakteri geçemez.");
-            else if (duplicateSkus.Contains(row.Sku, StringComparer.OrdinalIgnoreCase)) Error(ProductImportField.Sku, "DUPLICATE_SKU", "Dosyada mükerrer SKU.");
+            else if (duplicateSkus.Contains(row.Sku, StringComparer.Ordinal)) Error(ProductImportField.Sku, "DUPLICATE_SKU", "Dosyada mükerrer SKU.");
             else if (command.ImportOptions.RejectExistingSkus && existing.Contains(row.Sku)) Error(ProductImportField.Sku, "SKU_EXISTS", "SKU veritabanında mevcut.");
             if (string.IsNullOrWhiteSpace(row.ProductNameTr)) Error(ProductImportField.ProductNameTr, "PRODUCT_NAME_REQUIRED", "Türkçe ürün adı zorunludur.");
             else if (row.ProductNameTr.Length > 250) Error(ProductImportField.ProductNameTr, "PRODUCT_NAME_TOO_LONG", "Ürün adı 250 karakteri geçemez.");

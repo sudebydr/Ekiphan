@@ -31,10 +31,32 @@ internal static class CatalogPdfImportEndpoints
                 return Problem(400, "A ZIP file and confirmed=true are required.");
             var file = form.Files[0];
             await using var content = file.OpenReadStream();
-            try { return Results.Created("/api/catalogs/documents", await service.ExecuteAsync(content, Path.GetFileName(file.FileName), file.Length, ct)); }
+            IReadOnlyDictionary<string, string>? titles = null;
+            if (!string.IsNullOrWhiteSpace(form["titles"]))
+                titles = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(form["titles"]!);
+            try { return Results.Created("/api/catalogs/documents", await service.ExecuteAsync(content, Path.GetFileName(file.FileName), file.Length, titles, ct)); }
             catch (ArgumentException ex) { return Problem(422, ex.Message); }
             catch (InvalidOperationException ex) { return Problem(409, ex.Message); }
         }).WithMetadata(new RequestSizeLimitAttribute(2049L * 1024 * 1024));
+        group.MapPost("/backfill-covers", async (ICatalogPdfImportService service, CancellationToken ct) =>
+            Results.Ok(await service.BackfillCoversAsync(ct)));
+        group.MapPost("/single", async (HttpRequest request, ICatalogPdfImportService service, CancellationToken ct) =>
+        {
+            if (!request.HasFormContentType) return Problem(400, "multipart/form-data is required.");
+            var form = await request.ReadFormAsync(ct);
+            if (form.Files.Count != 1 || form.Files[0].Name != "file")
+                return Problem(400, "Exactly one PDF file field named 'file' is required.");
+            var file = form.Files[0];
+            await using var content = file.OpenReadStream();
+            try
+            {
+                var result = await service.UploadSingleAsync(content, Path.GetFileName(file.FileName), file.Length,
+                    form["title"].ToString(), ct);
+                return Results.Created(result.Url, result);
+            }
+            catch (ArgumentException ex) { return Problem(422, ex.Message); }
+            catch (InvalidOperationException ex) { return Problem(409, ex.Message); }
+        }).WithMetadata(new RequestSizeLimitAttribute(501L * 1024 * 1024));
     }
     private static IResult Problem(int status, string detail) => Results.Problem(statusCode: status, title: ReasonPhrases.GetReasonPhrase(status), detail: detail);
 }

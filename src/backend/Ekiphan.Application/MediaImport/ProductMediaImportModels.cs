@@ -8,7 +8,7 @@ public sealed class ProductMediaImportOptions
     public int MaxZipSizeMb { get; set; } = 250;
     public int MaxFileCount { get; set; } = 5000;
     public int MaxExtractedSizeMb { get; set; } = 2000;
-    public int MaxSingleImageSizeMb { get; set; } = 20;
+    public int MaxSingleImageSizeMb { get; set; } = 4;
     public int MaxCompressionRatio { get; set; } = 100;
     public int UploadTokenLifetimeMinutes { get; set; } = 60;
     public int ValidationTokenLifetimeMinutes { get; set; } = 30;
@@ -19,14 +19,14 @@ public sealed class ProductMediaImportOptions
 }
 
 public enum ProductMediaDetectedPosition { Main, Detail, Front, Back, Side, Gallery, Unknown }
-public enum ProductMediaPreviewFileStatus { Ready, Unsupported, Invalid, Duplicate, MissingSku, SecurityRejected }
+public enum ProductMediaPreviewFileStatus { Ready, Unsupported, Invalid, Duplicate, MissingSku, SecurityRejected, Skipped }
 public enum ProductMediaValidationFileStatus { Valid, Unmatched, Duplicate, Invalid, Conflict, Ignored }
 public enum ProductMediaMatchSource { FileName, Manual, ExistingMapping, None }
 
 public sealed record ProductMediaImportPreviewRequest(Stream Content, string FileName, string ContentType, long Length, Guid UserId);
 public sealed record ProductMediaImportPreviewDto(string UploadToken, string FileName, long ZipFileSize,
     int TotalEntryCount, int SupportedImageCount, int IgnoredFileCount, int InvalidFileCount,
-    int DuplicateFileCount, int ExtractedSkuCount, IReadOnlyList<ProductMediaImportFilePreviewDto> Files,
+    int DuplicateFileCount, int SkippedEntryCount, int ExtractedSkuCount, IReadOnlyList<ProductMediaImportFilePreviewDto> Files,
     string Summary);
 public sealed record ProductMediaImportFilePreviewDto(string TemporaryFileId, string OriginalFileName,
     string NormalizedFileName, string Extension, long FileSize, string? ExtractedSku,
@@ -46,7 +46,7 @@ public sealed record ProductMediaImportFileValidationDto(string TemporaryFileId,
     string? ExtractedSku, Guid? MatchedProductId, string? MatchedProductSku, string? MatchedProductName,
     ProductMediaMatchSource MatchSource, int SortOrder, bool IsPrimary, string ContentHash,
     ProductMediaValidationFileStatus Status, IReadOnlyList<ProductMediaImportErrorDto> Errors,
-    IReadOnlyList<ProductMediaImportWarningDto> Warnings);
+    IReadOnlyList<ProductMediaImportWarningDto> Warnings, Guid? ExistingMediaAssetId = null);
 public sealed record ProductMediaImportExecuteCommand(string ValidationToken);
 public sealed record ProductMediaImportExecutionResultDto(Guid BatchId, ProductMediaImportBatchStatus Status,
     int ImportedFiles, int SkippedFiles, int ErrorFiles, IReadOnlyList<ProductMediaImportErrorDto> Errors);
@@ -80,6 +80,8 @@ public sealed record ProductMediaStoredValidation(Guid BatchId, string UploadTok
     DateTimeOffset ExpiresAt, bool Used = false);
 public sealed record ProductMediaProductMatch(Guid Id, string Sku, string Name, bool IsDeleted,
     bool IsPublished, DateTimeOffset UpdatedAt, bool HasPrimaryImage);
+public sealed record ProductMediaSkuResolution(ProductMediaProductMatch? Product, bool IsAmbiguous);
+public sealed record ProductMediaContentLink(Guid ProductId, string ContentHash);
 
 public interface IProductMediaImportArchiveReader
 {
@@ -87,6 +89,11 @@ public interface IProductMediaImportArchiveReader
         long length, CancellationToken cancellationToken = default);
 }
 public interface IProductMediaSkuParser { ProductMediaSkuParseResult Parse(string fileName); }
+public interface IProductMediaSkuResolver
+{
+    IReadOnlyList<string> GetCandidateSkus(string fileName);
+    ProductMediaSkuResolution Resolve(string fileName, IReadOnlyCollection<ProductMediaProductMatch> products);
+}
 public interface IProductMediaImportValidationService
 { Task<ProductMediaImportValidationResultDto> ValidateAsync(ProductMediaImportValidateCommand command, CancellationToken cancellationToken = default); }
 public interface IProductMediaImportExecutionService
@@ -105,7 +112,9 @@ public interface IProductMediaImportRepository
     Task SaveAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ProductMediaProductMatch>> FindProductsAsync(IReadOnlyCollection<string> skus,
         IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken = default);
-    Task<IReadOnlySet<string>> ExistingMediaHashesAsync(IReadOnlyCollection<string> hashes, CancellationToken cancellationToken = default);
+    Task<IReadOnlyDictionary<string, Guid>> FindMediaAssetsByHashesAsync(IReadOnlyCollection<string> hashes, CancellationToken cancellationToken = default);
+    Task<IReadOnlySet<ProductMediaContentLink>> FindProductMediaContentLinksAsync(IReadOnlyCollection<Guid> productIds,
+        IReadOnlyCollection<string> hashes, CancellationToken cancellationToken = default);
     Task<ProductMediaImportBatch?> GetBatchAsync(Guid id, bool tracked, CancellationToken cancellationToken = default);
     Task<string?> GetProductNameAsync(Guid id, CancellationToken cancellationToken = default);
     Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action, CancellationToken cancellationToken = default);

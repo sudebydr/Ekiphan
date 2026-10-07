@@ -2,11 +2,18 @@ using Ekiphan.Application.DataImport;
 using Ekiphan.Domain.DataImport;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Ekiphan.Api.DataImport;
 
 internal static class ImportEndpoints
 {
+    private static readonly Action<ILogger, Guid, Exception?> LogPublishFailure =
+        LoggerMessage.Define<Guid>(
+            LogLevel.Error,
+            new EventId(1, "ImportPublishFailure"),
+            "Import job {ImportJobId} could not be published.");
+
     private const long MaximumFileSizeBytes =
         ImportFileReadOptions.DefaultMaximumFileSizeBytes;
 
@@ -91,7 +98,7 @@ internal static class ImportEndpoints
         {
             return Problem(
                 StatusCodes.Status415UnsupportedMediaType,
-                "A multipart/form-data request is required.");
+                "multipart/form-data biçiminde bir istek gereklidir.");
         }
 
         IFormCollection form;
@@ -103,14 +110,14 @@ internal static class ImportEndpoints
         {
             return Problem(
                 StatusCodes.Status413PayloadTooLarge,
-                "The multipart body is malformed or exceeds the upload limit.");
+                "Yükleme gövdesi geçersiz veya boyut sınırını aşıyor.");
         }
 
         if (form.Files.Count != 1)
         {
             return Problem(
                 StatusCodes.Status400BadRequest,
-                "Exactly one import file is required.");
+                "Tam olarak bir import dosyası gereklidir.");
         }
 
         var file = form.Files[0];
@@ -118,14 +125,14 @@ internal static class ImportEndpoints
         {
             return Problem(
                 StatusCodes.Status400BadRequest,
-                $"File size must be between 1 and {MaximumFileSizeBytes} bytes.");
+                $"Dosya boyutu 1 ile {MaximumFileSizeBytes} bayt arasında olmalıdır.");
         }
 
         if (!HasAllowedMediaType(file))
         {
             return Problem(
                 StatusCodes.Status415UnsupportedMediaType,
-                "The file extension and media type combination is not supported.");
+                "Dosya uzantısı ve medya türü birleşimi desteklenmiyor.");
         }
 
         var isDryRun = true;
@@ -135,7 +142,7 @@ internal static class ImportEndpoints
             {
                 return Problem(
                     StatusCodes.Status400BadRequest,
-                    "isDryRun must be either true or false.");
+                    "isDryRun değeri true veya false olmalıdır.");
             }
         }
 
@@ -170,7 +177,7 @@ internal static class ImportEndpoints
     private static IResult AuthenticationUnavailable() =>
         Problem(
             StatusCodes.Status503ServiceUnavailable,
-            "Import upload is unavailable until JWT authentication is configured.");
+            "JWT kimlik doğrulaması yapılandırılana kadar import yükleme kullanılamaz.");
 
     private static IResult AuthenticationUnavailableForJob(Guid jobId) =>
         AuthenticationUnavailable();
@@ -192,7 +199,7 @@ internal static class ImportEndpoints
         {
             return Problem(
                 StatusCodes.Status400BadRequest,
-                "status is not a valid import job status.");
+                "status geçerli bir import iş durumu değil.");
         }
 
         return Results.Ok(
@@ -230,7 +237,7 @@ internal static class ImportEndpoints
         {
             return Problem(
                 StatusCodes.Status400BadRequest,
-                "severity is not a valid import issue severity.");
+                "severity geçerli bir import sorun seviyesi değil.");
         }
 
         var issues = await queryService.GetIssuesAsync(
@@ -256,7 +263,7 @@ internal static class ImportEndpoints
         {
             return Problem(
                 StatusCodes.Status400BadRequest,
-                "severity is not a valid import issue severity.");
+                "severity geçerli bir import sorun seviyesi değil.");
         }
 
         if (await queryService.GetJobAsync(jobId, cancellationToken) is null)
@@ -277,6 +284,7 @@ internal static class ImportEndpoints
     private static async Task<IResult> PublishAsync(
         Guid jobId,
         ImportPublishingService publishingService,
+        ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
         try
@@ -293,6 +301,29 @@ internal static class ImportEndpoints
         catch (InvalidOperationException exception)
         {
             return Problem(StatusCodes.Status409Conflict, exception.Message);
+        }
+        catch (DbUpdateConcurrencyException exception)
+        {
+            LogPublishFailure(
+                loggerFactory.CreateLogger("Ekiphan.Api.DataImport.ImportPublishing"),
+                jobId,
+                exception);
+            var entityNames = string.Join(", ", exception.Entries
+                .Select(entry => entry.Metadata.ClrType.Name)
+                .Distinct(StringComparer.Ordinal));
+            return Problem(
+                StatusCodes.Status409Conflict,
+                $"Import yayınlama sırasında şu kayıtlar eşzamanlı güncellendi: {entityNames}. Ürün değişiklikleri kaydedilmedi.");
+        }
+        catch (DbUpdateException exception)
+        {
+            LogPublishFailure(
+                loggerFactory.CreateLogger("Ekiphan.Api.DataImport.ImportPublishing"),
+                jobId,
+                exception);
+            return Problem(
+                StatusCodes.Status409Conflict,
+                "Referans veri çakışması nedeniyle import yayınlanamadı. Ürün değişiklikleri kaydedilmedi.");
         }
     }
 
@@ -378,5 +409,5 @@ internal static class ImportEndpoints
     private static IResult InvalidPagination() =>
         Problem(
             StatusCodes.Status400BadRequest,
-            "page must be at least 1 and pageSize must be between 1 and 100.");
+            "page en az 1 olmalı ve pageSize 1 ile 100 arasında olmalıdır.");
 }

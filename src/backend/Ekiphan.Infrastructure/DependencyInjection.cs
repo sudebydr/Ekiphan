@@ -47,7 +47,7 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
         IConfiguration configuration,
-        string redisConnectionString)
+        string? redisConnectionString)
     {
         services.AddSingleton<IConfigurationValidationService, ConfigurationValidationService>();
         services.AddDataProtection().SetApplicationName("Ekiphan.Admin.Security");
@@ -212,6 +212,7 @@ public static class DependencyInjection
                 "ProductMediaImport limits must be positive.")
             .ValidateOnStart();
         services.AddSingleton<IProductMediaSkuParser, ProductMediaSkuParser>();
+        services.AddSingleton<IProductMediaSkuResolver, ProductMediaSkuResolver>();
         services.AddSingleton<IProductMediaDuplicateDetector, Sha256ProductMediaDuplicateDetector>();
         services.AddSingleton<ITemporaryProductMediaStorage, TemporaryProductMediaStorage>();
         services.AddSingleton<IProductMediaImportTokenService, ProductMediaImportTokenService>();
@@ -354,11 +355,20 @@ public static class DependencyInjection
         services.AddSingleton(TimeProvider.System);
 
         // Performance & Caching
-        services.AddSingleton<IConnectionMultiplexer>(
-            _ => ConnectionMultiplexer.Connect(redisConnectionString));
-        services.AddSingleton<IApplicationCache, RedisApplicationCache>();
+        if (string.IsNullOrWhiteSpace(redisConnectionString))
+        {
+            services.AddSingleton<IApplicationCache, MemoryApplicationCache>();
+            services.AddSingleton<IDistributedLockService, InMemoryDistributedLockService>();
+        }
+        else
+        {
+            services.AddSingleton<IConnectionMultiplexer>(
+                _ => ConnectionMultiplexer.Connect(redisConnectionString));
+            services.AddSingleton<IApplicationCache, RedisApplicationCache>();
+            services.AddSingleton<IDistributedLockService, RedisDistributedLockService>();
+        }
+
         services.AddSingleton<ICacheKeyFactory, DefaultCacheKeyFactory>();
-        services.AddSingleton<IDistributedLockService, RedisDistributedLockService>();
         services.AddScoped<ICacheInvalidationService, CacheInvalidationService>();
         services.AddSingleton<ICacheMetrics, CacheMetrics>();
         services.AddSingleton<IPerformanceMetrics, PerformanceMetrics>();

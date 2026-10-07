@@ -44,13 +44,13 @@ internal static class ProductImportEndpoints
     private static async Task<IResult> PreviewAsync(HttpRequest request, IProductImportService service,
         IConfiguration configuration, CancellationToken cancellationToken)
     {
-        if (!request.HasFormContentType) return Problem(400, "multipart/form-data is required.");
+        if (!request.HasFormContentType) return Problem(400, "multipart/form-data biçiminde bir istek gereklidir.");
         var form = await request.ReadFormAsync(cancellationToken);
-        if (form.Files.Count != 1) return Problem(400, "Exactly one file is required.");
+        if (form.Files.Count != 1) return Problem(400, "Tam olarak bir dosya gereklidir.");
         var file = form.Files[0];
-        if (!Allowed(file)) return Problem(400, "File extension and MIME type are not supported.");
+        if (!Allowed(file)) return Problem(400, "Dosya uzantısı ve MIME türü desteklenmiyor.");
         var maximum = configuration.GetValue("ProductImport:MaximumFileSizeBytes", ImportFileReadOptions.DefaultMaximumFileSizeBytes);
-        if (file.Length <= 0 || file.Length > maximum) return Problem(400, $"File size must be between 1 and {maximum} bytes.");
+        if (file.Length <= 0 || file.Length > maximum) return Problem(400, $"Dosya boyutu 1 ile {maximum} bayt arasında olmalıdır.");
         var userId = Guid.NewGuid();
         return await Execute(async () =>
         {
@@ -112,7 +112,7 @@ internal static class ProductImportEndpoints
     }
     private static bool TryUser(ClaimsPrincipal user, out Guid id) =>
         Guid.TryParse(user.FindFirstValue("sub") ?? user.FindFirstValue(ClaimTypes.NameIdentifier), out id) && id != Guid.Empty;
-    private static IResult Unavailable() => Problem(503, "Product import is unavailable until authentication is configured.");
+    private static IResult Unavailable() => Problem(503, "Kimlik doğrulama yapılandırılana kadar ürün importu kullanılamaz.");
     private static IResult UnavailableForBatch(Guid batchId) => Unavailable();
     private static IResult Problem(int status, string detail) => Results.Problem(statusCode: status,
         title: ReasonPhrases.GetReasonPhrase(status), detail: detail);

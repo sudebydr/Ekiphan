@@ -22,6 +22,7 @@ type PreviewResult = {
   ignoredFileCount: number;
   invalidFileCount: number;
   duplicateFileCount: number;
+  skippedEntryCount: number;
   extractedSkuCount: number;
   files: PreviewFile[];
   summary: string;
@@ -37,6 +38,8 @@ type ValidationFile = {
   sortOrder: number;
   isPrimary: boolean;
   status: string | number;
+  errors?: { code: string; message: string }[];
+  warnings?: { code: string; message: string }[];
 };
 
 type ValidationResult = {
@@ -60,7 +63,22 @@ type ExecutionResult = {
   importedFiles: number;
   skippedFiles: number;
   errorFiles: number;
+  errors: { code: string; field?: string | null; message: string }[];
 };
+
+const reasonText: Record<string, string> = {
+  PRODUCT_NOT_FOUND: "Ürün SKU'su sistemde bulunamadı",
+  SKU_RESOLUTION_FAILED: "Dosya adından güvenli SKU çıkarılamadı",
+  AMBIGUOUS_SKU: "Birden fazla ürünle eşleşiyor",
+  INVALID_IMAGE: "Geçersiz görsel",
+  EXTENSION_CONTENT_MISMATCH: "Dosya uzantısı ve içeriği uyuşmuyor",
+  DUPLICATE_MEDIA: "Tekrar görsel"
+};
+
+function validationReason(item: ValidationFile) {
+  const code = item.errors?.[0]?.code ?? item.warnings?.[0]?.code;
+  return code ? reasonText[code] ?? code : null;
+}
 
 async function readError(response: Response) {
   try {
@@ -200,6 +218,7 @@ export function ProductMediaImport() {
         ZIP içindeki görseller dosya adındaki SKU üzerinden ürünlerle
         otomatik eşleştirilir.
       </p>
+      <p>WebP önerilir · JPG, JPEG, PNG desteklenir · Görsel başına maksimum 4 MB.</p>
 
       {error && (
         <div className={styles.error} role="alert">
@@ -242,6 +261,8 @@ export function ProductMediaImport() {
             Tekrar: <strong>{preview.duplicateFileCount}</strong>
           </p>
 
+          <p>Atlanan arşiv girdisi: <strong>{preview.skippedEntryCount}</strong></p>
+
           <button
             type="button"
             disabled={busy || preview.supportedImageCount === 0}
@@ -268,7 +289,8 @@ export function ProductMediaImport() {
             .filter((item) => item.status !== 0)
             .slice(0, 20)
             .map((item) => (
-              <p key={item.temporaryFileId}>
+              <p key={item.temporaryFileId} title={validationReason(item) ?? undefined}>
+                {validationReason(item) ? `${validationReason(item)} — ` : null}
                 {item.originalFileName} →{" "}
                 {item.matchedProductSku ?? "EŞLEŞMEDİ"}
               </p>
@@ -278,8 +300,7 @@ export function ProductMediaImport() {
             type="button"
             disabled={
               busy ||
-              validation.matchedFiles === 0 ||
-              validation.conflicts > 0
+              validation.matchedFiles === 0
             }
             onClick={() => void executeImport()}
           >
@@ -295,6 +316,9 @@ export function ProductMediaImport() {
           Hatalı: {result.errorFiles}
           <br />
           Batch: {result.batchId}
+          {result.errors.length > 0 && (
+            <><br />İlk hata: {result.errors[0].message}</>
+          )}
         </div>
       )}
     </div>

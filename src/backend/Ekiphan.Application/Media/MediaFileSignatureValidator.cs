@@ -37,7 +37,7 @@ public sealed class MediaFileSignatureValidator
 
             return (assetType, mime, extension) switch
             {
-                (MediaAssetType.Image, "image/jpeg", ".jpg" or ".jpeg") =>
+                (MediaAssetType.Image, "image/jpeg", ".jpg" or ".jpeg" or ".jfif") =>
                     StartsWith(header, read, Jpeg),
                 (MediaAssetType.Image, "image/png", ".png") =>
                     StartsWith(header, read, Png),

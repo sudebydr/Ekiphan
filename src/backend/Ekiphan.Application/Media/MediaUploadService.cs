@@ -46,9 +46,12 @@ public sealed class MediaUploadService(
                 "The uploaded stream length is invalid.");
         }
 
-        var maximumLength = command.AssetType == MediaAssetType.Image
-            ? 25L * 1024 * 1024
-            : 50L * 1024 * 1024;
+        var maximumLength = command.AssetType switch
+        {
+            MediaAssetType.Image => 4L * 1024 * 1024,
+            MediaAssetType.Pdf => 500L * 1024 * 1024,
+            _ => 50L * 1024 * 1024,
+        };
         if (command.Length > maximumLength)
         {
             throw new ArgumentOutOfRangeException(
@@ -94,8 +97,9 @@ public sealed class MediaUploadService(
         var storageKey =
             $"media/{now.Year:D4}/{now.Month:D2}/" +
             $"{Guid.NewGuid():N}{extension}";
+        var assetId = Guid.NewGuid();
         var asset = MediaAsset.CreateFile(
-            Guid.NewGuid(),
+            assetId,
             command.AssetType,
             command.FileName,
             storageKey,
@@ -125,7 +129,7 @@ public sealed class MediaUploadService(
         }
 
         return new UploadedMediaResult(
-            asset.Id,
+            assetId,
             asset.AssetType,
             asset.OriginalFileName!,
             asset.StorageKey!,

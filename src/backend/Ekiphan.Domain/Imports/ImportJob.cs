@@ -158,9 +158,14 @@ public sealed class ImportJob : Entity
         WarningCount = _rows.Sum(
             row => row.Issues.Count(issue => issue.Severity == ImportIssueSeverity.Warning));
         ValidationCompletedAt = completedAt;
-        if (InvalidRowCount > 0 || ValidRowCount == 0)
+        if (InvalidRowCount > 0)
         {
             Status = ImportJobStatus.ValidationFailed;
+        }
+        else if (ValidRowCount == 0)
+        {
+            Status = ImportJobStatus.Completed;
+            CompletedAt = completedAt;
         }
         else if (IsDryRun)
         {

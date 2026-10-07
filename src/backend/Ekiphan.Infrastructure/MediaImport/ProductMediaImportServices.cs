@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using Ekiphan.Application.Media;
 using Ekiphan.Application.MediaImport;
 using Ekiphan.Domain.Media;
+using Ekiphan.Domain.Common;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -10,6 +11,12 @@ using Microsoft.Extensions.Options;
 #pragma warning disable CA1848, CA1826
 
 namespace Ekiphan.Infrastructure.MediaImport;
+
+internal static class ProductMediaImportExecutionPolicy
+{
+    public static bool IsImportable(ProductMediaImportFileValidationDto file) =>
+        file.Status == ProductMediaValidationFileStatus.Valid && file.MatchedProductId.HasValue;
+}
 
 internal sealed class ProductMediaImportService(
     IProductMediaImportArchiveReader archiveReader,
@@ -42,6 +49,7 @@ internal sealed class ProductMediaImportService(
                 files.Count(x => x.Status == ProductMediaPreviewFileStatus.Unsupported),
                 files.Count(x => x.Status is ProductMediaPreviewFileStatus.Invalid or ProductMediaPreviewFileStatus.SecurityRejected),
                 files.Count(x => x.Status == ProductMediaPreviewFileStatus.Duplicate),
+                files.Count(x => x.Status == ProductMediaPreviewFileStatus.Skipped),
                 files.Where(x => x.ExtractedSku is not null).Select(x => x.ExtractedSku).Distinct(StringComparer.OrdinalIgnoreCase).Count(),
                 files, $"{files.Count} files analyzed; {files.Count(x => x.Status == ProductMediaPreviewFileStatus.Ready)} ready.");
         }
@@ -82,6 +90,7 @@ internal sealed class ProductMediaImportService(
 internal sealed class ProductMediaImportValidationService(
     IProductMediaImportTokenService tokens,
     IProductMediaImportRepository repository,
+    IProductMediaSkuResolver skuResolver,
     IValidator<ProductMediaImportValidateCommand> validator,
     IOptions<ProductMediaImportOptions> options,
     TimeProvider clock,
@@ -95,17 +104,20 @@ internal sealed class ProductMediaImportValidationService(
         if (batch.Items.Count > 0) throw new ProductMediaImportConflictException("This upload has already been validated.");
         var manual = (command.ManualMappings ?? []).ToDictionary(x => x.TemporaryFileId, StringComparer.Ordinal);
         var importOptions = command.ImportOptions ?? new();
-        var skus = upload.Archive.Entries.Select(x => manual.TryGetValue(x.TemporaryFileId, out var m) ? m.Sku : x.Parsed.Sku)
-            .Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x!.Trim().ToUpperInvariant()).ToArray();
+        var skus = upload.Archive.Entries.SelectMany(x =>
+                manual.TryGetValue(x.TemporaryFileId, out var mapping) && !string.IsNullOrWhiteSpace(mapping.Sku)
+                    ? [SkuNormalizer.Normalize(mapping.Sku)]
+                    : skuResolver.GetCandidateSkus(x.NormalizedFileName))
+            .ToArray();
         var ids = manual.Values.Where(x => x.ProductId.HasValue).Select(x => x.ProductId!.Value).ToArray();
         var products = await repository.FindProductsAsync(skus, ids, cancellationToken);
-        var existingHashes = await repository.ExistingMediaHashesAsync(upload.Archive.Entries.Where(x => x.Sha256.Length == 64).Select(x => x.Sha256).ToArray(), cancellationToken);
         var files = new List<ProductMediaImportFileValidationDto>();
         foreach (var entry in upload.Archive.Entries)
         {
             var errors = new List<ProductMediaImportErrorDto>(); var warnings = new List<ProductMediaImportWarningDto>();
             var status = entry.Status switch
             { ProductMediaPreviewFileStatus.Unsupported => ProductMediaValidationFileStatus.Ignored,
+              ProductMediaPreviewFileStatus.Skipped => ProductMediaValidationFileStatus.Ignored,
               ProductMediaPreviewFileStatus.Duplicate => ProductMediaValidationFileStatus.Duplicate,
               ProductMediaPreviewFileStatus.Ready => ProductMediaValidationFileStatus.Valid,
               ProductMediaPreviewFileStatus.MissingSku => ProductMediaValidationFileStatus.Unmatched,
@@ -114,29 +126,29 @@ internal sealed class ProductMediaImportValidationService(
             { status = ProductMediaValidationFileStatus.Conflict; errors.Add(new("DUPLICATE_CONTENT", "contentHash", "Duplicate content exists in this ZIP.")); }
             ProductMediaProductMatch? product = null; var source = ProductMediaMatchSource.None;
             var mapping = manual.GetValueOrDefault(entry.TemporaryFileId);
-            var requestedSku = mapping?.Sku?.Trim().ToUpperInvariant() ?? entry.Parsed.Sku;
-            var matches = mapping?.ProductId is { } productId
-                ? products.Where(x => x.Id == productId).ToList()
-                : products.Where(x => string.Equals(x.Sku, requestedSku, StringComparison.OrdinalIgnoreCase)).ToList();
+            var candidates = mapping?.Sku is { Length: > 0 } manualSkuCandidates
+                ? new[] { SkuNormalizer.Normalize(manualSkuCandidates) }
+                : skuResolver.GetCandidateSkus(entry.NormalizedFileName);
+            var resolution = mapping?.ProductId is { } productId
+                ? new ProductMediaSkuResolution(products.SingleOrDefault(x => x.Id == productId), false)
+                : mapping?.Sku is { Length: > 0 } manualSku
+                    ? ResolveManualSku(manualSku, products)
+                    : skuResolver.Resolve(entry.NormalizedFileName, products);
             if (mapping is not null) source = ProductMediaMatchSource.Manual;
             else if (entry.Parsed.Sku is not null) source = ProductMediaMatchSource.FileName;
             if (status is ProductMediaValidationFileStatus.Valid or ProductMediaValidationFileStatus.Unmatched)
             {
-                if (matches.Count == 0) { status = importOptions.SkipUnmatchedFiles ? ProductMediaValidationFileStatus.Unmatched : ProductMediaValidationFileStatus.Conflict; errors.Add(new("PRODUCT_NOT_FOUND", "sku", "No editable product matches the SKU.")); }
-                else if (matches.Count > 1) { status = ProductMediaValidationFileStatus.Conflict; errors.Add(new("AMBIGUOUS_SKU", "sku", "The SKU matches more than one product.")); }
-                else if (matches[0].IsDeleted) { status = ProductMediaValidationFileStatus.Invalid; errors.Add(new("PRODUCT_DELETED", "productId", "The selected product is deleted.")); }
-                else product = matches[0];
-            }
-            if (entry.Sha256.Length == 64 && existingHashes.Contains(entry.Sha256))
-            {
-                status = importOptions.SkipDuplicateContent ? ProductMediaValidationFileStatus.Duplicate : ProductMediaValidationFileStatus.Conflict;
-                if (importOptions.SkipDuplicateContent)
-                    warnings.Add(new("MEDIA_EXISTS", "contentHash", "The same content already exists in the media library."));
-                else
-                    errors.Add(new("MEDIA_EXISTS", "contentHash", "The same content already exists in the media library."));
+                if (mapping?.ProductId is null && candidates.Count == 0)
+                { status = ProductMediaValidationFileStatus.Unmatched; errors.Add(CreateResolutionFailure(false)); }
+                else if (resolution.IsAmbiguous) { status = ProductMediaValidationFileStatus.Conflict; errors.Add(new("AMBIGUOUS_SKU", "sku", "The SKU matches more than one product.")); }
+                else if (resolution.Product is null) { status = importOptions.SkipUnmatchedFiles ? ProductMediaValidationFileStatus.Unmatched : ProductMediaValidationFileStatus.Conflict; errors.Add(CreateResolutionFailure(true)); }
+                else if (resolution.Product.IsDeleted) { status = ProductMediaValidationFileStatus.Invalid; errors.Add(new("PRODUCT_DELETED", "productId", "The selected product is deleted.")); }
+                else product = resolution.Product;
             }
             if (entry.Status is ProductMediaPreviewFileStatus.Invalid or ProductMediaPreviewFileStatus.SecurityRejected)
                 errors.Add(new(entry.ErrorCode ?? "INVALID_FILE", "file", entry.ErrorMessage ?? "The file is invalid."));
+            else if (entry.Status is ProductMediaPreviewFileStatus.Skipped or ProductMediaPreviewFileStatus.Unsupported)
+                warnings.Add(new(entry.ErrorCode ?? "UNSUPPORTED_MEDIA_ENTRY", "file", entry.ErrorMessage ?? "The file was skipped."));
             var sort = mapping?.SortOrder ?? entry.Parsed.SuggestedSortOrder;
             var primary = mapping?.IsPrimary ?? entry.Parsed.SuggestedIsPrimary;
             if (product?.HasPrimaryImage == true && primary && !importOptions.ReplaceExistingPrimaryImage)
@@ -144,20 +156,27 @@ internal sealed class ProductMediaImportValidationService(
             files.Add(new(entry.TemporaryFileId, entry.OriginalFileName, entry.Parsed.Sku, product?.Id, product?.Sku,
                 product?.Name, source, sort, primary, entry.Sha256, status, errors, warnings));
         }
+        var hashes = files.Where(x => x.ContentHash.Length == 64).Select(x => x.ContentHash)
+            .Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+        var matchedProductIds = files.Where(x => x.Status == ProductMediaValidationFileStatus.Valid && x.MatchedProductId.HasValue)
+            .Select(x => x.MatchedProductId!.Value).Distinct().ToArray();
+        var existingAssets = await repository.FindMediaAssetsByHashesAsync(hashes, cancellationToken);
+        var existingLinks = await repository.FindProductMediaContentLinksAsync(matchedProductIds, hashes, cancellationToken);
+        ApplyContentDuplicateRules(files, existingAssets, existingLinks, importOptions.SkipDuplicateContent);
         NormalizeProductAssignments(files);
         foreach (var file in files)
         {
             var entry = upload.Archive.Entries.Single(x => x.TemporaryFileId == file.TemporaryFileId);
             var item = new ProductMediaImportBatchItem(Guid.NewGuid(), batch.Id, file.TemporaryFileId, file.OriginalFileName,
                 file.ExtractedSku, file.ContentHash, file.SortOrder, file.IsPrimary);
-            if (file.Status == ProductMediaValidationFileStatus.Valid && file.MatchedProductId is { } id) item.Match(id, file.SortOrder, file.IsPrimary);
+            if (ProductMediaImportExecutionPolicy.IsImportable(file)) item.Match(file.MatchedProductId!.Value, file.SortOrder, file.IsPrimary);
             else item.SetFailure(file.Status switch { ProductMediaValidationFileStatus.Duplicate => ProductMediaImportBatchItemStatus.Duplicate,
                 ProductMediaValidationFileStatus.Ignored or ProductMediaValidationFileStatus.Unmatched => ProductMediaImportBatchItemStatus.Skipped,
                 _ => ProductMediaImportBatchItemStatus.Failed }, file.Errors.FirstOrDefault()?.Code ?? file.Status.ToString().ToUpperInvariant(),
                 file.Errors.FirstOrDefault()?.Message ?? file.Warnings.FirstOrDefault()?.Message ?? file.Status.ToString());
             batch.AddItem(item);
         }
-        var matched = files.Count(x => x.Status == ProductMediaValidationFileStatus.Valid);
+        var matched = files.Count(ProductMediaImportExecutionPolicy.IsImportable);
         var errorsCount = files.Count(x => x.Status is ProductMediaValidationFileStatus.Invalid or ProductMediaValidationFileStatus.Conflict);
         batch.SetValidationSummary(
     files.Count,
@@ -191,6 +210,53 @@ catch (Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException ex)
             files.Count(x => x.Status == ProductMediaValidationFileStatus.Ignored), files.Where(x => x.MatchedProductId.HasValue).Select(x => x.MatchedProductId).Distinct().Count(),
             products.Count(x => !x.HasPrimaryImage), files.Count(x => x.Status == ProductMediaValidationFileStatus.Conflict), files,
             $"{matched} files matched; {errorsCount} files contain critical errors.");
+    }
+
+    private static ProductMediaSkuResolution ResolveManualSku(string sku, IReadOnlyCollection<ProductMediaProductMatch> products)
+    {
+        var canonicalSku = SkuNormalizer.Normalize(sku);
+        var matches = products.Where(product => SkuNormalizer.Normalize(product.Sku) == canonicalSku).ToArray();
+        return matches.Length == 1 ? new(matches[0], false) : new(null, matches.Length > 1);
+    }
+
+    internal static ProductMediaImportErrorDto CreateResolutionFailure(bool hasCandidate) => hasCandidate
+        ? new("PRODUCT_NOT_FOUND", "sku", "No editable product matches the SKU.")
+        : new("SKU_RESOLUTION_FAILED", "sku", "A safe SKU could not be extracted from the file name.");
+
+    internal static void ApplyContentDuplicateRules(
+        List<ProductMediaImportFileValidationDto> files,
+        IReadOnlyDictionary<string, Guid> existingAssets,
+        IReadOnlySet<ProductMediaContentLink> existingLinks,
+        bool skipDuplicateContent)
+    {
+        var pendingLinks = new HashSet<ProductMediaContentLink>();
+        for (var index = 0; index < files.Count; index++)
+        {
+            var file = files[index];
+            if (file.Status != ProductMediaValidationFileStatus.Valid || file.MatchedProductId is not { } productId ||
+                file.ContentHash.Length != 64)
+                continue;
+
+            var link = new ProductMediaContentLink(productId, file.ContentHash);
+            if (existingLinks.Contains(link) || !pendingLinks.Add(link))
+            {
+                const string message = "The same image is already assigned to this product.";
+                files[index] = file with
+                {
+                    Status = skipDuplicateContent ? ProductMediaValidationFileStatus.Duplicate : ProductMediaValidationFileStatus.Conflict,
+                    Errors = skipDuplicateContent ? file.Errors : [.. file.Errors, new("DUPLICATE_MEDIA", "contentHash", message)],
+                    Warnings = skipDuplicateContent ? [.. file.Warnings, new("DUPLICATE_MEDIA", "contentHash", message)] : file.Warnings
+                };
+                continue;
+            }
+
+            files[index] = file with
+            {
+                ExistingMediaAssetId = existingAssets.TryGetValue(file.ContentHash, out var assetId)
+                    ? assetId
+                    : null
+            };
+        }
     }
 
     private static void NormalizeProductAssignments(List<ProductMediaImportFileValidationDto> files)
@@ -234,13 +300,15 @@ internal sealed class ProductMediaImportExecutionService(
         await validator.ValidateAndThrowAsync(command, cancellationToken);
         if (!tokens.TryUseValidation(command.ValidationToken, out var validation)) throw new ProductMediaImportTokenException("Validation token is invalid, expired, or already used.");
         if (!tokens.TryGetUpload(validation.UploadToken, out var upload)) throw new ProductMediaImportTokenException("Source upload is invalid or expired.");
-        if (validation.Files.Any(x => x.Status is ProductMediaValidationFileStatus.Invalid or ProductMediaValidationFileStatus.Conflict))
-            throw new ProductMediaImportConflictException("Validation contains critical errors.");
         if (!string.Equals(upload.Archive.Sha256, (await repository.GetBatchAsync(validation.BatchId, false, cancellationToken))?.OriginalFileHash, StringComparison.OrdinalIgnoreCase))
             throw new ProductMediaImportConflictException("ZIP hash changed after preview.");
         var batch = await repository.GetBatchAsync(validation.BatchId, true, cancellationToken) ?? throw new KeyNotFoundException();
-        var errors = new List<ProductMediaImportErrorDto>(); var imported = 0; var skipped = 0;
+        var errors = new List<ProductMediaImportErrorDto>(); var imported = 0; var skipped = 0; var failed = 0;
         var storageKeysToCompensate = new HashSet<string>(StringComparer.Ordinal);
+        var assetsByHash = validation.Files.Where(x => x.ExistingMediaAssetId is { } id && id != Guid.Empty)
+            .GroupBy(x => x.ContentHash, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(x => x.Key, x => x.MinBy(file => file.ExistingMediaAssetId!.Value)!.ExistingMediaAssetId!.Value,
+                StringComparer.OrdinalIgnoreCase);
         var transactionCommitted = false;
         var now = clock.GetUtcNow(); batch.Start(now); await repository.SaveAsync(cancellationToken);
         if (logger.IsEnabled(LogLevel.Information))
@@ -252,7 +320,7 @@ internal sealed class ProductMediaImportExecutionService(
                 foreach (var file in validation.Files)
                 {
                     var item = batch.Items.Single(x => x.TemporaryFileId == file.TemporaryFileId);
-                    if (file.Status != ProductMediaValidationFileStatus.Valid || file.MatchedProductId is null) { skipped++; continue; }
+                    if (!ProductMediaImportExecutionPolicy.IsImportable(file)) { skipped++; continue; }
                     UploadedMediaResult? uploaded = null;
                     try
                     {
@@ -262,11 +330,20 @@ internal sealed class ProductMediaImportExecutionService(
                         if (!string.Equals(currentHash, file.ContentHash, StringComparison.OrdinalIgnoreCase))
                             throw new ProductMediaImportConflictException("A temporary image changed after validation.");
                         content.Position = 0;
-                        uploaded = await mediaUpload.UploadAsync(new(content, Path.GetFileName(file.OriginalFileName), archiveEntry.ContentType,
-                            archiveEntry.Length, MediaAssetType.Image, "tr", file.MatchedProductName ?? file.MatchedProductSku ?? "Ürün görseli",
-                            file.MatchedProductName ?? file.MatchedProductSku ?? "Ürün görseli"), ct);
-                        storageKeysToCompensate.Add(uploaded.StorageKey);
-                        await repository.AddProductMediaAsync(file.MatchedProductId.Value, uploaded.Id, batch.Id, file.SortOrder,
+                        if (assetsByHash.TryGetValue(file.ContentHash, out var existingAssetId))
+                        {
+                            uploaded = new(existingAssetId, MediaAssetType.Image, archiveEntry.NormalizedFileName, string.Empty,
+                                archiveEntry.ContentType, archiveEntry.Length, file.ContentHash);
+                        }
+                        else
+                        {
+                            uploaded = await mediaUpload.UploadAsync(new(content, Path.GetFileName(archiveEntry.NormalizedFileName), archiveEntry.ContentType,
+                                archiveEntry.Length, MediaAssetType.Image, "tr", file.MatchedProductName ?? file.MatchedProductSku ?? "Ürün görseli",
+                                file.MatchedProductName ?? file.MatchedProductSku ?? "Ürün görseli"), ct);
+                            storageKeysToCompensate.Add(uploaded.StorageKey);
+                            assetsByHash[file.ContentHash] = uploaded.Id;
+                        }
+                        await repository.AddProductMediaAsync(file.MatchedProductId!.Value, uploaded.Id, batch.Id, file.SortOrder,
                             file.IsPrimary, validation.Options.ReplaceExistingPrimaryImage, now, ct);
                         item.Imported(uploaded.Id, now); imported++;
                         if (logger.IsEnabled(LogLevel.Information))
@@ -275,7 +352,7 @@ internal sealed class ProductMediaImportExecutionService(
                     catch (Exception ex) when (ex is not OperationCanceledException and
                         not ProductMediaImportConflictException and not MediaUploadUnavailableException)
                     {
-                        skipped++; item.SetFailure(ProductMediaImportBatchItemStatus.Failed, "IMPORT_FAILED", ex.Message);
+                        failed++; item.SetFailure(ProductMediaImportBatchItemStatus.Failed, "IMPORT_FAILED", ex.Message);
                         errors.Add(new("IMPORT_FAILED", file.OriginalFileName, ex.Message));
                         if (uploaded is not null)
                         {
@@ -285,13 +362,13 @@ internal sealed class ProductMediaImportExecutionService(
                         logger.LogWarning(ex, "Product media file skipped. BatchId={BatchId} ProductId={ProductId} SKU={SKU} Status=Failed", batch.Id, file.MatchedProductId, file.MatchedProductSku);
                     }
                 }
-                batch.Complete(clock.GetUtcNow(), imported, skipped, errors.Count);
+                batch.Complete(clock.GetUtcNow(), imported, skipped, failed);
             }, cancellationToken);
             transactionCommitted = true;
             await temporaryStorage.DeleteAsync(upload.Archive.ContainerId, CancellationToken.None);
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("Product media batch completed. BatchId={BatchId} UserId={UserId} Status={Status}", batch.Id, upload.UserId, batch.Status);
-            return new(batch.Id, batch.Status, imported, skipped, errors.Count, errors);
+            return new(batch.Id, batch.Status, imported, skipped, failed, errors);
         }
         catch (Exception ex)
         {

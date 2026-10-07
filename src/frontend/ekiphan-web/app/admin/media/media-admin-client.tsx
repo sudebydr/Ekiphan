@@ -7,7 +7,7 @@ import type {
 } from "../../../lib/admin-media-types";
 import type { ProblemDetails } from "../../../lib/admin-product-relation-types";
 import styles from "../catalog/products/products.module.css";
-import { CatalogPdfImport } from "./catalog-pdf-import";
+import { CatalogPdfImport, SingleCatalogPdfUpload } from "./catalog-pdf-import";
 import { ProductMediaImport } from "./product-media-import";
 
 type Target = { id: string; name: string };
@@ -35,7 +35,6 @@ export function MediaAdminClient() {
   const [englishDescription, setEnglishDescription] = useState("");
   const [externalUrl, setExternalUrl] = useState("");
   const [files, setFiles] = useState<File[]>([]);
-  const [assetType, setAssetType] = useState("Image");
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [assetFilter, setAssetFilter] = useState("");
@@ -146,15 +145,20 @@ export function MediaAdminClient() {
 
   async function upload(event: FormEvent) {
     event.preventDefault(); if (files.length === 0) return;
+    const maximum = 4 * 1024 * 1024;
+    if (files.some((file) => file.size > maximum)) {
+      setError("Dosya 4 MB sınırını aşıyor.");
+      return;
+    }
     setBusy(true); setError(null); setMessage(null);
     try {
       for (const file of files) {
         const form = new FormData();
         const fallbackTitle = file.name.replace(/\.[^.]+$/, "");
-        form.set("file", file); form.set("assetType", assetType);
+        form.set("file", file); form.set("assetType", "Image");
         form.set("languageCode", "tr");
         form.set("title", files.length === 1 ? title : fallbackTitle);
-        if (assetType === "Image") form.set("altText", altText || fallbackTitle);
+        form.set("altText", altText || fallbackTitle);
         if (files.length === 1 && description) form.set("description", description);
         const response = await fetch("/api/admin/media", { method: "POST", body: form });
         if (!response.ok) throw new Error(await readError(response));
@@ -186,6 +190,28 @@ export function MediaAdminClient() {
     if (ok) setMessage(archive ? "Medya arşivlendi." : "Medya metinleri güncellendi.");
   }
 
+  async function deletePdf(asset: AdminMediaAsset) {
+    if (!window.confirm("Bu PDF’yi silmek istediğinize emin misiniz?")) return;
+    const ok = await jsonRequest(
+      `/api/admin/media-library/assets/${asset.id}`,
+      "DELETE"
+    );
+    if (ok) {
+      if (selectedId === asset.id) setSelectedId(null);
+      setMessage("PDF silindi.");
+    }
+  }
+
+  async function togglePdfStatus(asset: AdminMediaAsset) {
+    const makeActive = asset.status !== "Active";
+    const ok = await jsonRequest(
+      `/api/admin/media-library/assets/${asset.id}/status`,
+      "PUT",
+      { active: makeActive }
+    );
+    if (ok) setMessage(`PDF ${makeActive ? "aktif" : "pasif"} yapıldı.`);
+  }
+
   async function removeUsage(
     usage: AdminMediaLibrary["assignments"][number]
   ) {
@@ -215,9 +241,16 @@ export function MediaAdminClient() {
     if (ok) setMessage("Medya ataması kaydedildi.");
   }
 
-  const assetName = (asset: AdminMediaAsset) =>
-    asset.translations.find((item) => item.languageCode === "tr")?.title ??
-    asset.originalFileName ?? asset.assetType;
+  const assetName = (asset: AdminMediaAsset) => {
+    const translatedTitle = asset.translations
+      .find((item) => item.languageCode === "tr")?.title.trim();
+    return translatedTitle || asset.originalFileName || asset.assetType;
+  };
+
+  const formatCreatedAt = (value: string) => new Intl.DateTimeFormat("tr-TR", {
+    dateStyle: "medium",
+    timeStyle: "short"
+  }).format(new Date(value));
 
   return <main className={styles.page}>
     <header className={styles.header}><div><p className={styles.eyebrow}>EKİPHAN · ADMIN</p><h1>Medya yönetimi</h1>
@@ -249,11 +282,34 @@ export function MediaAdminClient() {
           {loading && <p className={styles.listState}>Medya yükleniyor…</p>}
           {!loading && library.assets.length === 0 &&
             <p className={styles.listState}>Filtreye uygun medya bulunamadı.</p>}
-          {!loading && library.assets.map((asset) =>
-          <button type="button" key={asset.id} onClick={() => chooseAsset(asset)}
-            className={selectedId === asset.id ? styles.selected : styles.product}>
-            <strong>{assetName(asset)}</strong><span>{asset.assetType}</span><small>{asset.status}</small>
-          </button>)}</div>
+          {!loading && library.assets.map((asset) => asset.assetType === "Pdf" ?
+            <article key={asset.id}
+              className={`${styles.pdfCard} ${selectedId === asset.id ? styles.pdfCardSelected : ""}`}>
+              <button type="button" className={styles.pdfCardMain}
+                onClick={() => chooseAsset(asset)}>
+                <span className={styles.pdfBadge}>PDF</span>
+                <strong>{assetName(asset)}</strong>
+                <span className={styles.pdfFileName}>{asset.originalFileName ?? "Dosya adı belirtilmemiş"}</span>
+                <span className={styles.pdfMeta}>
+                  Tür: PDF · Durum: {asset.status === "Active" ? "Aktif" : "Pasif"}
+                </span>
+                <time className={styles.pdfDate} dateTime={asset.createdAt}>
+                  Yüklenme: {formatCreatedAt(asset.createdAt)}
+                </time>
+              </button>
+              <div className={styles.pdfActions}>
+                <button type="button" className={styles.pdfStatus} disabled={busy}
+                  onClick={() => void togglePdfStatus(asset)}>
+                  {asset.status === "Active" ? "Pasif yap" : "Aktif yap"}
+                </button>
+                <button type="button" className={styles.pdfDelete} disabled={busy}
+                  onClick={() => void deletePdf(asset)}>Sil</button>
+              </div>
+            </article>
+            : <button type="button" key={asset.id} onClick={() => chooseAsset(asset)}
+                className={selectedId === asset.id ? styles.selected : styles.product}>
+                <strong>{assetName(asset)}</strong><span>{asset.assetType}</span><small>{asset.status}</small>
+              </button>)}</div>
         {library.totalCount > library.pageSize && <div className={styles.pagination}>
           <button type="button" disabled={page <= 1 || loading}
             onClick={() => setPage((value) => value - 1)}>Önceki</button>
@@ -290,25 +346,27 @@ export function MediaAdminClient() {
         </form>}
       </section>
       <section className={styles.panel}>
-        <CatalogPdfImport />
         <ProductMediaImport />
-        <form className={styles.editor} onSubmit={upload}><h2>Dosya yükle</h2>
-          <label>Dosya tipi<select value={assetType} onChange={(e) => setAssetType(e.target.value)}><option>Image</option><option>Pdf</option><option>Document</option></select></label>
-          <label>Dosyalar<input type="file" required multiple
+        <CatalogPdfImport />
+        <form className={styles.editor} onSubmit={upload}><h2>Tek Ürün Görseli Yükle</h2>
+          <label>Dosya<input type="file" required
+            accept=".webp,.jpg,.jpeg,.png,image/webp,image/jpeg,image/png"
             onChange={(e) => setFiles(Array.from(e.target.files ?? []))} /></label>
           <label>Türkçe başlık<input required={files.length <= 1} maxLength={250} value={title} onChange={(e) => setTitle(e.target.value)} /></label>
-          {assetType === "Image" && <label>Alt metin<input required maxLength={500} value={altText} onChange={(e) => setAltText(e.target.value)} /></label>}
+          <label>Alt metin<input required maxLength={500} value={altText} onChange={(e) => setAltText(e.target.value)} /></label>
           <label>Açıklama<textarea maxLength={2000} value={description} onChange={(e) => setDescription(e.target.value)} /></label>
           <button disabled={busy || files.length === 0}>Güvenli yükle ({files.length})</button>
+          <small>Önerilen format: WebP · Maksimum dosya boyutu: 4 MB · Ürüne aşağıdaki manuel medya atama alanından bağlayın.</small>
           <small>Tehdit tarayıcısı yapılandırılmamışsa sistem güvenlik gereği yüklemeyi reddeder.</small>
         </form>
+        <SingleCatalogPdfUpload onUploaded={load} />
         <form className={styles.editor} onSubmit={createVideo}><h2>Harici video</h2>
           <label>HTTPS video adresi<input type="url" pattern="https://.*" required value={externalUrl} onChange={(e) => setExternalUrl(e.target.value)} /></label>
           <label>Türkçe başlık<input required maxLength={250} value={title} onChange={(e) => setTitle(e.target.value)} /></label>
           <label>Açıklama<textarea maxLength={2000} value={description} onChange={(e) => setDescription(e.target.value)} /></label>
           <button disabled={busy}>Video oluştur</button>
         </form>
-        <form className={styles.editor} onSubmit={saveAssignment}><h2>Medya ata</h2>
+        <form className={styles.editor} onSubmit={saveAssignment}><h2>Manuel medya atama</h2>
           <label>Hedef türü<select value={targetType} onChange={(e) => { const next = e.target.value as typeof targetType; setTargetType(next); setTargetId(""); setRole(next === "product" ? "GalleryImage" : next === "brand" ? "Logo" : "Image"); }}>
             <option value="product">Ürün</option><option value="brand">Marka</option><option value="category">Kategori</option>
           </select></label>

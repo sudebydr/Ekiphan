@@ -27,7 +27,7 @@ public sealed class ImportRow : Entity
         RawPayload = ImportGuard.Json(rawPayload, 1_000_000, nameof(rawPayload));
         SKU = string.IsNullOrWhiteSpace(sku)
             ? null
-            : ImportGuard.Required(sku, 100, nameof(sku)).ToUpperInvariant();
+            : SkuNormalizer.Normalize(ImportGuard.Required(sku, 100, nameof(sku)));
     }
 
     public Guid ImportJobId { get; private set; }
