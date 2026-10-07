@@ -17,13 +17,13 @@ function initials(name: string): string {
   return name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toLocaleUpperCase("tr-TR");
 }
 
-function attributeValue(attribute: CatalogAttribute): string {
+function attributeValue(attribute: CatalogAttribute, en = false): string {
   if (attribute.optionName) return attribute.optionName;
   if (attribute.textValue) return attribute.textValue;
   if (attribute.numericValue !== null) {
-    return `${attribute.numericValue.toLocaleString("tr-TR")}${attribute.unitSymbol ? ` ${attribute.unitSymbol}` : ""}`;
+    return `${attribute.numericValue.toLocaleString(en ? "en-US" : "tr-TR")}${attribute.unitSymbol ? ` ${attribute.unitSymbol}` : ""}`;
   }
-  if (attribute.booleanValue !== null) return attribute.booleanValue ? "Evet" : "Hayır";
+  if (attribute.booleanValue !== null) return en ? (attribute.booleanValue ? "Yes" : "No") : (attribute.booleanValue ? "Evet" : "Hayır");
   return "—";
 }
 
@@ -31,17 +31,17 @@ function uniqueProducts(products: CatalogProductSummary[]): CatalogProductSummar
   return Array.from(new Map(products.map((product) => [product.id, product])).values()).slice(0, 12);
 }
 
-function specificationGroup(attribute: CatalogAttribute): string {
+function specificationGroup(attribute: CatalogAttribute, en = false): string {
   const name = attribute.name.toLocaleLowerCase("tr-TR");
-  if (/geniş|yüksek|derin|uzun|ölç|çap|ağırlık/.test(name)) return "Boyutlar";
-  if (/volt|güç|frekans|elektr|enerji/.test(name)) return "Elektrik";
-  if (/kapasite|hacim|porsiyon|adet/.test(name)) return "Kapasite";
-  return "Ürün bilgileri";
+  if (/geniş|yüksek|derin|uzun|ölç|çap|ağırlık|width|height|depth|length|dimension|diameter|weight/.test(name)) return en ? "Dimensions" : "Boyutlar";
+  if (/volt|güç|frekans|elektr|enerji|power|frequency|electric|energy/.test(name)) return en ? "Electrical" : "Elektrik";
+  if (/kapasite|hacim|porsiyon|adet|capacity|volume|portion|quantity/.test(name)) return en ? "Capacity" : "Kapasite";
+  return en ? "Product information" : "Ürün bilgileri";
 }
 
-function groupedAttributes(attributes: CatalogAttribute[]) {
+function groupedAttributes(attributes: CatalogAttribute[], en = false) {
   return attributes.reduce<Record<string, CatalogAttribute[]>>((groups, attribute) => {
-    const group = specificationGroup(attribute);
+    const group = specificationGroup(attribute, en);
     groups[group] = [...(groups[group] ?? []), attribute];
     return groups;
   }, {});
@@ -106,7 +106,7 @@ function ErrorState({ caught, locale = "tr" }: { caught: unknown; locale?: "tr" 
 }
 
 function quickSpecifications(product: CatalogProductDetail, en = false) {
-  const fromAttributes = product.attributes.slice(0, 4).map((attribute) => ({ label: attribute.name, value: attributeValue(attribute) }));
+  const fromAttributes = product.attributes.slice(0, 3).map((attribute) => ({ label: attribute.name, value: attributeValue(attribute, en) }));
   const fallbacks = [
     ...(product.categories[0] ? [{ label: en ? "Category" : "Kategori", value: product.categories[0].name }] : []),
     ...(product.brand ? [{ label: en ? "Brand" : "Marka", value: product.brand.name }] : []),
@@ -132,23 +132,26 @@ export default async function ProductDetailPage({ params, searchParams }: {
 
   const category = product.categories[0]?.name ?? "—";
   const specs = quickSpecifications(product, en);
-  const groups = groupedAttributes(product.attributes);
+  const groups = groupedAttributes(product.attributes, en);
   const similar = uniqueProducts(product.similarProducts);
   const complementary = uniqueProducts(product.complementaryProducts);
   const applicationAreas = product.attributes
     .filter(attribute => attribute.name.toLocaleLowerCase(en ? "en-US" : "tr-TR").includes(en ? "application area" : "kullanım alan"))
-    .map(attributeValue).filter(value => value !== "—");
-  const overviewItems = Array.from(new Set([
-    ...product.tags.map((tag) => tag.name),
-    ...product.categories.map((item) => item.name)
-  ])).slice(0, 4);
+    .map((attribute) => attributeValue(attribute, en)).filter(value => value !== "—");
+  const overviewItems: { title: string; detail?: string }[] = product.attributes
+    .map((attribute) => ({ title: attribute.name, detail: attributeValue(attribute, en) }))
+    .filter((item) => item.detail !== "—")
+    .slice(0, 4);
+  if (overviewItems.length === 0) {
+    overviewItems.push(...product.tags.slice(0, 4).map((tag) => ({ title: tag.name })));
+  }
 
   const detailSpecificationGroups = Object.entries(groups).map(([name, attributes]) => ({
     name,
     items: attributes.map((attribute) => ({
       id: attribute.id,
       name: attribute.name,
-      value: attributeValue(attribute)
+      value: attributeValue(attribute, en)
     }))
   }));
 

@@ -10,7 +10,7 @@ type Props = {
   productName: string;
   category: string;
   description: string;
-  features: string[];
+  features: { title: string; detail?: string }[];
   specificationGroups: SpecificationGroup[];
   applicationAreas: string[];
   afterOverview?: ReactNode;
@@ -59,8 +59,12 @@ export function ProductDetailSections({ productName, category, description, feat
     { number: "01", icon: "plan" as const, title: "Project Support", text: "Professional project consultancy and kitchen planning." },
     { number: "02", icon: "support" as const, title: "Technical Support", text: "After-sales technical support and responsive solutions." },
     { number: "03", icon: "install" as const, title: "Installation", text: "Professional installation and commissioning." },
-    { number: "04", icon: "parts" as const, title: "Spare Parts", text: "Genuine spare parts and fast supply." }
+    { number: "04", icon: "parts" as const, title: "Wide Product Range", text: "Explore solutions for professional kitchens." }
   ] : services;
+  const localizedTurkishServices = services.map((service, index) => index === 3
+    ? { ...service, title: "Geniş ürün yelpazesi", text: "Profesyonel mutfaklara yönelik geniş ürün seçenekleri." }
+    : service);
+  const displayedServices = en ? localizedServices : localizedTurkishServices;
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>("overview");
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
@@ -76,20 +80,6 @@ export function ProductDetailSections({ productName, category, description, feat
     tabRefs.current[next]?.focus();
   }
 
-  const featureIcons: IconName[] = ["shield", "performance", "leaf", "clean"];
-  const featureDescriptions = en ? [
-    "Durable components deliver reliable performance under intensive use.",
-    "Dependable capacity suited to the pace of professional operations.",
-    "Efficient operation helps businesses manage resources responsibly.",
-    "Easy-care surfaces support hygiene standards and simplify cleaning."
-  ] : [
-    "Kaliteli bileşenleriyle yoğun kullanımlarda uzun ömürlü performans sunar.",
-    "Profesyonel operasyonların temposuna uyumlu, güvenilir çalışma kapasitesi.",
-    "Verimli kullanım yapısıyla işletme kaynaklarını dengeli kullanmaya yardımcı olur.",
-    "Hijyen standartlarını destekleyen, bakımı ve temizliği kolay yüzeyler."
-  ];
-  const displayFeatures = [...features, ...(en ? ["Durability", "High Performance", "Energy Efficiency", "Easy Cleaning"] : ["Üstün dayanıklılık", "Yüksek performans", "Enerji verimliliği", "Kolay temizlik"])].filter((item, index, list) => list.indexOf(item) === index).slice(0, 4);
-
   return <><section className={styles.details} aria-label={en ? `${productName} product details` : `${productName} ürün detayları`}>
       <div className={styles.tabList} role="tablist" aria-label={en ? "Product details sections" : "Ürün detay bölümleri"}>
         {tabs.map((tab, index) => <button key={tab.id} ref={(node) => { tabRefs.current[index] = node; }} type="button" role="tab" id={`product-tab-${tab.id}`} aria-selected={activeTab === tab.id} aria-controls="product-detail-panel" tabIndex={activeTab === tab.id ? 0 : -1} onClick={() => setActiveTab(tab.id)} onKeyDown={(event) => onTabKeyDown(event, index)}>
@@ -99,8 +89,8 @@ export function ProductDetailSections({ productName, category, description, feat
 
       <div className={styles.panel} role="tabpanel" id="product-detail-panel" aria-labelledby={`product-tab-${activeTab}`} tabIndex={0}>
         {activeTab === "overview" && <><div className={styles.overview}>
-          <div className={styles.intro}><span className={styles.kicker}>{category}</span><h2>{en ? "Reliable performance for professional kitchens" : "Profesyonel mutfaklar için maksimum performans"}</h2><i aria-hidden="true"/><p>{description}</p><p>{en ? "Backed by Ekiphan’s project experience and after-sales support, this product offers a reliable solution for professional use." : "Ekiphan’ın proje deneyimi ve satış sonrası desteğiyle profesyonel kullanıma yönelik güvenilir bir ürün çözümü sunar."}</p></div>
-          <ol className={styles.features}>{displayFeatures.map((feature, index) => <li key={feature}><span>{String(index + 1).padStart(2, "0")}</span><Icon name={featureIcons[index]}/><div><h3>{feature}</h3><p>{featureDescriptions[index]}</p></div></li>)}</ol>
+          <div className={styles.intro}><span className={styles.kicker}>{category}</span><h2>{en ? "Reliable performance for professional kitchens" : "Profesyonel mutfaklar için maksimum performans"}</h2><i aria-hidden="true"/>{description && <p>{description}</p>}</div>
+          {features.length > 0 ? <ol className={styles.features}>{features.map((feature, index) => <li key={`${feature.title}-${index}`}><span>{String(index + 1).padStart(2, "0")}</span><div><h3>{feature.title}</h3>{feature.detail && <p>{feature.detail}</p>}</div></li>)}</ol> : <p className={styles.empty}>{en ? "No additional product highlights are available." : "Bu ürün için ek özellik bilgisi bulunmuyor."}</p>}
         </div>{afterOverview}</>}
 
         {activeTab === "specs" && <div className={styles.specifications}>
@@ -110,17 +100,17 @@ export function ProductDetailSections({ productName, category, description, feat
 
         {activeTab === "documents" && <div className={styles.documents}>
           <header><span className={styles.kicker}>{en ? "Files" : "Dosyalar"}</span><h2>{en ? "Technical Documents" : "Teknik dokümanlar"}</h2></header>
-          <div><Link href={en ? "/en/contact" : "/iletisim"}><span>PDF</span><strong>{en ? "Technical Data Sheet" : "Teknik föy"}<small>{en ? "Request from our project team" : "Proje ekibimizden talep edin"}</small></strong><b>{en ? "Request" : "Talep et"} →</b></Link><Link href={en ? "/en/contact" : "/iletisim"}><span>PDF</span><strong>{en ? "Use & Care Guide" : "Kullanım ve bakım bilgisi"}<small>{en ? "Request from our technical team" : "Teknik ekibimizden talep edin"}</small></strong><b>{en ? "Request" : "Talep et"} →</b></Link><Link href={en ? "/en/catalogs" : "/kataloglar"}><span>PDF</span><strong>{en ? "Product Catalogue" : "Ürün kataloğu"}<small>{en ? "Browse current catalogues" : "Güncel katalogları inceleyin"}</small></strong><b>{en ? "Explore" : "İncele"} →</b></Link></div>
+          <div><Link href={en ? "/en/contact" : "/iletisim"}><span>↗</span><strong>{en ? "Request technical documents" : "Teknik doküman talep edin"}<small>{en ? "Contact our team for product documentation." : "Ürüne ait dokümanlar için ekibimizle iletişime geçin."}</small></strong><b>{en ? "Contact" : "İletişim"} →</b></Link></div>
         </div>}
 
         {activeTab === "applications" && <div className={styles.applications}>
           <header><span className={styles.kicker}>{en ? "Applications" : "Uygulama"}</span><h2>{en ? "Where is this product used?" : "Bu ürün nerelerde kullanılır?"}</h2></header>
-          <div>{applicationAreas.map((area, index) => <article key={area}><span>{String(index + 1).padStart(2, "0")}</span><strong>{area}</strong></article>)}</div>
+          {applicationAreas.length > 0 ? <div>{applicationAreas.map((area, index) => <article key={area}><span>{String(index + 1).padStart(2, "0")}</span><strong>{area}</strong></article>)}</div> : <p className={styles.empty}>{en ? "No application areas are listed for this product." : "Bu ürün için uygulama alanı bilgisi bulunmuyor."}</p>}
         </div>}
       </div>
     </section>
     <section className={styles.services} aria-label={en ? "Ekiphan service benefits" : "Ekiphan hizmet avantajları"}>
-      {localizedServices.map((service) => <article key={service.number}>
+      {displayedServices.map((service) => <article key={service.number}>
         <div className={styles.serviceTop}><Icon name={service.icon}/><span>{service.number}</span></div>
         <h2>{service.title}</h2><p>{service.text}</p>
       </article>)}
