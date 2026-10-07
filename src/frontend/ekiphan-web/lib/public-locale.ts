@@ -19,7 +19,7 @@ const enToTr: Record<string, string> = Object.fromEntries(
 );
 
 export function localeFromPath(pathname: string | undefined): PublicLocale {
-  return pathname?.startsWith("/en") ? "en" : "tr";
+  return pathname === "/en" || pathname?.startsWith("/en/") ? "en" : "tr";
 }
 
 export function localizedPath(pathname: string, targetLocale: PublicLocale): string {
