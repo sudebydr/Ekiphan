@@ -47,9 +47,10 @@ function groupedAttributes(attributes: CatalogAttribute[]) {
   }, {});
 }
 
-function RelatedProducts({ products, title, sectionId }: { products: CatalogProductSummary[]; title: string; sectionId: string }) {
+function RelatedProducts({ products, title, sectionId, locale = "tr" }: { products: CatalogProductSummary[]; title: string; sectionId: string; locale?: "tr" | "en" }) {
   if (products.length === 0) return null;
-  return <section className={styles.relatedSection} aria-labelledby={sectionId}><div className={styles.sectionHeading}><div><p className={styles.sectionEyebrow}>ÜRÜN ÖNERİLERİ</p><h2 id={sectionId}>{title}</h2></div><Link href="/katalog">Tüm ürünler <span aria-hidden="true">→</span></Link></div><RelatedProductsCarousel items={products.map(product=>({id:product.id,slug:product.slug,name:product.name,sku:product.sku,category:product.primaryCategory?.name ?? "",brand:product.brand?.name ?? "",image:product.image}))}/></section>;
+  const en = locale === "en";
+  return <section className={styles.relatedSection} aria-labelledby={sectionId}><div className={styles.sectionHeading}><div><p className={styles.sectionEyebrow}>{en ? "RECOMMENDED PRODUCTS" : "ÜRÜN ÖNERİLERİ"}</p><h2 id={sectionId}>{title}</h2></div><Link href={en ? "/en/products" : "/katalog"}>{en ? "All Products" : "Tüm ürünler"} <span aria-hidden="true">→</span></Link></div><RelatedProductsCarousel items={products.map(product=>({id:product.id,slug:product.slug,name:product.name,sku:product.sku,category:product.primaryCategory?.name ?? "",brand:product.brand?.name ?? "",image:product.image}))} locale={locale}/></section>;
 }
 export async function generateMetadata({ params, searchParams }: {
   params: Promise<{ slug: string }>;
@@ -57,6 +58,7 @@ export async function generateMetadata({ params, searchParams }: {
 }): Promise<Metadata> {
   const { slug } = await params;
   const language = (await searchParams).lang === "en" ? "en" : "tr";
+  const en = language === "en";
   try {
     const product = await getProduct(slug, language);
     const description = product.metaDescription ?? product.shortDescription ?? `${product.name} ürün özellikleri ve detayları.`;
@@ -88,26 +90,27 @@ export async function generateMetadata({ params, searchParams }: {
   }
 }
 
-function ErrorState({ caught }: { caught: unknown }) {
+function ErrorState({ caught, locale = "tr" }: { caught: unknown; locale?: "tr" | "en" }) {
+  const en = locale === "en";
   return (
     <main className={`${catalogStyles.page} ${catalogStyles.detailPage}`} data-public-page>
-      <PublicHeader currentPath="/katalog" />
+      <PublicHeader currentPath={en ? "/en/products" : "/katalog"} />
       <section className={catalogStyles.hero}>
-        <div><p className={catalogStyles.eyebrow}>ÜRÜN KATALOĞU</p><h1>Ürün bilgisine ulaşılamadı.</h1></div>
-        <p className={catalogStyles.heroText}>Bağlantı yeniden kurulduğunda ürün bilgileri burada gösterilecek.</p>
+        <div><p className={catalogStyles.eyebrow}>{en ? "PRODUCT CATALOGUE" : "ÜRÜN KATALOĞU"}</p><h1>{en ? "Product information is unavailable." : "Ürün bilgisine ulaşılamadı."}</h1></div>
+        <p className={catalogStyles.heroText}>{en ? "Product information will appear here once the connection is restored." : "Bağlantı yeniden kurulduğunda ürün bilgileri burada gösterilecek."}</p>
       </section>
-      <Link className={catalogStyles.backLink} href="/katalog">← Kataloğa dön</Link>
-      <div className={catalogStyles.error} role="alert"><strong>Ürün bilgisi yüklenemedi.</strong><p>{caught instanceof CatalogApiError ? caught.message : "Lütfen daha sonra tekrar deneyin."}</p></div>
+      <Link className={catalogStyles.backLink} href={en ? "/en/products" : "/katalog"}>{en ? "← Back to Catalogue" : "← Kataloğa dön"}</Link>
+      <div className={catalogStyles.error} role="alert"><strong>{en ? "Product information could not be loaded." : "Ürün bilgisi yüklenemedi."}</strong><p>{en ? "Please try again later." : caught instanceof CatalogApiError ? caught.message : "Lütfen daha sonra tekrar deneyin."}</p></div>
     </main>
   );
 }
 
-function quickSpecifications(product: CatalogProductDetail) {
+function quickSpecifications(product: CatalogProductDetail, en = false) {
   const fromAttributes = product.attributes.slice(0, 4).map((attribute) => ({ label: attribute.name, value: attributeValue(attribute) }));
   const fallbacks = [
-    ...(product.categories[0] ? [{ label: "Kategori", value: product.categories[0].name }] : []),
-    ...(product.brand ? [{ label: "Marka", value: product.brand.name }] : []),
-    { label: "Ürün kodu", value: product.sku }
+    ...(product.categories[0] ? [{ label: en ? "Category" : "Kategori", value: product.categories[0].name }] : []),
+    ...(product.brand ? [{ label: en ? "Brand" : "Marka", value: product.brand.name }] : []),
+    { label: en ? "Product code" : "Ürün kodu", value: product.sku }
   ];
   return [...fromAttributes, ...fallbacks].slice(0, 4);
 }
@@ -118,21 +121,22 @@ export default async function ProductDetailPage({ params, searchParams }: {
 }) {
   const { slug } = await params;
   const language = (await searchParams).lang === "en" ? "en" : "tr";
+  const en = language === "en";
   let product: CatalogProductDetail;
   try {
     product = await getProduct(slug, language);
   } catch (caught) {
     if (caught instanceof CatalogApiError && caught.status === 404) notFound();
-    return <ErrorState caught={caught} />;
+    return <ErrorState caught={caught} locale={language} />;
   }
 
   const category = product.categories[0]?.name ?? "—";
-  const specs = quickSpecifications(product);
+  const specs = quickSpecifications(product, en);
   const groups = groupedAttributes(product.attributes);
   const similar = uniqueProducts(product.similarProducts);
   const complementary = uniqueProducts(product.complementaryProducts);
   const applicationAreas = product.attributes
-    .filter(attribute => attribute.name.toLocaleLowerCase("tr-TR").includes("kullanım alan"))
+    .filter(attribute => attribute.name.toLocaleLowerCase(en ? "en-US" : "tr-TR").includes(en ? "application area" : "kullanım alan"))
     .map(attributeValue).filter(value => value !== "—");
   const overviewItems = Array.from(new Set([
     ...product.tags.map((tag) => tag.name),
@@ -150,11 +154,11 @@ export default async function ProductDetailPage({ params, searchParams }: {
 
   return (
     <main className={styles.detailPage} data-public-page>
-      <PublicHeader currentPath="/katalog" />
+      <PublicHeader currentPath={en ? `/en/products/${encodeURIComponent(product.slug)}` : "/katalog"} />
       <div className={styles.pageShell}>
         <nav className={styles.breadcrumb} aria-label="Breadcrumb">
-          <Link href="/">Ana Sayfa</Link><span>/</span><Link href="/katalog">Ürünler</Link><span>/</span>
-          {product.categories[0] && <><Link href={`/katalog?category=${product.categories[0].slug}`}>{product.categories[0].name}</Link><span>/</span></>}
+          <Link href={en ? "/en" : "/"}>{en ? "Home" : "Ana Sayfa"}</Link><span>/</span><Link href={en ? "/en/products" : "/katalog"}>{en ? "Products" : "Ürünler"}</Link><span>/</span>
+          {product.categories[0] && <><Link href={`${en ? "/en/products" : "/katalog"}?category=${product.categories[0].slug}`}>{product.categories[0].name}</Link><span>/</span></>}
           <strong>{product.name}</strong>
         </nav>
 
@@ -166,14 +170,14 @@ export default async function ProductDetailPage({ params, searchParams }: {
               {product.brand && <strong>{product.brand.name}</strong>}
             </div>
             <h1 id="product-title">{product.name}</h1>
-            <p className={styles.modelLine}><span>Ürün Kodu: {product.sku}</span></p>
+            <p className={styles.modelLine}><span>{en ? "Product Code:" : "Ürün Kodu:"} {product.sku}</span></p>
             {product.shortDescription && <p className={styles.lead}>{product.shortDescription}</p>}
             <dl className={styles.quickSpecs}>{specs.map((spec) => <div key={`${spec.label}-${spec.value}`}><dt>{spec.label}</dt><dd>{spec.value}</dd></div>)}</dl>
             <div className={styles.primaryAction}>
-              <AddToQuoteButton productId={product.id} slug={product.slug} name={product.name} sku={product.sku} brandName={product.brand?.name ?? null} imageUrl={product.images[0]?.url ?? null} className={styles.quoteButton} showQuantityControl quantityClassName={styles.quantityControl} />
-              <Link href="/iletisim">Teklif al <span aria-hidden="true">→</span></Link>
+              <AddToQuoteButton productId={product.id} slug={product.slug} name={product.name} sku={product.sku} brandName={product.brand?.name ?? null} imageUrl={product.images[0]?.url ?? null} className={styles.quoteButton} showQuantityControl quantityClassName={styles.quantityControl} locale={language} />
+              <Link href={en ? "/en/contact" : "/iletisim"}>{en ? "Request a Quote" : "Teklif al"} <span aria-hidden="true">→</span></Link>
             </div>
-            <div className={styles.secondaryActions}><Link href="/kataloglar">↓ Ürün kataloğu</Link><Link href="/iletisim">↓ Teknik doküman talep et</Link></div>
+            <div className={styles.secondaryActions}><Link href={en ? "/en/catalogs" : "/kataloglar"}>↓ {en ? "Product catalogue" : "Ürün kataloğu"}</Link><Link href={en ? "/en/contact" : "/iletisim"}>↓ {en ? "Request technical documents" : "Teknik doküman talep et"}</Link></div>
           </div>
         </section>
       </div>
@@ -184,16 +188,15 @@ export default async function ProductDetailPage({ params, searchParams }: {
         features={overviewItems}
         specificationGroups={detailSpecificationGroups}
         applicationAreas={applicationAreas}
-        afterOverview={<><RelatedProducts products={similar} title="Benzer ürünler" sectionId="similar-products-title" />
-          <RelatedProducts products={complementary} title="Tamamlayıcı ürünler" sectionId="complementary-products-title" /></>}
+        locale={language}
+        afterOverview={<><RelatedProducts products={similar} title={en ? "Similar Products" : "Benzer ürünler"} sectionId="similar-products-title" locale={language} />
+          <RelatedProducts products={complementary} title={en ? "Complementary Products" : "Tamamlayıcı ürünler"} sectionId="complementary-products-title" locale={language} /></>}
       />
 
       <div className={styles.mobileQuoteBar}>
-        <span><small>Teklif listenize ekleyin</small><strong>{product.name}</strong></span>
-        <AddToQuoteButton productId={product.id} slug={product.slug} name={product.name} sku={product.sku} brandName={product.brand?.name ?? null} imageUrl={product.images[0]?.url ?? null} className={styles.mobileQuoteButton} />
+        <span><small>{en ? "Add to your quote list" : "Teklif listenize ekleyin"}</small><strong>{product.name}</strong></span>
+        <AddToQuoteButton productId={product.id} slug={product.slug} name={product.name} sku={product.sku} brandName={product.brand?.name ?? null} imageUrl={product.images[0]?.url ?? null} className={styles.mobileQuoteButton} locale={language} />
       </div>
     </main>
   );
 }
-
-

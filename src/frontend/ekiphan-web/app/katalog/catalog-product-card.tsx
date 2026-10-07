@@ -13,8 +13,9 @@ function initials(name: string): string {
 }
 
 /** A consistent catalog card, shared by every product result. */
-export function CatalogProductCard({ product }: { product: CatalogProductSummary }) {
-  const productHref = `/katalog/${encodeURIComponent(product.slug)}`;
+export function CatalogProductCard({ product, locale = "tr" }: { product: CatalogProductSummary; locale?: "tr" | "en" }) {
+  const en = locale === "en";
+  const productHref = `${en ? "/en/products" : "/katalog"}/${encodeURIComponent(product.slug)}`;
 
   return (
     <article className={styles.productCard}>
@@ -27,16 +28,16 @@ export function CatalogProductCard({ product }: { product: CatalogProductSummary
           )}
         </div>
         <div className={styles.productBody}>
-          <span className={styles.meta}>{product.primaryCategory?.name ?? "Profesyonel ürün"}</span>
+          <span className={styles.meta}>{product.primaryCategory?.name ?? (en ? "Professional product" : "Profesyonel ürün")}</span>
           <h3 title={product.name}>{product.name}</h3>
           <div className={styles.productIdentity}>
-            <span>{product.brand?.name ?? "Ekiphan seçkisi"}</span>
-            <span className={styles.sku}>Kod: {product.sku}</span>
+            <span>{product.brand?.name ?? (en ? "Ekiphan selection" : "Ekiphan seçkisi")}</span>
+            <span className={styles.sku}>{en ? "Code:" : "Kod:"} {product.sku}</span>
           </div>
         </div>
       </Link>
       <div className={styles.productActions}>
-        <Link className={styles.productDetailLink} href={productHref}>Detayı incele</Link>
+        <Link className={styles.productDetailLink} href={productHref}>{en ? "View Details" : "Detayı incele"}</Link>
         <AddToQuoteButton
           productId={product.id}
           slug={product.slug}
@@ -48,6 +49,7 @@ export function CatalogProductCard({ product }: { product: CatalogProductSummary
           showQuantityControl
           quantityClassName={styles.quoteQuantity}
           compactQuantityControl
+          locale={locale}
         />
       </div>
     </article>

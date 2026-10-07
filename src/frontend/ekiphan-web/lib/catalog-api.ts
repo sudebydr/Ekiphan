@@ -66,17 +66,20 @@ async function getJson<T>(path: string): Promise<T> {
   return (await response.json()) as T;
 }
 
-export async function getCatalogNavigation(): Promise<CatalogNavigation> {
-  return isDemoProductsEnabled()
-    ? getDemoCatalogNavigation()
-    : getJson("/api/catalog/tr/navigation");
+export async function getCatalogNavigation(language: "tr" | "en" = "tr"): Promise<CatalogNavigation> {
+  if (isDemoProductsEnabled()) return getDemoCatalogNavigation();
+  try { return await getJson(`/api/catalog/${language}/navigation`); }
+  catch (error) { if (language === "en") return getJson("/api/catalog/tr/navigation"); throw error; }
 }
-export async function getCatalogFacets(category: string): Promise<CatalogFacet[]> {
+export async function getCatalogFacets(category: string, language: "tr" | "en" = "tr"): Promise<CatalogFacet[]> {
   if (isDemoProductsEnabled()) return [];
 
   try {
-    return await getJson(`/api/catalog/tr/facets?category=${encodeURIComponent(category)}`);
+    return await getJson(`/api/catalog/${language}/facets?category=${encodeURIComponent(category)}`);
   } catch {
+    if (language === "en") {
+      try { return await getJson(`/api/catalog/tr/facets?category=${encodeURIComponent(category)}`); } catch { /* Keep empty facets available as a fallback. */ }
+    }
     return [];
   }
 }
@@ -84,8 +87,9 @@ export function getCatalogSitemap(): Promise<CatalogSitemapEntry[]> {
   return getJson("/api/catalog/tr/sitemap");
 }
 
-export function getBrands(): Promise<CatalogBrandListItem[]> {
-  return getJson("/api/catalog/tr/brands");
+export async function getBrands(language: "tr" | "en" = "tr"): Promise<CatalogBrandListItem[]> {
+  try { return await getJson(`/api/catalog/${language}/brands`); }
+  catch (error) { if (language === "en") return getJson("/api/catalog/tr/brands"); throw error; }
 }
 
 export type CatalogPdfDocument = { id: string; slug: string; title: string; fileName: string; url: string; coverUrl: string; createdAt: string };
@@ -108,14 +112,14 @@ export function getBrand(slug: string): Promise<CatalogBrandDetail> {
 }
 
 export async function getProducts(
-  query: URLSearchParams
+  query: URLSearchParams,
+  language: "tr" | "en" = "tr"
 ): Promise<CatalogPagedResult> {
   if (isDemoProductsEnabled()) return getDemoProducts(query);
 
   const queryString = query.toString();
-  return getJson(
-    `/api/catalog/tr/products${queryString ? `?${queryString}` : ""}`
-  );
+  try { return await getJson(`/api/catalog/${language}/products${queryString ? `?${queryString}` : ""}`); }
+  catch (error) { if (language === "en") return getJson(`/api/catalog/tr/products${queryString ? `?${queryString}` : ""}`); throw error; }
 }
 export async function getProduct(slug: string, language: "tr" | "en" = "tr"): Promise<CatalogProductDetail> {
   if (isDemoProductsEnabled()) {

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./public-footer.module.css";
 import type { SiteSettingsDto } from "../lib/public-settings";
+import { localeFromPath, localizedPath } from "../lib/public-locale";
 
 const groups = [
   {
@@ -63,6 +64,13 @@ function SocialIcon({ network }: { network: "instagram" | "linkedin" | "youtube"
 export function PublicFooter({ settings }: { settings: SiteSettingsDto | null }) {
   const pathname = usePathname();
   if (pathname.startsWith("/admin")) return null;
+  const locale = localeFromPath(pathname);
+  const isEnglish = locale === "en";
+  const footerGroups = isEnglish ? [
+    { title: "About", links: [{ href: "/hakkimizda", label: "Who We Are" }, { href: "/referanslar", label: "References" }, { href: "/galeri", label: "Gallery" }, { href: "/basin-odasi", label: "Press Room" }] },
+    { title: "Categories", links: [{ href: "/katalog", label: "All Products" }, { href: "/endustriyel-mutfak", label: "Industrial Kitchen" }, { href: "/kataloglar", label: "Catalogs" }, { href: "/showroom", label: "Showroom" }] },
+    { title: "Support", links: [{ href: "/iletisim", label: "Contact" }, { href: "/teklif-listem", label: "Request a Quote" }] }
+  ] : groups;
 
   const phone = settings?.phone || "0242 340 25 15";
   const address = settings?.showroomAddress || "Serik Cd. Sinan Mh. Havaalanı Yolu 10. km No: 107, 07170 Altınova / Kepez / ANTALYA";
@@ -82,11 +90,11 @@ export function PublicFooter({ settings }: { settings: SiteSettingsDto | null })
     <footer className={styles.footer}>
       <div className={styles.inner}>
         <div className={styles.mainRow}>
-          <section className={styles.brandColumn} aria-label="Ekiphan hakkında">
-            <Link className={styles.brand} href="/" aria-label="Ekiphan ana sayfa">
+          <section className={styles.brandColumn} aria-label={isEnglish ? "About Ekiphan" : "Ekiphan hakkında"}>
+            <Link className={styles.brand} href={isEnglish ? "/en" : "/"} aria-label={isEnglish ? "Ekiphan home page" : "Ekiphan ana sayfa"}>
               ekiphan<span aria-hidden="true">.</span>
             </Link>
-            <p>{settings?.companySlogan || "Profesyonel mutfak ve otel ekipmanlarında güçlü çözüm ortağınız."}</p>
+            <p>{isEnglish ? "Your trusted partner in professional kitchen and hotel equipment." : settings?.companySlogan || "Profesyonel mutfak ve otel ekipmanlarında güçlü çözüm ortağınız."}</p>
             {socialLinks.length > 0 && (
               <div className={styles.socials} aria-label="Sosyal medya">
                 {socialLinks.map(({ network, href, label }) => (
@@ -98,20 +106,20 @@ export function PublicFooter({ settings }: { settings: SiteSettingsDto | null })
             )}
           </section>
 
-          {groups.map((group) => (
+          {footerGroups.map((group) => (
             <nav className={styles.linkGroup} aria-label={group.title} key={group.title}>
               <h2>{group.title}</h2>
-              {group.links.map((link) => <Link href={link.href} key={link.href}>{link.label}</Link>)}
+              {group.links.map((link) => <Link href={localizedPath(link.href, locale)} key={link.href}>{link.label}</Link>)}
             </nav>
           ))}
 
-          <section className={styles.ctaColumn} aria-label="İletişim ve teklif">
-            <p className={styles.eyebrow}>Projenizi birlikte planlayalım</p>
-            <Link href="/teklif-listem" className={styles.primaryCta}>
-              Teklif Al <span aria-hidden="true">↗</span>
+          <section className={styles.ctaColumn} aria-label={isEnglish ? "Contact and quote" : "İletişim ve teklif"}>
+            <p className={styles.eyebrow}>{isEnglish ? "Let's plan your project together" : "Projenizi birlikte planlayalım"}</p>
+            <Link href={localizedPath("/teklif-listem", locale)} className={styles.primaryCta}>
+              {isEnglish ? "Request a Quote" : "Teklif Al"} <span aria-hidden="true">↗</span>
             </Link>
-            <Link href="/iletisim" className={styles.secondaryCta}>
-              İletişim <span aria-hidden="true">→</span>
+            <Link href={localizedPath("/iletisim", locale)} className={styles.secondaryCta}>
+              {isEnglish ? "Contact" : "İletişim"} <span aria-hidden="true">→</span>
             </Link>
             <a className={styles.contactDetail} href={`tel:${phone.replace(/\s+/g, "")}`}>{phone}</a>
             <a className={styles.contactDetail} href={`mailto:${email}`}>{email}</a>
@@ -120,7 +128,7 @@ export function PublicFooter({ settings }: { settings: SiteSettingsDto | null })
         </div>
 
         <div className={styles.bottom}>
-          <span>© {new Date().getFullYear()} {settings?.companyTitle || "Ekiphan"}. Tüm hakları saklıdır.</span>
+          <span>© {new Date().getFullYear()} {settings?.companyTitle || "Ekiphan"}. {isEnglish ? "All rights reserved." : "Tüm hakları saklıdır."}</span>
           <a className={styles.mostIdea} href="https://www.mostidea.com.tr/" target="_blank" rel="noopener noreferrer">DIGITAL EXPERIENCE BY MOST IDEA</a>
           <nav aria-label="Yasal bağlantılar">
             <Link href="/gizlilik">Gizlilik</Link>

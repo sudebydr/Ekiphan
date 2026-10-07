@@ -5,6 +5,7 @@ import MobileNavToggle from "./mobile-nav-toggle";
 import { PublicNavigation } from "./public-navigation";
 import { ScrollNavbar } from "./scroll-navbar";
 import styles from "./public-header.module.css";
+import { localeFromPath, localizedPath, publicCopy } from "../lib/public-locale";
 
 type PublicHeaderProps = {
   currentPath?: string;
@@ -26,8 +27,8 @@ export function PublicHeader({
   currentPath,
   tone = "light"
 }: PublicHeaderProps) {
-  const isEnglish = currentPath?.startsWith("/en") ?? false;
-
+  const locale = localeFromPath(currentPath);
+  const languagePath = localizedPath(currentPath ?? "/", locale === "en" ? "tr" : "en");
   return (
     <header
       data-sticky-nav="true"
@@ -43,39 +44,36 @@ export function PublicHeader({
       <div className={styles.headerTop}>
         <Link
           className={styles.catalogBrand}
-          href="/"
-          aria-label="Ekiphan ana sayfa"
+          href={locale === "en" ? "/en" : "/"}
+          aria-label={locale === "en" ? "Ekiphan home page" : "Ekiphan ana sayfa"}
         >
           <strong>
             ekiphan<span aria-hidden="true" />
           </strong>
 
           <small>
-            PROFESYONEL MUTFAK ÇÖZÜMLERİ
+            {locale === "en" ? "PROFESSIONAL KITCHEN SOLUTIONS" : "PROFESYONEL MUTFAK ÇÖZÜMLERİ"}
           </small>
         </Link>
 
-        <HeaderSearch />
+        <HeaderSearch locale={locale} />
 
         <div className={styles.headerActions}>
           <Link
-            className={styles.quoteButton}
-            href="/teklif-listem"
+            className={styles.headerLanguage}
+            href={languagePath}
+            aria-label={locale === "en" ? "Switch to Turkish" : "Switch to English"}
+            hrefLang={locale === "en" ? "tr" : "en"}
           >
-            Teklif Al
+            {locale === "en" ? "TR" : "EN"}
+          </Link>
+          <Link
+            className={styles.quoteButton}
+            href={localizedPath("/teklif-listem", locale)}
+          >
+            {publicCopy[locale].quote}
           </Link>
 
-          <Link
-            className={styles.headerLanguage}
-            href={isEnglish ? "/" : "/en"}
-            aria-label={
-              isEnglish
-                ? "Türkçeye geç"
-                : "Switch to English"
-            }
-          >
-            {isEnglish ? "TR" : "EN"}
-          </Link>
         </div>
 
         <MobileNavToggle />

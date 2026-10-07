@@ -37,10 +37,11 @@ function many(value: string | string[] | undefined): string[] {
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<Metadata> {
   const params = await searchParams;
+  const isEnglish = one(params.lang) === "en";
   const categorySlug = one(params.category).trim();
   if (categorySlug) {
     try {
-      const navigation = await getCatalogNavigation();
+      const navigation = await getCatalogNavigation(isEnglish ? "en" : "tr");
       const category = navigation.categories.find((item) => item.slug === categorySlug);
       if (category) {
         const canonical = category.canonicalUrl ?? `/katalog?category=${encodeURIComponent(category.slug)}`;
@@ -51,7 +52,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
       }
     } catch { /* Fall back to catalog metadata. */ }
   }
-  return { title: "Ürün Kataloğu", description: "Ekiphan otel, restoran ve endüstriyel mutfak ekipmanları kataloğu.", alternates: { canonical: "/katalog" }, openGraph: { type: "website", locale: "tr_TR", title: "Ürün Kataloğu", description: "Ekiphan otel, restoran ve endüstriyel mutfak ekipmanları kataloğu.", images: defaultSocialImage ? [defaultSocialImage] : undefined, url: "/katalog" } };
+  return { title: isEnglish ? "Product Catalogue | Ekiphan" : "Ürün Kataloğu", description: isEnglish ? "Browse Ekiphan's professional hotel, restaurant and industrial kitchen equipment." : "Ekiphan otel, restoran ve endüstriyel mutfak ekipmanları kataloğu.", alternates: { canonical: isEnglish ? "/en/products" : "/katalog", languages: { tr: "/katalog", en: "/en/products" } }, openGraph: { type: "website", locale: isEnglish ? "en_US" : "tr_TR", title: isEnglish ? "Product Catalogue | Ekiphan" : "Ürün Kataloğu", description: isEnglish ? "Browse Ekiphan's professional hotel, restaurant and industrial kitchen equipment." : "Ekiphan otel, restoran ve endüstriyel mutfak ekipmanları kataloğu.", images: defaultSocialImage ? [defaultSocialImage] : undefined, url: isEnglish ? "/en/products" : "/katalog" } };
 }
 
 function productQuery(params: SearchParams): URLSearchParams {
@@ -73,13 +74,13 @@ function productQuery(params: SearchParams): URLSearchParams {
   return query;
 }
 
-function pageHref(query: URLSearchParams, page: number): string {
+function pageHref(query: URLSearchParams, page: number, basePath = "/katalog"): string {
   const next = new URLSearchParams(query);
   next.set("page", String(page));
-  return `/katalog?${next.toString()}`;
+  return `${basePath}?${next.toString()}`;
 }
 
-function filterHref(query: URLSearchParams, key: string, value?: string): string {
+function filterHref(query: URLSearchParams, key: string, value: string | undefined, basePath = "/katalog"): string {
   const next = new URLSearchParams(query);
   if (value === undefined) next.delete(key);
   else {
@@ -90,17 +91,18 @@ function filterHref(query: URLSearchParams, key: string, value?: string): string
   next.delete("page");
   next.delete("pageSize");
   const queryString = next.toString();
-  return queryString ? `/katalog?${queryString}` : "/katalog";
+  return queryString ? `${basePath}?${queryString}` : basePath;
 }
 
 /** Filtre bağlantılarının temeli: şu anki tüm seçimler (sayfa hariç). */
-function baseFilterQuery(params: SearchParams): string {
+function baseFilterQuery(params: SearchParams, isEnglish = false): string {
   const query = new URLSearchParams();
   for (const key of ["q", "section", "category", "brand", "tag", "sort"]) {
     const value = one(params[key]).trim();
     if (value) query.set(key, value);
   }
   for (const value of many(params.attribute)) query.append("attribute", value);
+  if (isEnglish) query.set("lang", "en");
   if (one(params.view) === "list") query.set("view", "list");
   return query.toString();
 }
@@ -127,7 +129,7 @@ function buildOptions(
 
 type CatalogView = "grid" | "list";
 
-function viewHref(params: SearchParams, view: CatalogView): string {
+function viewHref(params: SearchParams, view: CatalogView, basePath = "/katalog"): string {
   const next = new URLSearchParams();
   for (const [key, raw] of Object.entries(params)) {
     if (key === "view" || key === "page") continue;
@@ -137,7 +139,7 @@ function viewHref(params: SearchParams, view: CatalogView): string {
   }
   if (view === "list") next.set("view", "list");
   const queryString = next.toString();
-  return queryString ? `/katalog?${queryString}` : "/katalog";
+  return queryString ? `${basePath}?${queryString}` : basePath;
 }
 
 function GridIcon() {
@@ -167,6 +169,8 @@ export default async function CatalogPage({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
+  const isEnglish = one(params.lang) === "en";
+  const basePath = isEnglish ? "/en/products" : "/katalog";
   const query = productQuery(params);
   const view: CatalogView = one(params.view) === "list" ? "list" : "grid";
   // Sayfa/filtre bağlantılarında görünüm tercihi korunur; API sorgusuna eklenmez.
@@ -179,11 +183,11 @@ export default async function CatalogPage({
 
   try {
     [navigation, products] = await Promise.all([
-      getCatalogNavigation(),
-      getProducts(query)
+      getCatalogNavigation(isEnglish ? "en" : "tr"),
+      getProducts(query, isEnglish ? "en" : "tr")
     ]);
     const category = one(params.category).trim();
-    if (category) facets = await getCatalogFacets(category);
+    if (category) facets = await getCatalogFacets(category, isEnglish ? "en" : "tr");
   } catch (caught) {
     error =
       caught instanceof CatalogApiError
@@ -197,12 +201,12 @@ export default async function CatalogPage({
   const attributeFilters = many(params.attribute);
   const activeFilters = [
     one(params.q).trim()
-      ? { key: "q", label: `Arama: ${one(params.q).trim()}` }
+      ? { key: "q", label: `${isEnglish ? "Search" : "Arama"}: ${one(params.q).trim()}` }
       : null,
     one(params.section).trim()
       ? {
           key: "section",
-          label: `Grup: ${
+          label: `${isEnglish ? "Group" : "Grup"}: ${
             navigation?.sections.find(
               (item) => item.slug === one(params.section).trim()
             )?.name ?? one(params.section).trim()
@@ -212,7 +216,7 @@ export default async function CatalogPage({
     one(params.category).trim()
       ? {
           key: "category",
-          label: `Kategori: ${
+          label: `${isEnglish ? "Category" : "Kategori"}: ${
             navigation?.categories.find(
               (item) => item.slug === one(params.category).trim()
             )?.name ?? one(params.category).trim()
@@ -222,7 +226,7 @@ export default async function CatalogPage({
     one(params.brand).trim()
       ? {
           key: "brand",
-          label: `Marka: ${
+          label: `${isEnglish ? "Brand" : "Marka"}: ${
             navigation?.brands.find(
               (item) => item.slug === one(params.brand).trim()
             )?.name ?? one(params.brand).trim()
@@ -232,7 +236,7 @@ export default async function CatalogPage({
     one(params.tag).trim()
       ? {
           key: "tag",
-          label: `Etiket: ${
+          label: `${isEnglish ? "Tag" : "Etiket"}: ${
             navigation?.tags.find(
               (item) => item.slug === one(params.tag).trim()
             )?.name ?? one(params.tag).trim()
@@ -252,24 +256,25 @@ export default async function CatalogPage({
       return {
         key: "attribute",
         value,
-        label: `${facet?.name ?? "Özellik"}: ${shownValue}`
+        label: `${facet?.name ?? (isEnglish ? "Attribute" : "Özellik")}: ${shownValue}`
       };
     })
   ].filter((item): item is { key: string; label: string; value?: string } =>
     item !== null);
 
-  const baseQuery = baseFilterQuery(params);
+  const baseQuery = baseFilterQuery(params, isEnglish);
+  if (isEnglish) linkQuery.set("lang", "en");
   const sectionValue = one(params.section).trim();
   const brandValue = one(params.brand).trim();
   const tagValue = one(params.tag).trim();
   const sortValue = one(params.sort).trim() || "Name";
-  const sectionOptions = buildOptions(baseQuery, "section", "Tüm gruplar", navigation?.sections ?? [], sectionValue);
-  const brandOptions = buildOptions(baseQuery, "brand", "Tüm markalar", navigation?.brands ?? [], brandValue);
-  const tagOptions = buildOptions(baseQuery, "tag", "Tüm etiketler", navigation?.tags ?? [], tagValue);
+  const sectionOptions = buildOptions(baseQuery, "section", isEnglish ? "All groups" : "Tüm gruplar", navigation?.sections ?? [], sectionValue);
+  const brandOptions = buildOptions(baseQuery, "brand", isEnglish ? "All brands" : "Tüm markalar", navigation?.brands ?? [], brandValue);
+  const tagOptions = buildOptions(baseQuery, "tag", isEnglish ? "All tags" : "Tüm etiketler", navigation?.tags ?? [], tagValue);
   const sortOptions: FilterOption[] = [
-    { value: "Name", label: "Ada göre A–Z" },
-    { value: "NameDescending", label: "Ada göre Z–A" },
-    { value: "Newest", label: "En güncel" }
+    { value: "Name", label: isEnglish ? "Name A–Z" : "Ada göre A–Z" },
+    { value: "NameDescending", label: isEnglish ? "Name Z–A" : "Ada göre Z–A" },
+    { value: "Newest", label: isEnglish ? "Newest" : "En güncel" }
   ].map((item) => ({
     ...item,
     href: optionHref(baseQuery, "sort", item.value),
@@ -279,8 +284,8 @@ export default async function CatalogPage({
 
   return (
     <main className={styles.page} data-public-page>
-      <PublicHeader currentPath="/katalog" />
-      <h1 className={styles.srOnly}>Ürün Kataloğu</h1>
+      <PublicHeader currentPath={isEnglish ? "/en/products" : "/katalog"} />
+      <h1 className={styles.srOnly}>{isEnglish ? "Product Catalogue" : "Ürün Kataloğu"}</h1>
 
       <div className={styles.catalogLayout}>
         <CatalogFilterForm className={styles.filters}>
@@ -293,25 +298,25 @@ export default async function CatalogPage({
             .map((value) => <input key={value} type="hidden" name="attribute" value={value} />)}
           {view === "list" && <input type="hidden" name="view" value="list" />}
           <details className={styles.filterPanel} open>
-            <summary><span className={styles.filterLabel}>Filtrele</span>{activeFilters.length > 0 && <span>{activeFilters.length} aktif</span>}</summary>
+            <summary><span className={styles.filterLabel}>{isEnglish ? "Filters" : "Filtrele"}</span>{activeFilters.length > 0 && <span>{activeFilters.length} {isEnglish ? "active" : "aktif"}</span>}</summary>
             <div className={styles.filterDrawer}>
               <div className={styles.simpleFilterFields}>
                 <details className={styles.filterGroup} open={Boolean(searchValue)}>
-                  <summary><span>Ürün ara</span></summary>
+                  <summary><span>{isEnglish ? "Search products" : "Ürün ara"}</span></summary>
                   <div className={styles.field}>
-                    <label htmlFor="catalog-search">Ürün ara</label>
-                    <input key={searchValue} id="catalog-search" name="q" type="search" minLength={2} maxLength={100} defaultValue={searchValue} placeholder="Ürün adı veya kodu" />
+                    <label htmlFor="catalog-search">{isEnglish ? "Search products" : "Ürün ara"}</label>
+                    <input key={searchValue} id="catalog-search" name="q" type="search" minLength={2} maxLength={100} defaultValue={searchValue} placeholder={isEnglish ? "Product name or code" : "Ürün adı veya kodu"} />
                   </div>
                 </details>
-                <FilterOptionGroup title="Ürün grubu" options={sectionOptions} />
-                {navigation && <CatalogCategoryFilter categories={navigation.categories} selectedSlug={one(params.category).trim()} baseQuery={baseQuery} />}
+                <FilterOptionGroup title={isEnglish ? "Product group" : "Ürün grubu"} options={sectionOptions} />
+                {navigation && <CatalogCategoryFilter categories={navigation.categories} selectedSlug={one(params.category).trim()} baseQuery={baseQuery} isEnglish={isEnglish} />}
                 <FilterOptionGroup title="Marka" options={brandOptions} />
-                <FilterOptionGroup title="Kullanım etiketi" options={tagOptions} />
+                <FilterOptionGroup title={isEnglish ? "Usage tag" : "Kullanım etiketi"} options={tagOptions} />
                 <DynamicCatalogFilters facets={facets} selected={attributeFilters} baseQuery={baseQuery} />
-                <FilterOptionGroup title="Sıralama" options={sortOptions} open={Boolean(one(params.sort).trim())} />
+                <FilterOptionGroup title={isEnglish ? "Sort" : "Sıralama"} options={sortOptions} open={Boolean(one(params.sort).trim())} />
                 <div className={styles.filterActions}>
-                  <button className={styles.primaryButton} type="submit">Ara / uygula</button>
-                  <Link className={styles.secondaryButton} href="/katalog">Filtreleri temizle</Link>
+                  <button className={styles.primaryButton} type="submit">{isEnglish ? "Apply filters" : "Ara / uygula"}</button>
+                  <Link className={styles.secondaryButton} href={basePath}>{isEnglish ? "Clear filters" : "Filtreleri temizle"}</Link>
                 </div>
               </div>
             </div>
@@ -323,49 +328,49 @@ export default async function CatalogPage({
 
           <div className={styles.catalogToolbar}>
             <span className={styles.productCount}>
-              {products ? `${products.totalCount.toLocaleString("tr-TR")} ürün bulundu` : "Ürünler"}
+              {products ? `${products.totalCount.toLocaleString(isEnglish ? "en-US" : "tr-TR")} ${isEnglish ? "products found" : "ürün bulundu"}` : (isEnglish ? "Products" : "Ürünler")}
             </span>
             <div className={styles.toolbarActions}>
-              <div className={styles.viewActions} role="group" aria-label="Görünüm seçimi">
-                <Link className={styles.viewButton} href={viewHref(params, "grid")} aria-label="Grid görünümü" aria-current={view === "grid" ? "true" : undefined} scroll={false}><GridIcon /></Link>
-                <Link className={styles.viewButton} href={viewHref(params, "list")} aria-label="Liste görünümü" aria-current={view === "list" ? "true" : undefined} scroll={false}><ListIcon /></Link>
+              <div className={styles.viewActions} role="group" aria-label={isEnglish ? "View options" : "Görünüm seçimi"}>
+                <Link className={styles.viewButton} href={viewHref(params, "grid", basePath)} aria-label={isEnglish ? "Grid view" : "Grid görünümü"} aria-current={view === "grid" ? "true" : undefined} scroll={false}><GridIcon /></Link>
+                <Link className={styles.viewButton} href={viewHref(params, "list", basePath)} aria-label={isEnglish ? "List view" : "Liste görünümü"} aria-current={view === "list" ? "true" : undefined} scroll={false}><ListIcon /></Link>
               </div>
-              <QuoteListIndicator className={styles.quoteLink} />
+              <QuoteListIndicator className={styles.quoteLink} locale={isEnglish ? "en" : "tr"} />
             </div>
           </div>
 
           {activeFilters.length > 0 && (
-            <div className={styles.activeFilters} aria-label="Aktif filtreler">
-              <span>Aktif filtreler</span>
+            <div className={styles.activeFilters} aria-label={isEnglish ? "Active filters" : "Aktif filtreler"}>
+              <span>{isEnglish ? "Active filters" : "Aktif filtreler"}</span>
               {activeFilters.map((filter) => (
                 <Link
                   className={styles.activeFilter}
-                  href={filterHref(linkQuery, filter.key, filter.value)}
+                  href={filterHref(linkQuery, filter.key, filter.value, basePath)}
                   key={`${filter.key}-${filter.value ?? ""}`}
-                  aria-label={`${filter.label} filtresini kaldır`}
+                  aria-label={isEnglish ? `Remove ${filter.label} filter` : `${filter.label} filtresini kaldır`}
                 >
                   {filter.label} <span aria-hidden="true">×</span>
                 </Link>
               ))}
-              <Link className={styles.clearFilters} href="/katalog">
-                Tümünü temizle
+              <Link className={styles.clearFilters} href={basePath}>
+                {isEnglish ? "Clear all" : "Tümünü temizle"}
               </Link>
             </div>
           )}
 
           {error ? (
             <div className={styles.error} role="alert">
-              <strong>Katalog yüklenemedi.</strong>
+              <strong>{isEnglish ? "Catalogue could not be loaded." : "Katalog yüklenemedi."}</strong>
               <p>{error}</p>
             </div>
           ) : products?.items.length === 0 ? (
             <div className={styles.empty}>
-              <h3>Bu filtrelerle ürün bulunamadı.</h3>
-              <p>Arama kelimenizi azaltın veya filtreleri temizleyin.</p>
+              <h3>{isEnglish ? "No products found with these filters." : "Bu filtrelerle ürün bulunamadı."}</h3>
+              <p>{isEnglish ? "Try a shorter search term or clear the filters." : "Arama kelimenizi azaltın veya filtreleri temizleyin."}</p>
             </div>
           ) : (
             <div className={styles.productGrid} data-view={view}>
-              {products?.items.map((product) => <CatalogProductCard key={product.id} product={product} />)}
+              {products?.items.map((product) => <CatalogProductCard key={product.id} product={product} locale={isEnglish ? "en" : "tr"} />)}
             </div>
           )}
 
@@ -374,25 +379,25 @@ export default async function CatalogPage({
               {products.page > 1 ? (
                 <Link
                   className={styles.secondaryButton}
-                  href={pageHref(linkQuery, products.page - 1)}
+                  href={pageHref(linkQuery, products.page - 1, basePath)}
                 >
-                  Önceki
+                  {isEnglish ? "Previous" : "Önceki"}
                 </Link>
               ) : (
-                <span>Önceki</span>
+                <span>{isEnglish ? "Previous" : "Önceki"}</span>
               )}
               <span>
-                Sayfa {products.page} / {pageCount}
+                {isEnglish ? "Page" : "Sayfa"} {products.page} / {pageCount}
               </span>
               {products.page < pageCount ? (
                 <Link
                   className={styles.secondaryButton}
-                  href={pageHref(linkQuery, products.page + 1)}
+                  href={pageHref(linkQuery, products.page + 1, basePath)}
                 >
-                  Sonraki
+                  {isEnglish ? "Next" : "Sonraki"}
                 </Link>
               ) : (
-                <span>Sonraki</span>
+                <span>{isEnglish ? "Next" : "Sonraki"}</span>
               )}
             </nav>
           )}

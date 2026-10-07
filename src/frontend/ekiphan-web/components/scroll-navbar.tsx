@@ -10,9 +10,7 @@ export function ScrollNavbar() {
 
     if (!header) return;
 
-    const nav = header.querySelector<HTMLElement>(
-      'nav[aria-label="Ana menü"]'
-    );
+    const nav = header.querySelector<HTMLElement>("#public-mobile-navigation");
 
     if (!nav) return;
 

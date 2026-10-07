@@ -9,7 +9,7 @@ import {
   readQuoteList
 } from "../lib/quote-list";
 
-export function QuoteListIndicator({ className }: { className?: string }) {
+export function QuoteListIndicator({ className, locale = "tr" }: { className?: string; locale?: "tr" | "en" }) {
   const [count, setCount] = useState(0);
   const pathname = usePathname();
 
@@ -30,11 +30,11 @@ export function QuoteListIndicator({ className }: { className?: string }) {
   return (
     <Link
       className={className}
-      href="/teklif-listem"
-      aria-current={pathname === "/teklif-listem" ? "page" : undefined}
-      aria-label={`Teklif listem, ${count} ürün`}
+      href={locale === "en" ? "/en/quote-list" : "/teklif-listem"}
+      aria-current={pathname === (locale === "en" ? "/en/quote-list" : "/teklif-listem") ? "page" : undefined}
+      aria-label={locale === "en" ? `My quote list, ${count} items` : `Teklif listem, ${count} ürün`}
     >
-      Teklif listem{count > 0 ? ` (${count})` : ""}
+      {locale === "en" ? "My quote list" : "Teklif listem"}{count > 0 ? ` (${count})` : ""}
     </Link>
   );
 }

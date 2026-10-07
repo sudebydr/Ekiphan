@@ -24,24 +24,25 @@ export async function generateMetadata(): Promise<Metadata> {
   catch { return { title: "Galeri", robots: { index: false, follow: false } }; }
 }
 
-export default async function GalleryPage() {
+export default async function GalleryPage({ locale = "tr" }: { locale?: "tr" | "en" } = {}) {
+  const en = locale === "en";
   let items: PublicGalleryItem[] = [];
   try { items = await getGallery(); } catch { /* Local fallback remains available. */ }
   const displayItems = [...showroomItems, ...items.map((item) => ({ ...item, collection: "Kurumsal" }))];
 
   return <main className={styles.page} data-public-page>
-    <PublicHeader currentPath="/galeri" />
+    <PublicHeader currentPath={en ? "/en/gallery" : "/galeri"} />
     <div className={styles.content}>
-      <nav className={styles.breadcrumb} aria-label="Sayfa yolu"><a href="/">Ana Sayfa</a><span>{"\u203a"}</span><strong>Galeri</strong></nav>
+      <nav className={styles.breadcrumb} aria-label={en ? "Breadcrumb" : "Sayfa yolu"}><a href={en ? "/en" : "/"}>{en ? "Home" : "Ana Sayfa"}</a><span>{"\u203a"}</span><strong>{en ? "Gallery" : "Galeri"}</strong></nav>
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
-          <p>PROJELER &amp; SHOWROOM</p>
-          <h1>Projelerden<br />{"\u0130lham Alan \u00c7\u00f6z\u00fcmler"}</h1>
-          <span>{"Otel, restoran, kafe ve end\u00fcstriyel mutfak projelerimizden se\u00e7kiyi ke\u015ffedin. Her proje, profesyonel mutfaklara \u00f6zel \u00e7\u00f6z\u00fcmlerimizin bir yans\u0131mas\u0131d\u0131r."}</span>
-          <a href="#projeler">{"Projelerimizi \u0130ncele"} <b aria-hidden="true">{"\u2192"}</b></a>
+          <p>{en ? "PROJECTS &amp; SHOWROOM" : "PROJELER &amp; SHOWROOM"}</p>
+          <h1>{en ? <>Inspired by<br />our projects</> : <>Projelerden<br />{"\u0130lham Alan \u00c7\u00f6z\u00fcmler"}</>}</h1>
+          <span>{en ? "Explore a selection of our hotel, restaurant, café and industrial kitchen projects. Each reflects our approach to professional kitchen solutions." : "Otel, restoran, kafe ve end\u00fcstriyel mutfak projelerimizden se\u00e7kiyi ke\u015ffedin. Her proje, profesyonel mutfaklara \u00f6zel \u00e7\u00f6z\u00fcmlerimizin bir yans\u0131mas\u0131d\u0131r."}</span>
+          <a href="#projeler">{en ? "Explore Projects" : "Projelerimizi \u0130ncele"} <b aria-hidden="true">{"\u2192"}</b></a>
         </div>
       </section>
     </div>
-    <GalleryShowcase items={displayItems} />
+    <GalleryShowcase items={displayItems} locale={locale} />
   </main>;
 }

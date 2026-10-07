@@ -31,141 +31,142 @@ const values = [
     "Teslimin ötesinde, uzun soluklu destek sunarız.",
   ],
 ] as const;
+const valuesEn = [
+  ["01", "Reliability", "Clear communication and consistent delivery at every stage."],
+  ["02", "Expertise", "We combine sector knowledge with the needs of your project."],
+  ["03", "Solution Focus", "A practical, efficient roadmap for every space."],
+  ["04", "Lasting Partnership", "Long-term support that continues beyond delivery."]
+] as const;
 
-export default function AboutPage() {
+export default function AboutPage({ locale = "tr" }: { locale?: "tr" | "en" } = {}) {
+  const en = locale === "en";
+  const displayedValues = en ? valuesEn : values;
   return (
     <main className={styles.page} data-public-page>
-      <PublicHeader currentPath="/hakkimizda" />
+      <PublicHeader currentPath={en ? "/en/about" : "/hakkimizda"} />
 
       {/* HERO */}
       <section className={styles.hero}>
         <div className={styles.heroImage} aria-hidden="true" />
 
         <div className={styles.heroContent}>
-          <p className={styles.eyebrow}>EKİPHAN’I TANIYIN</p>
+          <p className={styles.eyebrow}>{en ? "MEET EKIPHAN" : "EKİPHAN’I TANIYIN"}</p>
 
           <h1>
-            Köklerimizden
+            {en ? "From Our Roots" : "Köklerimizden"}
             <br />
-            <em>Geleceğe</em>
+            <em>{en ? "to the Future" : "Geleceğe"}</em>
           </h1>
 
           <div className={styles.heroLine} />
 
           <p className={styles.heroText}>
-            Ekiphan; profesyonel mutfakların ihtiyaçlarını dinleyen, doğru
-            ekipmanı doğru projeyle buluşturan bir çözüm ortağıdır.
+            {en ? "Ekiphan listens to the needs of professional kitchens and connects the right equipment with the right project." : "Ekiphan; profesyonel mutfakların ihtiyaçlarını dinleyen, doğru ekipmanı doğru projeyle buluşturan bir çözüm ortağıdır."}
           </p>
 
           <p className={styles.heroText}>
-            Planlamadan tedarike, kurulumdan satış sonrası desteğe kadar her
-            adımda deneyimimizi işletmenizin ritmiyle birleştiriyoruz.
+            {en ? "From planning and procurement to installation and after-sales support, we bring our experience to the rhythm of your operation." : "Planlamadan tedarike, kurulumdan satış sonrası desteğe kadar her adımda deneyimimizi işletmenizin ritmiyle birleştiriyoruz."}
           </p>
         </div>
 
         <div className={styles.heroNumber}>01</div>
       </section>
 
-      {/* BİZ KİMİZ */}
+      {/* COMPANY */}
       <section className={styles.identity}>
         <div className={styles.sectionIndex}>02</div>
 
         <div className={styles.sectionLabel}>
-          <span>BİZ KİMİZ?</span>
+          <span>{en ? "WHO WE ARE" : "BİZ KİMİZ?"}</span>
         </div>
 
         <div className={styles.identityContent}>
           <h2>
-            İhtiyacı anlayan,
+            {en ? "A team that" : "İhtiyacı anlayan,"}
             <br />
-            çözümü birlikte
+            {en ? "understands needs" : "çözümü birlikte"}
             <br />
-            <em>tasarlayan ekip.</em>
+            <em>{en ? "and shapes solutions." : "tasarlayan ekip."}</em>
           </h2>
 
           <div className={styles.identityCopy}>
             <p>
-              Otel, restoran, kafe ve endüstriyel mutfak projelerinde güçlü
-              marka seçkisini operasyonel bilgiyle bir araya getiriyoruz.
+              {en ? "We combine a considered portfolio of brands with operational expertise for hotel, restaurant, café and commercial kitchen projects." : "Otel, restoran, kafe ve endüstriyel mutfak projelerinde güçlü marka seçkisini operasyonel bilgiyle bir araya getiriyoruz."}
             </p>
 
             <p>
-              Her projenin kendine özgü kullanım alışkanlığını, kapasitesini
-              ve hedefini dikkate alıyoruz.
+              {en ? "We account for each project's usage patterns, capacity and goals." : "Her projenin kendine özgü kullanım alışkanlığını, kapasitesini ve hedefini dikkate alıyoruz."}
             </p>
 
             <p>
-              Amacımız yalnızca ekipman tedarik etmek değil; uzun ömürlü,
-              verimli ve güven veren çalışma alanları oluşturmaktır.
+              {en ? "Our aim is not only to supply equipment, but to create dependable, efficient workspaces built to last." : "Amacımız yalnızca ekipman tedarik etmek değil; uzun ömürlü, verimli ve güven veren çalışma alanları oluşturmaktır."}
             </p>
           </div>
         </div>
       </section>
 
-      {/* MİSYON / VİZYON */}
+      {/* MISSION / VISION */}
       <section className={styles.missionVision}>
         <div className={styles.sectionIndex}>03</div>
 
         <div className={styles.missionVisionHeader}>
-          <span>YAKLAŞIMIMIZ</span>
+          <span>{en ? "OUR APPROACH" : "YAKLAŞIMIMIZ"}</span>
           <h2>
-            Bugünün ihtiyacını
+            {en ? "Meeting today's needs" : "Bugünün ihtiyacını"}
             <br />
-            yarının <em>değeriyle</em> buluşturuyoruz.
+            {en ? "with tomorrow's " : "yarının "}<em>{en ? "lasting value" : "değeriyle"}</em>{en ? "." : " buluşturuyoruz."}
           </h2>
         </div>
 
         <div className={styles.missionVisionGrid}>
           <article>
             <span className={styles.cardNumber}>01</span>
-            <p className={styles.eyebrow}>MİSYONUMUZ</p>
+            <p className={styles.eyebrow}>{en ? "OUR MISSION" : "MİSYONUMUZ"}</p>
 
             <h3>
-              İşletmeler için işlevsel,
+              {en ? "Delivering functional," : "İşletmeler için işlevsel,"}
               <br />
-              güvenilir çözümler üretmek.
+              {en ? "dependable solutions." : "güvenilir çözümler üretmek."}
             </h3>
 
             <p className={styles.cardText}>
-              Profesyonel ekipman bilgisini, ihtiyaca uygun planlama ve
-              güvenilir uygulamayla buluştururuz.
+              {en ? "We pair professional equipment expertise with needs-based planning and dependable implementation." : "Profesyonel ekipman bilgisini, ihtiyaca uygun planlama ve güvenilir uygulamayla buluştururuz."}
             </p>
           </article>
 
           <article>
             <span className={styles.cardNumber}>02</span>
-            <p className={styles.eyebrow}>VİZYONUMUZ</p>
+            <p className={styles.eyebrow}>{en ? "OUR VISION" : "VİZYONUMUZ"}</p>
 
             <h3>
-              Her projede kalıcı değer
+              {en ? "Creating lasting value" : "Her projede kalıcı değer"}
               <br />
-              yaratan çözüm ortağı olmak.
+              {en ? "in every project." : "yaratan çözüm ortağı olmak."}
             </h3>
 
             <p className={styles.cardText}>
-              HoReCa dünyasında seçkin markalar ve güçlü hizmet anlayışıyla
-              sürdürülebilir iş birlikleri kurarız.
+              {en ? "We build sustainable partnerships through selected brands and a strong service culture in the HoReCa sector." : "HoReCa dünyasında seçkin markalar ve güçlü hizmet anlayışıyla sürdürülebilir iş birlikleri kurarız."}
             </p>
           </article>
         </div>
       </section>
 
-      {/* DEĞERLER */}
+      {/* VALUES */}
       <section className={styles.values}>
         <div className={styles.sectionIndex}>04</div>
 
         <div className={styles.valuesHeader}>
-          <p className={styles.eyebrow}>DEĞERLERİMİZ</p>
+          <p className={styles.eyebrow}>{en ? "OUR VALUES" : "DEĞERLERİMİZ"}</p>
 
           <h2>
-            Her projede aynı
+            {en ? "The same principles" : "Her projede aynı"}
             <br />
-            çalışma <em>ilkeleri.</em>
+            {en ? "guide our work." : <>çalışma <em>ilkeleri.</em></>}
           </h2>
         </div>
 
         <div className={styles.valuesGrid}>
-          {values.map(([number, title, text]) => (
+          {displayedValues.map(([number, title, text]) => (
             <article key={number}>
               <span className={styles.valueNumber}>{number}</span>
 
@@ -183,23 +184,23 @@ export default function AboutPage() {
       <section className={styles.contactCta}>
         <img
           src="/images/showroom-experience.png"
-          alt="Ekiphan showroom"
+          alt={en ? "Ekiphan showroom" : "Ekiphan showroom"}
           loading="lazy"
         />
 
         <div className={styles.ctaOverlay} />
 
         <div className={styles.ctaContent}>
-          <p className={styles.eyebrow}>BİRLİKTE PLANLAYALIM</p>
+          <p className={styles.eyebrow}>{en ? "LET'S PLAN TOGETHER" : "BİRLİKTE PLANLAYALIM"}</p>
 
           <h2>
-            İhtiyacınızı konuşalım,
+            {en ? "Let's discuss your needs," : "İhtiyacınızı konuşalım,"}
             <br />
-            doğru çözümü <em>birlikte kuralım.</em>
+            {en ? <>and build the right solution <em>together.</em></> : <>doğru çözümü <em>birlikte kuralım.</em></>}
           </h2>
 
-          <Link href="/iletisim#contact-form">
-            İLETİŞİME GEÇİN
+          <Link href={en ? "/en/contact#contact-form" : "/iletisim#contact-form"}>
+            {en ? "GET IN TOUCH" : "İLETİŞİME GEÇİN"}
             <span>↗</span>
           </Link>
         </div>

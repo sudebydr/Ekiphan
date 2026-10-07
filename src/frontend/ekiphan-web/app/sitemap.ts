@@ -36,7 +36,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: new URL("/showroom", origin).href,
       changeFrequency: "monthly",
       priority: 0.7
-    }
+    },
+    ...["/en", "/en/products", "/en/services", "/en/about", "/en/industrial-kitchen", "/en/references", "/en/gallery", "/en/catalogs", "/en/contact", "/en/press", "/en/showroom"].map((path) => ({
+      url: new URL(path, origin).href,
+      changeFrequency: "monthly" as const,
+      priority: path === "/en" ? 1 : 0.6
+    }))
   ];
 
   try {
@@ -79,4 +84,3 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return entries;
 }
-

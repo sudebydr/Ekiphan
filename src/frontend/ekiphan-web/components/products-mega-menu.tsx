@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCatalogNavigation } from "../lib/catalog-api";
 import styles from "./public-navigation.module.css";
+import { localizedPath } from "../lib/public-locale";
 
 type MegaGroup = {
   id: string;
@@ -13,9 +14,9 @@ type MegaGroup = {
   }[];
 };
 
-async function loadGroups(): Promise<MegaGroup[]> {
+async function loadGroups(locale: "tr" | "en"): Promise<MegaGroup[]> {
   try {
-    const navigation = await getCatalogNavigation();
+    const navigation = await getCatalogNavigation(locale);
 
     const roots = navigation.categories.filter(
       (item) => item.parentId === null
@@ -40,8 +41,9 @@ async function loadGroups(): Promise<MegaGroup[]> {
   }
 }
 
-export async function ProductsMegaMenu() {
-  const groups = await loadGroups();
+export async function ProductsMegaMenu({ locale = "tr" }: { locale?: "tr" | "en" }) {
+  const en = locale === "en";
+  const groups = await loadGroups(locale);
 
   if (groups.length === 0) {
     return (
@@ -51,22 +53,21 @@ export async function ProductsMegaMenu() {
         <div className={styles.productsMegaEmpty}>
           <div>
             <span className={styles.productsMegaEyebrow}>
-              EKİPHAN KATALOĞU
+              {en ? "EKIPHAN CATALOGUE" : "EKİPHAN KATALOĞU"}
             </span>
 
-            <h3>Ürünlerimizi keşfedin</h3>
+            <h3>{en ? "Explore our products" : "Ürünlerimizi keşfedin"}</h3>
 
             <p>
-              Profesyonel mutfak ve masaüstü çözümlerimizi
-              incelemek için kataloğa göz atın.
+              {en ? "Explore our catalogue of professional kitchen and tabletop solutions." : "Profesyonel mutfak ve masaüstü çözümlerimizi incelemek için kataloğa göz atın."}
             </p>
           </div>
 
           <Link
             className={styles.productsMegaAll}
-            href="/katalog"
+            href={localizedPath("/katalog", locale)}
           >
-            Tüm Ürünler
+            {en ? "All Products" : "Tüm Ürünler"}
             <span aria-hidden="true">↗</span>
           </Link>
         </div>
@@ -86,7 +87,7 @@ export async function ProductsMegaMenu() {
           >
             <Link
               className={styles.productsMegaHeading}
-              href={`/katalog?category=${encodeURIComponent(
+              href={`${localizedPath("/katalog", locale)}?category=${encodeURIComponent(
                 group.slug
               )}`}
             >
@@ -98,7 +99,7 @@ export async function ProductsMegaMenu() {
                 {group.children.map((child) => (
                   <li key={child.id}>
                     <Link
-                      href={`/katalog?category=${encodeURIComponent(
+                      href={`${localizedPath("/katalog", locale)}?category=${encodeURIComponent(
                         child.slug
                       )}`}
                     >
@@ -113,9 +114,9 @@ export async function ProductsMegaMenu() {
       </div>
       <Link
         className={styles.productsMegaAll}
-        href="/katalog"
+        href={localizedPath("/katalog", locale)}
       >
-        Tüm Ürünler
+        {en ? "All Products" : "Tüm Ürünler"}
         <span aria-hidden="true">↗</span>
       </Link>
     </div>

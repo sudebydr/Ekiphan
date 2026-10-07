@@ -11,11 +11,13 @@ type Category = CatalogNavigation["categories"][number];
 export function CatalogCategoryFilter({
   categories,
   selectedSlug,
-  baseQuery
+  baseQuery,
+  isEnglish = false
 }: {
   categories: Category[];
   selectedSlug: string;
   baseQuery: string;
+  isEnglish?: boolean;
 }) {
   const roots = categories.filter((item) => item.parentId === null);
   const childrenByParent = new Map<string, Category[]>();
@@ -48,7 +50,7 @@ export function CatalogCategoryFilter({
   return (
     <details className={styles.filterGroup} open={Boolean(selectedSlug)}>
       <summary>
-        <span>Kategoriler</span>
+        <span>{isEnglish ? "Categories" : "Kategoriler"}</span>
         {selectedName && <span className={styles.filterCurrent}>{selectedName}</span>}
       </summary>
       <ul className={styles.optionList}>
@@ -60,7 +62,7 @@ export function CatalogCategoryFilter({
             scroll={false}
             prefetch={false}
           >
-            Tüm kategoriler
+            {isEnglish ? "All categories" : "Tüm kategoriler"}
           </Link>
         </li>
         {roots.map((root) => {

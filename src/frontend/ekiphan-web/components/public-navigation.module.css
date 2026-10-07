@@ -923,7 +923,7 @@
     gap: 1rem 1.5rem;
   }
 
-.mobileNavUtilities > div a {
+  .mobileNavUtilities > div a {
     display: inline-flex;
     min-height: 2.75rem;
     align-items: center;
@@ -933,6 +933,7 @@
     letter-spacing: 0.08em;
     text-decoration: none;
   }
+
 }
 
 /* Keep all nine desktop links inside the viewport, including the fixed sticky row. */
@@ -945,5 +946,19 @@
     justify-content: space-between !important;
     gap: clamp(6px, 1.15vw, 16px) !important;
     padding-inline: clamp(12px, 1.6vw, 24px) !important;
+  }
+}
+
+/* One type scale for every mobile navigation label, including both accordion triggers. */
+@media (max-width: 900px) {
+  .mainNav > .navItem,
+  .mainNav > .productsMenu > summary,
+  .mainNav > .productsMenu > summary > .navItem {
+    font-family: "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.76rem !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
   }
 }

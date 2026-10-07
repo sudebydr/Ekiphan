@@ -35,7 +35,11 @@ export default function QuoteListPage() {
       <section className={styles.hero}>
         <div>
           <p className={styles.eyebrow}>TEKLİF TALEBİ</p>
-          <h1>Projenizi birlikte planlayalım.</h1>
+          <h1>
+            Projenizi birlikte
+            <br className={styles.desktopBreak} />
+            planlayalım.
+          </h1>
         </div>
         <p>
           Ürün adetlerini ve proje notlarınızı düzenleyin. Ekibimiz talebinizi

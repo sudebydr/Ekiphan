@@ -6,7 +6,8 @@ function finish(next: URLSearchParams): string {
   next.delete("page");
   next.delete("pageSize");
   const queryString = next.toString();
-  return queryString ? `/katalog?${queryString}` : "/katalog";
+  const basePath = next.get("lang") === "en" ? "/en/products" : "/katalog";
+  return queryString ? `${basePath}?${queryString}` : basePath;
 }
 
 /** Tek değerli filtre (grup, kategori, marka, etiket, sıralama) için bağlantı. Boş değer = filtreyi kaldır. */

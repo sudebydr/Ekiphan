@@ -14,6 +14,7 @@ type Props = {
   showQuantityControl?: boolean;
   quantityClassName?: string;
   compactQuantityControl?: boolean;
+  locale?: "tr" | "en";
 };
 
 export function AddToQuoteButton({
@@ -26,8 +27,10 @@ export function AddToQuoteButton({
   className,
   showQuantityControl = false,
   quantityClassName,
-  compactQuantityControl = false
+  compactQuantityControl = false,
+  locale = "tr"
 }: Props) {
+  const en = locale === "en";
   const [message, setMessage] = useState("");
   const [quantity, setQuantity] = useState<number | null>(null);
 
@@ -48,7 +51,7 @@ export function AddToQuoteButton({
       setMessage("");
       return;
     }
-    setMessage(result === "full" ? "Teklif listeniz en fazla 50 \u00fcr\u00fcn i\u00e7erebilir." : "Taray\u0131c\u0131n\u0131z teklif listesini kaydetmeye izin vermiyor.");
+    setMessage(result === "full" ? (en ? "Your quote list can contain up to 50 products." : "Teklif listeniz en fazla 50 \u00fcr\u00fcn i\u00e7erebilir.") : (en ? "Your browser does not allow saving the quote list." : "Taray\u0131c\u0131n\u0131z teklif listesini kaydetmeye izin vermiyor."));
   }
 
   function changeQuantity(change: number) {
@@ -73,27 +76,27 @@ export function AddToQuoteButton({
     if (compactQuantityControl) {
       return (
         <div className={quantityClassName}>
-          <div className="quoteQuantityControl" aria-label="Teklif listesi adedi">
-            <button type="button" onClick={() => changeQuantity(-1)} aria-label="Adedi azalt">-</button>
+          <div className="quoteQuantityControl" aria-label={en ? "Quote list quantity" : "Teklif listesi adedi"}>
+            <button type="button" onClick={() => changeQuantity(-1)} aria-label={en ? "Decrease quantity" : "Adedi azalt"}>-</button>
             <output>{quantity}</output>
-            <button type="button" onClick={() => changeQuantity(1)} aria-label={"Adedi art\u0131r"}>+</button>
+            <button type="button" onClick={() => changeQuantity(1)} aria-label={en ? "Increase quantity" : "Adedi art\u0131r"}>+</button>
           </div>
         </div>
       );
     }
 
     return (
-      <div className={quantityClassName} aria-label="Teklif listesi adedi">
-        <button type="button" onClick={() => changeQuantity(-1)} aria-label="Adedi azalt">-</button>
+      <div className={quantityClassName} aria-label={en ? "Quote list quantity" : "Teklif listesi adedi"}>
+        <button type="button" onClick={() => changeQuantity(-1)} aria-label={en ? "Decrease quantity" : "Adedi azalt"}>-</button>
         <output>{quantity}</output>
-        <button type="button" onClick={() => changeQuantity(1)} aria-label={"Adedi art\u0131r"}>+</button>
+        <button type="button" onClick={() => changeQuantity(1)} aria-label={en ? "Increase quantity" : "Adedi art\u0131r"}>+</button>
       </div>
     );
   }
 
   return (
     <div>
-      <button className={className} type="button" onClick={add}>Teklif listeme ekle</button>
+      <button className={className} type="button" onClick={add}>{en ? "Add to Quote List" : "Teklif listeme ekle"}</button>
       {message && <p role="status">{message}</p>}
     </div>
   );

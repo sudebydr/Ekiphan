@@ -12,6 +12,7 @@ import styles from "./quote.module.css";
 
 type Props = {
   kvkkNoticeUrl: string | null;
+  locale?: "tr" | "en";
 };
 
 type ProblemResponse = {
@@ -33,7 +34,8 @@ function itemInitials(name: string): string {
     .toLocaleUpperCase("tr-TR");
 }
 
-export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
+export function QuoteRequestClient({ kvkkNoticeUrl, locale = "tr" }: Props) {
+  const en = locale === "en";
   const [items, setItems] = useState<LocalQuoteItem[]>([]);
   const [ready, setReady] = useState(false);
   const [sending, setSending] = useState(false);
@@ -53,7 +55,7 @@ export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
       item.productId === productId ? { ...item, ...patch } : item
     );
     if (!writeQuoteList(next)) {
-      setError("Tarayıcınız teklif listesini kaydetmeye izin vermiyor.");
+      setError(en ? "Your browser does not allow saving the quote list." : "Tarayıcınız teklif listesini kaydetmeye izin vermiyor.");
       return;
     }
     setItems(next);
@@ -62,7 +64,7 @@ export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
   function removeItem(productId: string) {
     const next = items.filter((item) => item.productId !== productId);
     if (!writeQuoteList(next)) {
-      setError("Tarayıcınız teklif listesini kaydetmeye izin vermiyor.");
+      setError(en ? "Your browser does not allow saving the quote list." : "Tarayıcınız teklif listesini kaydetmeye izin vermiyor.");
       return;
     }
     setItems(next);
@@ -87,7 +89,7 @@ export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
       sector: String(form.get("sector") ?? ""),
       projectName: String(form.get("projectName") ?? ""),
       message: String(form.get("message") ?? ""),
-      languageCode: "tr",
+      languageCode: locale,
       kvkkConsent: form.get("kvkkConsent") === "on",
       commercialCommunicationConsent:
         form.get("commercialConsent") === "on",
@@ -121,7 +123,7 @@ export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
       if (!response.ok || !body.requestNumber) {
         setError(
           body.detail ??
-            "Teklif talebiniz gönderilemedi. Lütfen daha sonra tekrar deneyin."
+            (en ? "Your quote request could not be sent. Please try again later." : "Teklif talebiniz gönderilemedi. Lütfen daha sonra tekrar deneyin.")
         );
         return;
       }
@@ -132,7 +134,7 @@ export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
       formElement.reset();
     } catch {
       setError(
-        "Teklif servisine ulaşılamıyor. Lütfen daha sonra tekrar deneyin."
+        (en ? "The quote service is unavailable. Please try again later." : "Teklif servisine ulaşılamıyor. Lütfen daha sonra tekrar deneyin.")
       );
     } finally {
       setSending(false);
@@ -142,14 +144,26 @@ export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
   return (
     <div className={styles.layout}>
       <section className={styles.panel} aria-labelledby="quote-items-title">
-        <h2 id="quote-items-title">Seçtiğiniz ürünler</h2>
+        <div className={styles.panelHeading}>
+          <h2 id="quote-items-title">{en ? "Selected Products" : "Seçtiğiniz ürünler"}</h2>
+          <span className={styles.itemCount}>
+            {ready ? items.length : "—"} {en ? "items" : "ürün"}
+          </span>
+        </div>
         {!ready ? (
-          <p aria-live="polite">Teklif listeniz hazırlanıyor…</p>
+          <p aria-live="polite">{en ? "Preparing your quote list…" : "Teklif listeniz hazırlanıyor…"}</p>
         ) : items.length === 0 ? (
           <div className={styles.empty}>
-            <p>Teklif listenizde henüz ürün bulunmuyor.</p>
-            <Link className={styles.secondaryButton} href="/katalog">
-              Ürünlere git
+            <svg className={styles.emptyIcon} viewBox="0 0 48 48" aria-hidden="true">
+              <path d="m8 16 16-9 16 9v17L24 42 8 33V16Z" />
+              <path d="m8 16 16 9 16-9M24 25v17M16 11l16 9" />
+            </svg>
+            <p className={styles.emptyTitle}>{en ? "Your quote list is empty." : "Teklif listenizde henüz ürün bulunmuyor."}</p>
+            <p className={styles.emptyDescription}>
+              {en ? "Browse the products and add items to request a quote." : "Teklif alabilmek için ürünleri inceleyip listenize ekleyin."}
+            </p>
+            <Link className={styles.secondaryButton} href={en ? "/en/products" : "/katalog"}>
+              {en ? "View Products" : "Ürünlere git"} <span aria-hidden="true">→</span>
             </Link>
           </div>
         ) : (
@@ -159,7 +173,7 @@ export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
                 <Link
                   className={styles.itemVisual}
                   href={`/katalog/${encodeURIComponent(item.slug)}`}
-                  aria-label={`${item.name} ürününü görüntüle`}
+                  aria-label={en ? `View ${item.name}` : `${item.name} ürününü görüntüle`}
                 >
                   {itemImageUrl(item) ? (
                     <img src={itemImageUrl(item) ?? ""} alt={item.name} loading="lazy" />
@@ -179,18 +193,18 @@ export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
                     </h3>
                     <p className={styles.itemMeta}>
                       {item.brandName ? `${item.brandName} · ` : ""}
-                      Kod: {item.sku}
+                      {en ? "Code:" : "Kod:"} {item.sku}
                     </p>
                   </div>
                 </div>
                 <div className={styles.itemFields}>
                   <div className={styles.field}>
-                    <label htmlFor={`quantity-${item.productId}`}>Adet</label>
+                    <label htmlFor={`quantity-${item.productId}`}>{en ? "Quantity" : "Adet"}</label>
                     <div className={styles.quantityStepper}>
                       <button
                         type="button"
                         onClick={() => updateItem(item.productId, { quantity: Math.max(1, item.quantity - 1) })}
-                        aria-label="Adedi azalt"
+                        aria-label={en ? "Decrease quantity" : "Adedi azalt"}
                         disabled={item.quantity <= 1}
                       >
                         −
@@ -213,7 +227,7 @@ export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
                       <button
                         type="button"
                         onClick={() => updateItem(item.productId, { quantity: Math.min(100_000, item.quantity + 1) })}
-                        aria-label="Adedi artır"
+                        aria-label={en ? "Increase quantity" : "Adedi artır"}
                         disabled={item.quantity >= 100_000}
                       >
                         +
@@ -222,7 +236,7 @@ export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
                   </div>
                   <div className={styles.field}>
                     <label htmlFor={`note-${item.productId}`}>
-                      Ürün notu
+                      {en ? "Product note" : "Ürün notu"}
                     </label>
                     <textarea
                       id={`note-${item.productId}`}
@@ -233,7 +247,7 @@ export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
                           note: event.target.value
                         })
                       }
-                      placeholder="Renk, kullanım alanı veya proje notu"
+                      placeholder={en ? "Colour, use case or project note" : "Renk, kullanım alanı veya proje notu"}
                     />
                   </div>
                 </div>
@@ -242,9 +256,9 @@ export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
                     className={styles.textButton}
                     type="button"
                     onClick={() => removeItem(item.productId)}
-                    aria-label={`${item.name} ürününü teklif listesinden kaldır`}
+                    aria-label={en ? `Remove ${item.name} from quote list` : `${item.name} ürününü teklif listesinden kaldır`}
                   >
-                    Listeden kaldır
+                    {en ? "Remove from list" : "Listeden kaldır"}
                   </button>
                 </div>
               </article>
@@ -254,12 +268,14 @@ export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
       </section>
 
       <section className={`${styles.panel} ${styles.contactPanel}`} aria-labelledby="contact-title">
-        <h2 id="contact-title">İletişim bilgileriniz</h2>
+        <div className={styles.panelHeading}>
+          <h2 id="contact-title">{en ? "Your Contact Details" : "İletişim bilgileriniz"}</h2>
+        </div>
         {!kvkkNoticeUrl && (
           <div className={styles.legalNotice} role="status">
-            Hukuk onaylı KVKK aydınlatma metni henüz sisteme bağlanmadığı için
+            {en ? "Quote submission is temporarily unavailable because the approved privacy notice has not been configured. Your product list will remain saved on this device." : <>Hukuk onaylı KVKK aydınlatma metni henüz sisteme bağlanmadığı için
             teklif gönderimi geçici olarak kapalıdır. Ürün listeniz bu cihazda
-            korunur.
+            korunur.</>}
           </div>
         )}
         {error && (
@@ -269,84 +285,90 @@ export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
         )}
         {requestNumber && (
           <div className={styles.success} role="status">
-            Talebiniz alındı. Takip numaranız: <strong>{requestNumber}</strong>
+            {en ? "Your request has been received. Reference number:" : "Talebiniz alındı. Takip numaranız:"} <strong>{requestNumber}</strong>
           </div>
         )}
         <form onSubmit={submit}>
           <div className={styles.formGrid}>
             <div className={styles.field}>
-              <label htmlFor="fullName">Ad soyad</label>
+              <label htmlFor="fullName">{en ? "Full Name" : "Ad soyad"}</label>
               <input
                 id="fullName"
                 name="fullName"
                 autoComplete="name"
+                placeholder={en ? "Enter your full name" : "Adınızı ve soyadınızı girin"}
                 maxLength={200}
                 required
               />
             </div>
             <div className={styles.field}>
-              <label htmlFor="companyName">Firma adı</label>
+              <label htmlFor="companyName">{en ? "Company Name" : "Firma adı"}</label>
               <input
                 id="companyName"
                 name="companyName"
                 autoComplete="organization"
+                placeholder={en ? "Enter your company name" : "Firma adınızı girin"}
                 maxLength={200}
                 required
               />
             </div>
             <div className={styles.field}>
-              <label htmlFor="phone">Telefon</label>
+              <label htmlFor="phone">{en ? "Phone" : "Telefon"}</label>
               <input
                 id="phone"
                 name="phone"
                 type="tel"
                 autoComplete="tel"
+                placeholder={en ? "Your phone number" : "Telefon numaranız"}
                 maxLength={50}
                 required
               />
             </div>
             <div className={styles.field}>
-              <label htmlFor="email">E-posta</label>
+              <label htmlFor="email">{en ? "Email" : "E-posta"}</label>
               <input
                 id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
+                placeholder="ornek@firma.com"
                 maxLength={254}
                 required
               />
             </div>
             <div className={styles.field}>
-              <label htmlFor="country">Ülke</label>
+              <label htmlFor="country">{en ? "Country" : "Ülke"}</label>
               <input
                 id="country"
                 name="country"
                 autoComplete="country-name"
+                placeholder={en ? "Country" : "Ülke"}
                 maxLength={100}
-                defaultValue="Türkiye"
+                defaultValue={en ? "Turkey" : "Türkiye"}
                 required
               />
             </div>
             <div className={styles.field}>
-              <label htmlFor="city">Şehir</label>
+              <label htmlFor="city">{en ? "City" : "Şehir"}</label>
               <input
                 id="city"
                 name="city"
                 autoComplete="address-level2"
+                placeholder={en ? "City" : "Şehir"}
                 maxLength={100}
               />
             </div>
             <div className={styles.field}>
-              <label htmlFor="sector">Sektör</label>
-              <input id="sector" name="sector" maxLength={150} />
+              <label htmlFor="sector">{en ? "Industry" : "Sektör"}</label>
+              <input id="sector" name="sector" placeholder={en ? "Industry" : "Sektör"} maxLength={150} />
             </div>
             <div className={styles.field}>
-              <label htmlFor="projectName">Proje adı</label>
-              <input id="projectName" name="projectName" maxLength={200} />
+              <label htmlFor="projectName">{en ? "Project Name" : "Proje adı"}</label>
+              <input id="projectName" name="projectName" placeholder={en ? "Project Name" : "Proje adı"} maxLength={200} />
             </div>
             <div className={`${styles.field} ${styles.wide}`}>
-              <label htmlFor="message">Genel notunuz</label>
-              <textarea id="message" name="message" maxLength={4000} />
+              <label htmlFor="message">{en ? "Additional Notes" : "Genel notunuz"}</label>
+              <textarea id="message" name="message" placeholder={en ? "Share any details about your project…" : "Projeniz hakkında detayları paylaşabilirsiniz…"} maxLength={4000} />
             </div>
             <div className={`${styles.checkbox} ${styles.wide}`}>
               <input
@@ -364,13 +386,12 @@ export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      KVKK aydınlatma metnini
+                      {en ? "privacy notice" : "KVKK aydınlatma metnini"}
                     </a>{" "}
-                    okudum ve kişisel verilerimin talebim için işlenmesini kabul
-                    ediyorum.
+                    {en ? " read and consent to the processing of my personal data for this request." : " okudum ve kişisel verilerimin talebim için işlenmesini kabul ediyorum."}
                   </>
                 ) : (
-                  "KVKK aydınlatma metni yapılandırılmamış."
+                  (en ? "Privacy notice is not configured." : "KVKK aydınlatma metni yapılandırılmamış.")
                 )}
               </label>
             </div>
@@ -381,12 +402,11 @@ export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
                 type="checkbox"
               />
               <label htmlFor="commercialConsent">
-                Kampanya ve ürün duyuruları için ticari ileti almak istiyorum.
-                Bu seçim teklif talebinden bağımsız ve isteğe bağlıdır.
+                {en ? "I would like to receive commercial communications about offers and products. This is optional and independent of my quote request." : "Kampanya ve ürün duyuruları için ticari ileti almak istiyorum. Bu seçim teklif talebinden bağımsız ve isteğe bağlıdır."}
               </label>
             </div>
             <div className={styles.honeypot} aria-hidden="true">
-              <label htmlFor="website">Web sitesi</label>
+              <label htmlFor="website">{en ? "Website" : "Web sitesi"}</label>
               <input
                 id="website"
                 name="website"
@@ -407,7 +427,7 @@ export function QuoteRequestClient({ kvkkNoticeUrl }: Props) {
                 Boolean(requestNumber)
               }
             >
-              {sending ? "Gönderiliyor…" : "Teklif talebini gönder"}
+              {sending ? (en ? "Sending…" : "Gönderiliyor…") : <>{en ? "Submit Quote Request" : "Teklif talebini gönder"} <span aria-hidden="true">→</span></>}
             </button>
           </div>
         </form>

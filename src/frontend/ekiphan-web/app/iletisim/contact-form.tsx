@@ -20,7 +20,8 @@ type ContactTaxonomy = {
   complaintCategories: ComplaintCategory[];
 };
 
-export function ContactForm() {
+export function ContactForm({ locale = "tr" }: { locale?: "tr" | "en" }) {
+  const en = locale === "en";
   const [status, setStatus] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [reasons, setReasons] = useState<ContactReason[]>([]);
@@ -41,7 +42,7 @@ export function ContactForm() {
         setCategories(value.complaintCategories);
       })
       .catch(() => {
-        setStatus("İletişim nedenleri yüklenemedi.");
+          setStatus(en ? "Contact options could not be loaded." : "İletişim nedenleri yüklenemedi.");
       });
   }, []);
 
@@ -68,7 +69,7 @@ export function ContactForm() {
           contactReasonId: reasonId,
           complaintCategoryId: selectedReason?.isComplaintReason
             ? form.get("complaintCategoryId") : null,
-          languageCode: "tr",
+          languageCode: locale,
           kvkkConsent: form.get("kvkkConsent") === "on",
         }),
       });
@@ -76,18 +77,18 @@ export function ContactForm() {
       if (response.ok) {
         formElement.reset();
         setReasonId("");
-        setStatus("Mesajınız alındı. Teşekkür ederiz.");
+        setStatus(en ? "Your message has been received. Thank you." : "Mesajınız alındı. Teşekkür ederiz.");
       } else {
         const body = (await response.json()) as {
           detail?: string;
         };
 
         setStatus(
-          body.detail ?? "Mesajınız gönderilemedi."
+          body.detail ?? (en ? "Your message could not be sent." : "Mesajınız gönderilemedi.")
         );
       }
     } catch {
-      setStatus("Mesajınız gönderilemedi.");
+      setStatus(en ? "Your message could not be sent." : "Mesajınız gönderilemedi.");
     } finally {
       setSending(false);
     }
@@ -97,53 +98,53 @@ export function ContactForm() {
     <form className={styles.form} onSubmit={submit}>
       <div className={styles.row}>
         <label className={styles.srOnly}>
-          Ad soyad
+          {en ? "Full Name" : "Ad soyad"}
           <input
             name="fullName"
             required
             maxLength={200}
             autoComplete="name"
-            placeholder="Ad soyad"
+            placeholder={en ? "Full name" : "Ad soyad"}
           />
         </label>
 
         <label className={styles.srOnly}>
-          E-posta adresiniz
+          {en ? "Email Address" : "E-posta adresiniz"}
           <input
             name="email"
             required
             type="email"
             maxLength={320}
             autoComplete="email"
-            placeholder="E-posta adresiniz"
+            placeholder={en ? "Email address" : "E-posta adresiniz"}
           />
         </label>
       </div>
 
       <div className={styles.row}>
         <label className={styles.srOnly}>
-          Telefon numaranız
+          {en ? "Phone Number" : "Telefon numaranız"}
           <input
             name="phone"
             maxLength={50}
             autoComplete="tel"
-            placeholder="Telefon numaranız"
+            placeholder={en ? "Phone number" : "Telefon numaranız"}
           />
         </label>
 
         <label className={styles.srOnly}>
-          Şirket / Firma
+          {en ? "Company Name" : "Şirket / Firma"}
           <input
             name="companyName"
             maxLength={200}
             autoComplete="organization"
-            placeholder="Şirket / Firma"
+            placeholder={en ? "Company name" : "Şirket / Firma"}
           />
         </label>
       </div>
 
       <label className={styles.srOnly}>
-        İletişim nedeni
+        {en ? "Reason for Contact" : "İletişim nedeni"}
 
         <select
           name="contactReasonId"
@@ -152,7 +153,7 @@ export function ContactForm() {
           onChange={(event) => setReasonId(event.target.value)}
         >
           <option value="" disabled>
-            Neden seçin
+            {en ? "Select a reason" : "Neden seçin"}
           </option>
 
           {reasons.map((item) => (
@@ -165,7 +166,7 @@ export function ContactForm() {
 
       {selectedReason?.isComplaintReason && (
         <label className={styles.srOnly}>
-          Şikâyet kategorisi
+          {en ? "Complaint Category" : "Şikâyet kategorisi"}
 
           <select
             key={reasonId}
@@ -174,7 +175,7 @@ export function ContactForm() {
             defaultValue=""
           >
             <option value="" disabled>
-              Kategori seçin
+              {en ? "Select a category" : "Kategori seçin"}
             </option>
 
             {categories
@@ -189,23 +190,23 @@ export function ContactForm() {
       )}
 
       <label className={styles.srOnly}>
-        Konu
+        {en ? "Subject" : "Konu"}
         <input
           name="subject"
           required
           maxLength={200}
-          placeholder="Konu"
+          placeholder={en ? "Subject" : "Konu"}
         />
       </label>
 
       <label className={styles.srOnly}>
-        Mesajınız
+        {en ? "Your Message" : "Mesajınız"}
         <textarea
           name="message"
           required
           minLength={10}
           maxLength={4000}
-          placeholder="Mesajınız..."
+          placeholder={en ? "Your message..." : "Mesajınız..."}
         />
       </label>
 
@@ -213,7 +214,7 @@ export function ContactForm() {
         className={styles.honeypot}
         aria-hidden="true"
       >
-        Web sitesi
+        {en ? "Website" : "Web sitesi"}
         <input
           name="website"
           tabIndex={-1}
@@ -227,12 +228,11 @@ export function ContactForm() {
           type="checkbox"
           required
         />
-        Kişisel verilerimin iletişim talebimin yanıtlanması
-        amacıyla işlenmesini kabul ediyorum.
+        {en ? "I consent to the processing of my personal data to respond to my enquiry." : "Kişisel verilerimin iletişim talebimin yanıtlanması amacıyla işlenmesini kabul ediyorum."}
       </label>
 
       <button type="submit" disabled={sending}>
-        {sending ? "Gönderiliyor…" : "Mesaj Gönder"}
+        {sending ? (en ? "Sending…" : "Gönderiliyor…") : (en ? "Send Message" : "Mesaj Gönder")}
         <span aria-hidden="true">→</span>
       </button>
 

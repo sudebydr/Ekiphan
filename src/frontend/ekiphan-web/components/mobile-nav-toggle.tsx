@@ -8,6 +8,7 @@ export default function MobileNavToggle() {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const isEnglish = pathname.startsWith("/en");
 
   useEffect(() => {
     setIsOpen(false);
@@ -23,7 +24,7 @@ export default function MobileNavToggle() {
 
     const closeOnLink = (event: Event) => {
       const target = event.target;
-      if (target instanceof Element && target.closest('nav[aria-label="Ana menü"] a')) {
+      if (target instanceof Element && target.closest("#public-mobile-navigation a")) {
         setIsOpen(false);
       }
     };
@@ -47,7 +48,7 @@ export default function MobileNavToggle() {
       ref={buttonRef}
       className={styles.mobileMenuButton}
       type="button"
-      aria-label={isOpen ? "Menüyü kapat" : "Menüyü aç"}
+      aria-label={isEnglish ? (isOpen ? "Close menu" : "Open menu") : (isOpen ? "Menüyü kapat" : "Menüyü aç")}
       aria-controls="public-mobile-navigation"
       aria-expanded={isOpen}
       onClick={() => setIsOpen((open) => !open)}

@@ -42,18 +42,19 @@ function safeTourUrl(): string | null {
   }
 }
 
-export default async function ShowroomPage() {
+export default async function ShowroomPage({ locale = "tr" }: { locale?: "tr" | "en" } = {}) {
+  const en = locale === "en";
   let content: PublicContentPage | null = null;
   let error: string | null = null;
 
   try {
-    content = await getContentPage("showroom");
+    content = await getContentPage("showroom", locale);
   } catch (caught) {
     if (!(caught instanceof CatalogApiError && caught.status === 404)) {
       error =
         caught instanceof CatalogApiError
           ? caught.message
-          : "Showroom bilgileri şu anda görüntülenemiyor.";
+          : (en ? "Showroom information is currently unavailable." : "Showroom bilgileri şu anda görüntülenemiyor.");
     }
   }
 
@@ -65,7 +66,7 @@ export default async function ShowroomPage() {
 
   return (
     <main style={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden', backgroundColor: '#f8f4ee', margin: 0, padding: 0 }} data-public-page>
-      <PublicHeader currentPath="/showroom" />
+      <PublicHeader currentPath={en ? "/en/showroom" : "/showroom"} />
 
       <section style={{ position: 'relative', width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', margin: 0, padding: 0, borderRadius: 0, border: 'none', overflow: 'hidden' }}>
         <video 
@@ -79,31 +80,31 @@ export default async function ShowroomPage() {
       </section>
 
       {content && (
-        <section className={styles.content} aria-label="Showroom bilgileri" style={{ maxWidth: '86rem', margin: '0 auto', padding: '4rem 2rem' }}>
+        <section className={styles.content} aria-label={en ? "Showroom information" : "Showroom bilgileri"} style={{ maxWidth: '86rem', margin: '0 auto', padding: '4rem 2rem' }}>
           <div className={styles.copy}>
             {paragraphs.map((paragraph, index) => (
               <p key={`${index}-${paragraph.slice(0, 24)}`}>{paragraph}</p>
             ))}
           </div>
           <aside className={styles.tour}>
-            <p className={styles.eyebrow}>DİJİTAL ZİYARET</p>
-            <h2>Showroom turu</h2>
+            <p className={styles.eyebrow}>{en ? "VIRTUAL VISIT" : "DİJİTAL ZİYARET"}</p>
+            <h2>{en ? "Showroom Tour" : "Showroom turu"}</h2>
             {tourUrl ? (
               <>
                 <p>
-                  Tur, doğrulanmış harici sağlayıcı üzerinde yeni sekmede açılır.
+                  {en ? "The tour opens in a new tab on our verified external provider." : "Tur, doğrulanmış harici sağlayıcı üzerinde yeni sekmede açılır."}
                 </p>
                 <a
                   href={tourUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Showroom'u Gör <span aria-hidden="true">↗</span>
+                  {en ? "View Showroom" : "Showroom'u Gör"} <span aria-hidden="true">↗</span>
                 </a>
               </>
             ) : (
               <p>
-                Onaylı dijital tur bağlantısı henüz yapılandırılmamıştır.
+                {en ? "The approved digital tour link has not been configured yet." : "Onaylı dijital tur bağlantısı henüz yapılandırılmamıştır."}
               </p>
             )}
           </aside>

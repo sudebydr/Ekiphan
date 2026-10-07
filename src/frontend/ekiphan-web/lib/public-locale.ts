@@ -2,16 +2,19 @@ export type PublicLocale = "tr" | "en";
 
 const trToEn: Record<string, string> = {
   "/": "/en",
+  "/urunler": "/en/products",
   "/hakkimizda": "/en/about",
   "/hizmetler": "/en/services",
+  "/endustriyel-mutfak": "/en/industrial-kitchen",
   "/katalog": "/en/products",
+  "/kataloglar": "/en/catalogs",
   "/referanslar": "/en/references",
   "/galeri": "/en/gallery",
-  "/basin-odasi": "/en/press",
   "/iletisim": "/en/contact",
   "/teklif-listem": "/en/quote-list",
-  "/kvkk": "/en/privacy",
-  "/showroom": "/en/showroom"
+  "/showroom": "/en/showroom",
+  "/basin-odasi": "/en/press",
+  "/kvkk": "/en/privacy"
 };
 
 const enToTr: Record<string, string> = Object.fromEntries(
@@ -24,6 +27,8 @@ export function localeFromPath(pathname: string | undefined): PublicLocale {
 
 export function localizedPath(pathname: string, targetLocale: PublicLocale): string {
   const [path, query = ""] = pathname.split("?", 2);
+  if (targetLocale === "tr" && path !== "/en" && !path.startsWith("/en/")) return pathname;
+  if (targetLocale === "en" && path.startsWith("/en/")) return pathname;
   const map = targetLocale === "en" ? trToEn : enToTr;
   const exact = map[path];
   if (exact) return `${exact}${query ? `?${query}` : ""}`;

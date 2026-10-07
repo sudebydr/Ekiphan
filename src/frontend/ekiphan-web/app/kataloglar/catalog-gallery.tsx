@@ -15,7 +15,8 @@ type Catalog = {
 
 const PAGE_SIZE = 8;
 
-export function CatalogGallery({ catalogs }: { catalogs: Catalog[] }) {
+export function CatalogGallery({ catalogs, locale = "tr" }: { catalogs: Catalog[]; locale?: "tr" | "en" }) {
+  const en = locale === "en";
   const [selected, setSelected] = useState<Catalog | null>(null);
   const [page, setPage] = useState(0);
   const totalPages = Math.ceil(catalogs.length / PAGE_SIZE);
@@ -36,10 +37,10 @@ export function CatalogGallery({ catalogs }: { catalogs: Catalog[] }) {
 
   return (
     <>
-      <section className={styles.catalogSection} aria-label="Kataloglar">
+      <section className={styles.catalogSection} aria-label={en ? "Catalogues" : "Kataloglar"}>
         <div className={styles.sectionIntro}>
-          <p>Kataloglar</p>
-          <span>Kataloğu seçin; PDF önizlemesi sayfadan ayrılmadan açılır.</span>
+          <p>{en ? "Catalogues" : "Kataloglar"}</p>
+          <span>{en ? "Choose a catalogue to preview the PDF without leaving this page." : "Kataloğu seçin; PDF önizlemesi sayfadan ayrılmadan açılır."}</span>
         </div>
         <div className={styles.catalogGrid} id="catalog-grid">
           {visibleCatalogs.map((catalog, index) => (
@@ -54,7 +55,7 @@ export function CatalogGallery({ catalogs }: { catalogs: Catalog[] }) {
                 <small>{catalog.eyebrow}</small>
                 <strong>{catalog.title}</strong>
                 <em>{catalog.description}</em>
-                <b>PDF&apos;i Görüntüle</b>
+                <b>{en ? "View PDF" : "PDF'i Görüntüle"}</b>
               </span>
               <span className={styles.index} aria-hidden="true">{String(page * PAGE_SIZE + index + 1).padStart(2, "0")}</span>
             </button>
@@ -62,21 +63,21 @@ export function CatalogGallery({ catalogs }: { catalogs: Catalog[] }) {
         </div>
         {totalPages > 1 && (
           <nav className={styles.pagination} aria-label="Katalog sayfaları">
-            <button type="button" onClick={() => changePage(page - 1)} disabled={page === 0} aria-label="Önceki sayfa">←</button>
+            <button type="button" onClick={() => changePage(page - 1)} disabled={page === 0} aria-label={en ? "Previous page" : "Önceki sayfa"}>←</button>
             {Array.from({ length: totalPages }, (_, index) => (
               <button key={index} type="button" onClick={() => changePage(index)} className={index === page ? styles.activePage : ""} aria-current={index === page ? "page" : undefined}>{index + 1}</button>
             ))}
-            <button type="button" onClick={() => changePage(page + 1)} disabled={page === totalPages - 1} aria-label="Sonraki sayfa">→</button>
+            <button type="button" onClick={() => changePage(page + 1)} disabled={page === totalPages - 1} aria-label={en ? "Next page" : "Sonraki sayfa"}>→</button>
           </nav>
         )}
       </section>
 
       {selected && (
-        <div className={styles.modal} role="dialog" aria-modal="true" aria-label={`${selected.title} PDF önizlemesi`} onMouseDown={() => setSelected(null)}>
+        <div className={styles.modal} role="dialog" aria-modal="true" aria-label={en ? `${selected.title} PDF preview` : `${selected.title} PDF önizlemesi`} onMouseDown={() => setSelected(null)}>
           <section className={styles.modalPanel} onMouseDown={(event) => event.stopPropagation()}>
             <header className={styles.viewerHeader}>
               <div className={styles.modalMeta}><p>{selected.category} · {selected.eyebrow}</p><h2>{selected.title}</h2></div>
-              <button className={styles.close} type="button" onClick={() => setSelected(null)} aria-label="Önizlemeyi kapat">Kapat <span>×</span></button>
+              <button className={styles.close} type="button" onClick={() => setSelected(null)} aria-label={en ? "Close preview" : "Önizlemeyi kapat"}>{en ? "Close" : "Kapat"} <span>×</span></button>
             </header>
             <div className={styles.viewerSurface}>
               <iframe className={styles.pdfFrame} src={`${encodeURI(selected.pdfUrl)}#page=1&zoom=80&pagemode=none`} title={`${selected.title} PDF kataloğu`} />

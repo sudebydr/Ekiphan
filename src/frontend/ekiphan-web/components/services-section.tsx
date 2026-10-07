@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import styles from "./services-section.module.css";
 
-const services = [
+const servicesTr = [
   {
     title: "Proje Danışmanlığı",
     description:
@@ -54,6 +54,14 @@ const services = [
     image: "/images/feature-support-natural-v1.png",
   },
 ] as const;
+const servicesEn = [
+  { title: "Project Consultancy", description: "We assess your needs and build a roadmap suited to your investment.", detail: "We evaluate capacity, service model, budget and operational goals so your project starts with the right scope.", image: "/images/feature-consultation.png" },
+  { title: "Kitchen Planning", description: "We design efficient, safe and ergonomic professional kitchen workflows.", detail: "We plan preparation, cooking, service and dishwashing flows around the technical conditions of your space and optimize equipment placement.", image: "/images/feature-kitchen-triptych-v1.png" },
+  { title: "Equipment Selection", description: "We select the right brands and equipment for performance, budget and usage intensity.", detail: "We present options from our broad portfolio to match your capacity, energy efficiency and durability requirements.", image: "/images/industrial-kitchen-premium.png" },
+  { title: "Installation & Commissioning", description: "Our specialists manage delivery, installation and commissioning.", detail: "We oversee every commissioning step, from site coordination and testing to basic user guidance for your team.", image: "/images/ekiphan-kitchen-hero.png" },
+  { title: "Technical Service", description: "We provide fast, dependable technical support to keep your operation running.", detail: "Scheduled maintenance, repair response and performance checks help your equipment run reliably for longer.", image: "/images/feature-support-natural-v2.png" },
+  { title: "Spare Parts Support", description: "We minimize maintenance downtime with quick access to the right parts.", detail: "We identify compatible parts by product and model, then coordinate supply and replacement with our technical team.", image: "/images/feature-support-natural-v1.png" },
+] as const;
 
 function ServiceIcon() {
   return (
@@ -70,7 +78,9 @@ function ServiceIcon() {
   );
 }
 
-export function ServicesSection() {
+export function ServicesSection({ locale = "tr" }: { locale?: "tr" | "en" }) {
+  const isEnglish = locale === "en";
+  const services = isEnglish ? servicesEn : servicesTr;
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
@@ -82,19 +92,19 @@ export function ServicesSection() {
       <header className={styles.heading}>
         <div>
           <p className={styles.eyebrow}>
-            NASIL DESTEK OLUYORUZ?
+          {isEnglish ? "HOW WE SUPPORT YOU" : "NASIL DESTEK OLUYORUZ?"}
           </p>
 
           <h2 id="services-title">
-            İşletmenizin ritmine uyum sağlayan hizmet anlayışı.
+            {isEnglish ? "Services that keep pace with your operation." : "İşletmenizin ritmine uyum sağlayan hizmet anlayışı."}
           </h2>
         </div>
 
         <p className={styles.intro}>
-          Ekiphan, geniş ürün portföyü ve HoReCa sektörüne
+          {isEnglish ? "With a broad portfolio and a focus on the HoReCa sector, Ekiphan makes it easier to find the right equipment. We approach every project around its space, operations and needs." : <>Ekiphan, geniş ürün portföyü ve HoReCa sektörüne
           odaklanan yaklaşımıyla aradığınız ekipmana
           ulaşmanızı kolaylaştırır. Her projeyi kullanım alanı,
-          operasyon ve ihtiyaçlarınız doğrultusunda ele alırız.
+          operasyon ve ihtiyaçlarınız doğrultusunda ele alırız.</>}
         </p>
       </header>
 
@@ -147,16 +157,16 @@ export function ServicesSection() {
                     }
                   >
                     {isOpen
-                      ? "Detayı Kapat"
-                      : "Hizmeti İncele"}
+                      ? (isEnglish ? "Close Details" : "Detayı Kapat")
+                      : (isEnglish ? "Explore Service" : "Hizmeti İncele")}
 
                     <b aria-hidden="true">
                       {isOpen ? "−" : "→"}
                     </b>
                   </button>
 
-                  <Link href="/iletisim#contact-form">
-                    Teklif Alın{" "}
+                  <Link href={isEnglish ? "/en/contact#contact-form" : "/iletisim#contact-form"}>
+                    {isEnglish ? "Request a Quote" : "Teklif Alın"}{" "}
                     <span aria-hidden="true">
                       →
                     </span>
@@ -169,14 +179,14 @@ export function ServicesSection() {
       </div>
 
       <div className={styles.cta}>
-        <p>PROJENİZİ KONUŞALIM</p>
+        <p>{isEnglish ? "LET'S DISCUSS YOUR PROJECT" : "PROJENİZİ KONUŞALIM"}</p>
 
         <strong>
-          İhtiyacınızı anlatın, çözümü birlikte oluşturalım.
+          {isEnglish ? "Tell us what you need and let's build the right solution together." : "İhtiyacınızı anlatın, çözümü birlikte oluşturalım."}
         </strong>
 
-        <Link href="/iletisim#contact-form">
-          İletişime Geçin
+        <Link href={isEnglish ? "/en/contact#contact-form" : "/iletisim#contact-form"}>
+          {isEnglish ? "Get in Touch" : "İletişime Geçin"}
         </Link>
       </div>
     </section>
