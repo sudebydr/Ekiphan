@@ -5,11 +5,13 @@ namespace Ekiphan.Infrastructure.Media;
 public sealed class PublicMediaUrlResolver : IPublicMediaUrlResolver
 {
     private readonly Uri? baseUri;
+    private readonly bool useRelativeUrls;
 
     public PublicMediaUrlResolver(string? baseUrl)
     {
         if (string.IsNullOrWhiteSpace(baseUrl))
         {
+            useRelativeUrls = true;
             return;
         }
 
@@ -29,7 +31,7 @@ public sealed class PublicMediaUrlResolver : IPublicMediaUrlResolver
 
     public string? Resolve(string? storageKey)
     {
-        if (!IsSafeStorageKey(storageKey))
+        if ((!useRelativeUrls && baseUri is null) || !IsSafeStorageKey(storageKey))
         {
             return null;
         }

@@ -110,9 +110,9 @@ public static class DependencyInjection
         services.AddSingleton<IValidator<MediaUploadCommand>>(provider =>
             new MediaUploadCommandValidator(provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<MediaProcessingOptions>>().Value));
         services.AddTransient<IWebPOptimizationService, AdaptiveWebPOptimizationService>();
-        services.AddTransient<IMediaImageDecoder, ImageSharpMediaImageDecoder>();
-        services.AddTransient<IMediaMetadataSanitizer, ImageSharpMediaMetadataSanitizer>();
-        services.AddTransient<IMediaVariantGenerator, ImageSharpMediaVariantGenerator>();
+        services.AddTransient<IMediaImageDecoder, SkiaMediaImageDecoder>();
+        services.AddTransient<IMediaMetadataSanitizer, SkiaMediaMetadataSanitizer>();
+        services.AddTransient<IMediaVariantGenerator, SkiaMediaVariantGenerator>();
         services.AddScoped<IMediaProcessingRepository, MediaProcessingRepository>();
         services.AddScoped<IMediaProcessingService, MediaProcessingService>();
         services.AddScoped<

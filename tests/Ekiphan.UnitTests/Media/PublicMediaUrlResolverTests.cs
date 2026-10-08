@@ -32,12 +32,22 @@ public sealed class PublicMediaUrlResolverTests
     [InlineData("http://cdn.example.com")]
     [InlineData("https://cdn.example.com/media?token=secret")]
     [InlineData("not-a-url")]
-    [InlineData("")]
-    public void UnsafeOrMissingBaseUrlDisablesResolution(string baseUrl)
+    public void UnsafeBaseUrlDisablesResolution(string baseUrl)
     {
         var resolver = new PublicMediaUrlResolver(baseUrl);
 
         Assert.Null(resolver.Resolve("products/default.webp"));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData(" ")]
+    public void MissingBaseUrlUsesSafeSameOriginPath(string? baseUrl)
+    {
+        var resolver = new PublicMediaUrlResolver(baseUrl);
+        Assert.Equal("/media/products/default.webp", resolver.Resolve("media/products/default.webp"));
+        Assert.Null(resolver.Resolve("../secret.webp"));
     }
 
     [Theory]

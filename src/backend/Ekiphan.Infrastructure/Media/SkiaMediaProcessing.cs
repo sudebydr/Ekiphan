@@ -5,57 +5,94 @@ using Ekiphan.Domain.Media;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Webp;
-using SixLabors.ImageSharp.Processing;
+using SkiaSharp;
 
 namespace Ekiphan.Infrastructure.Media;
 
 internal sealed record GeneratedWebP(byte[] Content, int Width, int Height, int Quality, bool TargetExceeded);
 internal sealed record GeneratedMediaVariant(MediaVariantType Type, GeneratedWebP Image);
 
-internal interface IMediaImageDecoder
+internal sealed class DecodedMediaImage(SKBitmap bitmap, SKEncodedOrigin origin, int frameCount) : IDisposable
 {
-    Task<Image> DecodeAsync(Stream content, CancellationToken cancellationToken);
+    public SKBitmap Bitmap { get; private set; } = bitmap;
+    public int Width => Bitmap.Width;
+    public int Height => Bitmap.Height;
+    public int FrameCount { get; } = frameCount;
+
+    public void AutoOrient()
+    {
+        if (origin == SKEncodedOrigin.TopLeft) return;
+        var swapped = (int)origin >= (int)SKEncodedOrigin.LeftTop;
+        var oriented = new SKBitmap(swapped ? Height : Width, swapped ? Width : Height);
+        using var canvas = new SKCanvas(oriented);
+        switch (origin)
+        {
+            case SKEncodedOrigin.TopRight: canvas.Translate(Width, 0); canvas.Scale(-1, 1); break;
+            case SKEncodedOrigin.BottomRight: canvas.Translate(Width, Height); canvas.RotateDegrees(180); break;
+            case SKEncodedOrigin.BottomLeft: canvas.Translate(0, Height); canvas.Scale(1, -1); break;
+            case SKEncodedOrigin.LeftTop: canvas.RotateDegrees(90); canvas.Scale(1, -1); break;
+            case SKEncodedOrigin.RightTop: canvas.Translate(Height, 0); canvas.RotateDegrees(90); break;
+            case SKEncodedOrigin.RightBottom: canvas.Translate(Height, Width); canvas.RotateDegrees(90); canvas.Scale(-1, 1); break;
+            case SKEncodedOrigin.LeftBottom: canvas.Translate(0, Width); canvas.RotateDegrees(270); break;
+        }
+        canvas.DrawBitmap(Bitmap, 0, 0, new SKSamplingOptions(SKFilterMode.Nearest));
+        Bitmap.Dispose();
+        Bitmap = oriented;
+    }
+
+    public void Dispose() => Bitmap.Dispose();
 }
 
-internal sealed class ImageSharpMediaImageDecoder : IMediaImageDecoder
+internal interface IMediaImageDecoder
 {
-    public async Task<Image> DecodeAsync(Stream content, CancellationToken cancellationToken)
+    Task<DecodedMediaImage> DecodeAsync(Stream content, CancellationToken cancellationToken);
+}
+
+internal sealed class SkiaMediaImageDecoder(IOptions<MediaProcessingOptions> optionsAccessor) : IMediaImageDecoder
+{
+    public Task<DecodedMediaImage> DecodeAsync(Stream content, CancellationToken cancellationToken)
     {
-        try { return await Image.LoadAsync(content, cancellationToken); }
-        catch (UnknownImageFormatException)
-        {
+        cancellationToken.ThrowIfCancellationRequested();
+        using var managedStream = new SKManagedStream(content, false);
+        using var codec = SKCodec.Create(managedStream);
+        if (codec is null)
             throw new MediaProcessingException(MediaProcessingErrorCodes.ImageCorrupted,
                 "The image cannot be decoded.");
-        }
+        var options = optionsAccessor.Value;
+        if (codec.FrameCount > 1)
+            throw new MediaProcessingException(MediaProcessingErrorCodes.ImageCorrupted, "Animated images are not accepted.");
+        if (codec.Info.Width <= 0 || codec.Info.Height <= 0 || codec.Info.Width > options.MaxWidth || codec.Info.Height > options.MaxHeight)
+            throw new MediaProcessingException(MediaProcessingErrorCodes.DimensionsInvalid, "Image dimensions exceed the configured limit.");
+        if ((long)codec.Info.Width * codec.Info.Height > options.MaxPixelCount)
+            throw new MediaProcessingException(MediaProcessingErrorCodes.PixelLimitExceeded, "Image pixel count exceeds the configured limit.");
+        var bitmap = SKBitmap.Decode(codec);
+        if (bitmap is null)
+            throw new MediaProcessingException(MediaProcessingErrorCodes.ImageCorrupted,
+                "The image cannot be decoded.");
+        return Task.FromResult(new DecodedMediaImage(bitmap, codec.EncodedOrigin, codec.FrameCount));
     }
 }
 
 internal interface IMediaMetadataSanitizer
 {
-    void Sanitize(Image image, bool stripMetadata);
+    void Sanitize(DecodedMediaImage image, bool stripMetadata);
 }
 
-internal sealed class ImageSharpMediaMetadataSanitizer : IMediaMetadataSanitizer
+internal sealed class SkiaMediaMetadataSanitizer : IMediaMetadataSanitizer
 {
-    public void Sanitize(Image image, bool stripMetadata)
+    public void Sanitize(DecodedMediaImage image, bool stripMetadata)
     {
-        image.Mutate(x => x.AutoOrient());
-        if (!stripMetadata) return;
-        image.Metadata.ExifProfile = null;
-        image.Metadata.XmpProfile = null;
-        image.Metadata.IptcProfile = null;
-        // ICC is intentionally retained to preserve color fidelity; GPS/camera data lives in EXIF.
+        image.AutoOrient();
+        // Pixel encoding never copies EXIF/XMP/IPTC; the original upload remains unchanged.
     }
 }
 
 internal interface IMediaVariantGenerator
 {
-    Task<IReadOnlyList<GeneratedMediaVariant>> GenerateAsync(Image image, CancellationToken cancellationToken);
+    Task<IReadOnlyList<GeneratedMediaVariant>> GenerateAsync(DecodedMediaImage image, CancellationToken cancellationToken);
 }
 
-internal sealed class ImageSharpMediaVariantGenerator(IWebPOptimizationService optimizer) : IMediaVariantGenerator
+internal sealed class SkiaMediaVariantGenerator(IWebPOptimizationService optimizer) : IMediaVariantGenerator
 {
     private static readonly (MediaVariantType Type, int Size)[] Sizes =
     [
@@ -63,7 +100,7 @@ internal sealed class ImageSharpMediaVariantGenerator(IWebPOptimizationService o
         (MediaVariantType.Medium, 960), (MediaVariantType.Large, 1600),
     ];
 
-    public async Task<IReadOnlyList<GeneratedMediaVariant>> GenerateAsync(Image image,
+    public async Task<IReadOnlyList<GeneratedMediaVariant>> GenerateAsync(DecodedMediaImage image,
         CancellationToken cancellationToken)
     {
         var result = new List<GeneratedMediaVariant>(Sizes.Length);
@@ -75,7 +112,7 @@ internal sealed class ImageSharpMediaVariantGenerator(IWebPOptimizationService o
 
 internal interface IWebPOptimizationService
 {
-    Task<GeneratedWebP> EncodeAsync(Image image, int maxWidth, int maxHeight, CancellationToken cancellationToken);
+    Task<GeneratedWebP> EncodeAsync(DecodedMediaImage image, int maxWidth, int maxHeight, CancellationToken cancellationToken);
 }
 
 internal sealed class AdaptiveWebPOptimizationService(IOptions<MediaProcessingOptions> optionsAccessor)
@@ -83,29 +120,32 @@ internal sealed class AdaptiveWebPOptimizationService(IOptions<MediaProcessingOp
 {
     private readonly MediaProcessingOptions options = optionsAccessor.Value;
 
-    public async Task<GeneratedWebP> EncodeAsync(Image source, int maxWidth, int maxHeight,
+    public Task<GeneratedWebP> EncodeAsync(DecodedMediaImage source, int maxWidth, int maxHeight,
         CancellationToken cancellationToken)
     {
-        using var image = source.Clone(context => context.Resize(new ResizeOptions
-        {
-            Mode = ResizeMode.Max,
-            Size = new Size(Math.Min(maxWidth, source.Width), Math.Min(maxHeight, source.Height)),
-            Sampler = KnownResamplers.Lanczos3,
-        }));
+        cancellationToken.ThrowIfCancellationRequested();
+        var ratio = Math.Min(1d, Math.Min((double)maxWidth / source.Width, (double)maxHeight / source.Height));
+        var width = Math.Max(1, (int)Math.Round(source.Width * ratio));
+        var height = Math.Max(1, (int)Math.Round(source.Height * ratio));
+        using var bitmap = new SKBitmap(width, height);
+        using (var canvas = new SKCanvas(bitmap))
+            canvas.DrawBitmap(source.Bitmap, new SKRect(0, 0, width, height), new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear));
+        using var image = SKImage.FromBitmap(bitmap);
 
         var target = (long)options.TargetFileSizeKb * 1024;
         var quality = options.DefaultWebPQuality;
         byte[] bytes;
         do
         {
-            await using var output = new MemoryStream();
-            await image.SaveAsync(output, new WebpEncoder { Quality = quality }, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            using var output = image.Encode(SKEncodedImageFormat.Webp, quality)
+                ?? throw new MediaProcessingException(MediaProcessingErrorCodes.ProcessingFailed, "WebP encoding failed.");
             bytes = output.ToArray();
             if (bytes.LongLength <= target || quality <= options.MinimumWebPQuality) break;
             quality = Math.Max(options.MinimumWebPQuality, quality - 7);
         } while (true);
 
-        return new GeneratedWebP(bytes, image.Width, image.Height, quality, bytes.LongLength > target);
+        return Task.FromResult(new GeneratedWebP(bytes, width, height, quality, bytes.LongLength > target));
     }
 }
 
@@ -197,7 +237,7 @@ internal sealed class MediaProcessingService(
             var image = await decoder.DecodeAsync(command.Content, token);
             using (image)
             {
-                if (image.Frames.Count > 1)
+                if (image.FrameCount > 1)
                     throw new MediaProcessingException(MediaProcessingErrorCodes.ImageCorrupted,
                         "Animated images are not accepted.");
                 if (image.Width <= 0 || image.Height <= 0 || image.Width > options.MaxWidth || image.Height > options.MaxHeight)

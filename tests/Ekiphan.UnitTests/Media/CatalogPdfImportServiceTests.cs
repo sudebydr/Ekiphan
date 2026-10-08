@@ -304,7 +304,7 @@ public sealed class CatalogPdfImportServiceTests
                 .UploadSingleAsync(new MemoryStream(bytes), "real.pdf", bytes.Length, "Real");
             Assert.Null(result.Warning);
             var cover = await db.MediaAssets.SingleAsync(x => x.AssetType == MediaAssetType.Image);
-            using var image = SixLabors.ImageSharp.Image.Load(Path.Combine(root, cover.StorageKey!));
+            using var image = SkiaSharp.SKBitmap.Decode(Path.Combine(root, cover.StorageKey!));
             Assert.True(image.Width > 0);
             Assert.Equal(2, image.Height / image.Width);
             Assert.Equal(cover.Id, (await db.MediaAssets.SingleAsync(x => x.AssetType == MediaAssetType.Pdf)).CoverMediaAssetId);
