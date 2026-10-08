@@ -249,6 +249,7 @@ public sealed class AdminAuthenticationEndpointTests
                     builder.UseSetting(
                         "Authentication:Jwt:SigningKey",
                         SigningKey);
+                    builder.UseSetting("Authentication:Jwt:IdleTimeoutMinutes", "30");
                     builder.ConfigureTestServices(
                         services =>
                         {

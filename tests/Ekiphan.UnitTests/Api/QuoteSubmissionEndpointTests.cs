@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Ekiphan.Application.Quotes;
 using Ekiphan.Domain.Quotes;
+using Ekiphan.UnitTests.Quotes;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -99,6 +100,8 @@ public sealed class QuoteSubmissionEndpointTests
                         "Trusted_Connection=True");
                     if (repository is null)
                     {
+                        builder.UseSetting("QuoteConsent:KvkkVersion", "");
+                        builder.UseSetting("QuoteConsent:CommercialCommunicationVersion", "");
                         return;
                     }
 
@@ -113,6 +116,14 @@ public sealed class QuoteSubmissionEndpointTests
                         {
                             services.RemoveAll<IQuoteSubmissionRepository>();
                             services.RemoveAll<IQuoteRequestNumberGenerator>();
+                            services.RemoveAll<IBotVerificationService>();
+                            services.RemoveAll<IQuoteSpamDetectionService>();
+                            services.RemoveAll<IQuoteNotificationService>();
+                            services.RemoveAll<IQuoteActivityService>();
+                            services.AddSingleton<IBotVerificationService, QuoteSubmissionServiceTests.SuccessfulBotVerificationService>();
+                            services.AddSingleton<IQuoteSpamDetectionService, QuoteSubmissionServiceTests.AllowSpamDetectionService>();
+                            services.AddSingleton<IQuoteNotificationService, QuoteSubmissionServiceTests.NoOpNotificationService>();
+                            services.AddSingleton<IQuoteActivityService, QuoteSubmissionServiceTests.NoOpActivityService>();
                             services.AddSingleton<IQuoteSubmissionRepository>(
                                 repository);
                             services.AddSingleton<IQuoteRequestNumberGenerator>(

@@ -105,7 +105,7 @@ public sealed class QuoteManagementServiceTests
             new NoOpAuditLogService(),
             new StubTimeProvider());
 
-    private sealed class NoOpActivityService : IQuoteActivityService
+    internal sealed class NoOpActivityService : IQuoteActivityService
     {
         public Task LogAsync(Guid quoteId, QuoteActivityType activityType, Guid? actorUserId, string? previousValue, string? newValue, string description, object? metadata, QuoteRequestContext context, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
@@ -114,7 +114,7 @@ public sealed class QuoteManagementServiceTests
             Task.FromResult<IReadOnlyList<QuoteActivityDto>>([]);
     }
 
-    private sealed class NoOpAuditLogService : IAuditLogService
+    internal sealed class NoOpAuditLogService : IAuditLogService
     {
         public Task WriteAsync(Guid? actor, string action, string category, string entityType, string? entityId, Guid? target, object? oldValues, object? newValues, string? reason, AdminSecurityContext context, bool success, string? failure, CancellationToken ct) =>
             Task.CompletedTask;

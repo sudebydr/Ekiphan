@@ -197,25 +197,25 @@ public sealed class QuoteSubmissionServiceTests
         }
     }
 
-    private sealed class SuccessfulBotVerificationService : IBotVerificationService
+    internal sealed class SuccessfulBotVerificationService : IBotVerificationService
     {
         public Task<BotVerificationResult> VerifyAsync(string? token, string? ipAddress, CancellationToken cancellationToken = default) =>
             Task.FromResult(new BotVerificationResult(true, 1, null, null));
     }
 
-    private sealed class AllowSpamDetectionService : IQuoteSpamDetectionService
+    internal sealed class AllowSpamDetectionService : IQuoteSpamDetectionService
     {
         public Task<QuoteSpamCheckResult> CheckAsync(SubmitQuoteCommand command, QuoteRequestContext context, CancellationToken cancellationToken = default) =>
             Task.FromResult(new QuoteSpamCheckResult(false, 0, [], SpamRecommendedAction.Allow));
     }
 
-    private sealed class NoOpNotificationService : IQuoteNotificationService
+    internal sealed class NoOpNotificationService : IQuoteNotificationService
     {
         public Task QueueNewQuoteNotificationsAsync(Guid quoteId, QuoteRequestContext context, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
     }
 
-    private sealed class NoOpActivityService : IQuoteActivityService
+    internal sealed class NoOpActivityService : IQuoteActivityService
     {
         public Task LogAsync(Guid quoteId, QuoteActivityType activityType, Guid? actorUserId, string? previousValue, string? newValue, string description, object? metadata, QuoteRequestContext context, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;

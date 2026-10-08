@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 
@@ -113,7 +114,8 @@ public sealed class HttpHardeningTests
     private static WebApplicationFactory<Program> CreateFactory() =>
         new WebApplicationFactory<Program>()
             .WithWebHostBuilder(
-                builder => builder.UseSetting(
+                builder => builder.UseEnvironment("Testing")
+                    .UseSetting("MediaStorage:Provider", "Local").UseSetting(
                     "ConnectionStrings:EkiphanDatabase",
                     "Server=(localdb)\\mssqllocaldb;" +
                     "Database=HttpHardeningTests;" +

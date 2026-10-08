@@ -215,6 +215,10 @@ public sealed class AdminQuoteEndpointTests
                             services.RemoveAll<IAdminAuthenticationService>();
                             services.AddSingleton<IAdminAuthenticationService,
                                 TestAdminAuthenticationService>();
+                            services.RemoveAll<IQuoteActivityService>();
+                            services.RemoveAll<IAuditLogService>();
+                            services.AddSingleton<IQuoteActivityService, QuoteManagementServiceTests.NoOpActivityService>();
+                            services.AddSingleton<IAuditLogService, QuoteManagementServiceTests.NoOpAuditLogService>();
                             configureServices?.Invoke(services);
                         });
                 });
