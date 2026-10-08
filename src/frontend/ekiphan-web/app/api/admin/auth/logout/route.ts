@@ -63,7 +63,7 @@ export async function POST(request: NextRequest): Promise<Response> {
   );
   response.cookies.set("ekiphan_admin_access_token", "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.EKIPHAN_ALLOW_HTTP_AUTH !== "true" && process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: 0

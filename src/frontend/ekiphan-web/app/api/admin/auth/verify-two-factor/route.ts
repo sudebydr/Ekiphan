@@ -22,7 +22,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       return Response.json({ detail: "Doğrulama kodu geçersiz veya süresi dolmuş." }, { status: upstream.status || 401 });
     }
     const response = NextResponse.json({ displayName: result.displayName, permissions: result.permissions }, { headers: { "Cache-Control": "private, no-store", Pragma: "no-cache" } });
-    response.cookies.set(cookieName, result.accessToken, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", expires: new Date(result.expiresAt) });
+    response.cookies.set(cookieName, result.accessToken, { httpOnly: true, secure: process.env.EKIPHAN_ALLOW_HTTP_AUTH !== "true" && process.env.NODE_ENV === "production", sameSite: "lax", path: "/", expires: new Date(result.expiresAt) });
     return response;
   } catch {
     return Response.json({ detail: "Giriş servisine ulaşılamıyor." }, { status: 502 });

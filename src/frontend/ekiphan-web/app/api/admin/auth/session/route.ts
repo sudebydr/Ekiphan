@@ -56,7 +56,7 @@ export async function GET(): Promise<Response> {
     if (upstream.status === 401) {
       response.cookies.set(cookieName, "", {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: process.env.EKIPHAN_ALLOW_HTTP_AUTH !== "true" && process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
         maxAge: 0
