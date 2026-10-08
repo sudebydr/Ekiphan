@@ -50,8 +50,12 @@ internal static class CatalogPdfImportEndpoints
             await using var content = file.OpenReadStream();
             try
             {
-                var result = await service.UploadSingleAsync(content, Path.GetFileName(file.FileName), file.Length,
-                    form["title"].ToString(), ct);
+                var replaceId = form["replaceId"].ToString();
+                if (!string.IsNullOrWhiteSpace(replaceId) && !Guid.TryParse(replaceId, out _))
+                    return Problem(422, "Geçerli bir katalog kimliği gereklidir.");
+                var result = string.IsNullOrWhiteSpace(replaceId)
+                    ? await service.UploadSingleAsync(content, Path.GetFileName(file.FileName), file.Length, form["title"].ToString(), ct)
+                    : await service.ReplaceAsync(Guid.Parse(replaceId), content, Path.GetFileName(file.FileName), file.Length, form["title"].ToString(), ct);
                 return Results.Created(result.Url, result);
             }
             catch (ArgumentException ex) { return Problem(422, ex.Message); }

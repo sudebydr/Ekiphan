@@ -246,6 +246,17 @@
   color: #892a22;
 }
 
+.deleteDialog {
+  max-width: min(32rem, calc(100vw - 2rem));
+  padding: 1.5rem;
+  border: 1px solid #c8bda9;
+  border-radius: 0.75rem;
+}
+
+.deleteDialog::backdrop {
+  background: rgb(0 0 0 / 45%);
+}
+
 .srOnly {
   position: absolute;
   width: 1px;

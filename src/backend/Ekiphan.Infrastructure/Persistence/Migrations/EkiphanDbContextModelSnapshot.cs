@@ -328,6 +328,42 @@ namespace Ekiphan.Infrastructure.Persistence.Migrations
                     b.ToTable("CategoryTranslations", (string)null);
                 });
 
+            modelBuilder.Entity("Ekiphan.Domain.Catalog.PendingProductRelation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("RelationType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SourceProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("TargetNormalizedSku")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TargetNormalizedSku");
+
+                    b.HasIndex("SourceProductId", "TargetNormalizedSku", "RelationType")
+                        .IsUnique();
+
+                    b.ToTable("PendingProductRelations", (string)null);
+                });
+
             modelBuilder.Entity("Ekiphan.Domain.Catalog.Product", b =>
                 {
                     b.Property<Guid>("Id")
@@ -348,6 +384,9 @@ namespace Ekiphan.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByImportJobId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
@@ -418,6 +457,8 @@ namespace Ekiphan.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BrandId");
+
+                    b.HasIndex("CreatedByImportJobId");
 
                     b.HasIndex("ImportedByBatchId");
 
@@ -3887,6 +3928,9 @@ namespace Ekiphan.Infrastructure.Persistence.Migrations
                     b.Property<int>("AssetType")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("CoverMediaAssetId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -3965,6 +4009,8 @@ namespace Ekiphan.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CoverMediaAssetId");
 
                     b.HasIndex("CreatedAt");
 
@@ -5296,12 +5342,26 @@ namespace Ekiphan.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Ekiphan.Domain.Catalog.PendingProductRelation", b =>
+                {
+                    b.HasOne("Ekiphan.Domain.Catalog.Product", null)
+                        .WithMany()
+                        .HasForeignKey("SourceProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Ekiphan.Domain.Catalog.Product", b =>
                 {
                     b.HasOne("Ekiphan.Domain.Catalog.Brand", null)
                         .WithMany()
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Ekiphan.Domain.DataImport.ImportJob", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByImportJobId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Ekiphan.Domain.DataImport.ImportBatch", null)
                         .WithMany()
@@ -5856,6 +5916,14 @@ namespace Ekiphan.Infrastructure.Persistence.Migrations
                         .HasForeignKey("MediaAssetId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Ekiphan.Domain.Media.MediaAsset", b =>
+                {
+                    b.HasOne("Ekiphan.Domain.Media.MediaAsset", null)
+                        .WithMany()
+                        .HasForeignKey("CoverMediaAssetId")
+                        .OnDelete(DeleteBehavior.NoAction);
                 });
 
             modelBuilder.Entity("Ekiphan.Domain.Media.MediaAssetTranslation", b =>

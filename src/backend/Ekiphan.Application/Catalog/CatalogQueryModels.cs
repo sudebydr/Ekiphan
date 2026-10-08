@@ -12,7 +12,8 @@ public sealed record CatalogProductQuery(
     string? BrandSlug = null,
     string? TagSlug = null,
     CatalogProductSort Sort = CatalogProductSort.Name,
-    IReadOnlyList<CatalogAttributeFilter>? AttributeFilters = null);
+    IReadOnlyList<CatalogAttributeFilter>? AttributeFilters = null,
+    string? UsageArea = null);
 
 public sealed record CatalogAttributeFilter(Guid AttributeId, string Value);
 
@@ -118,7 +119,8 @@ public sealed record CatalogNavigation(
     IReadOnlyList<CatalogSectionNavigationItem> Sections,
     IReadOnlyList<CatalogCategoryNavigationItem> Categories,
     IReadOnlyList<CatalogBrandSummary> Brands,
-    IReadOnlyList<CatalogTagSummary> Tags);
+    IReadOnlyList<CatalogTagSummary> Tags,
+    IReadOnlyList<CatalogTagSummary>? UsageAreas = null);
 
 public sealed record CatalogSectionNavigationItem(
     Guid Id,

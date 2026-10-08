@@ -22,9 +22,10 @@ internal sealed class CatalogQueryService(
             .Where(section =>
                 section.IsPublished &&
                 section.Translations.Any(translation =>
-                    translation.LanguageCode == language))
+                    (translation.LanguageCode == language || translation.LanguageCode == "tr")))
             .SelectMany(section => section.Translations
-                .Where(translation => translation.LanguageCode == language)
+                .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr" &&
+                    !section.Translations.Any(text => text.LanguageCode == language))
                 .Select(translation => new
                 {
                     section.SortOrder,
@@ -50,9 +51,10 @@ internal sealed class CatalogQueryService(
             .Where(category =>
                 sectionIds.Contains(category.ProductSectionId) &&
                 category.Translations.Any(translation =>
-                    translation.LanguageCode == language))
+                    (translation.LanguageCode == language || translation.LanguageCode == "tr")))
             .SelectMany(category => category.Translations
-                .Where(translation => translation.LanguageCode == language)
+                .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr" &&
+                    !category.Translations.Any(text => text.LanguageCode == language))
                 .Select(translation => new
                 {
                     category.SortOrder,
@@ -102,11 +104,11 @@ internal sealed class CatalogQueryService(
             .AsNoTracking()
             .Where(product =>
                 product.IsPublished &&
-                product.PrimaryCategoryId.HasValue &&
-                navigationCategoryIds.Contains(product.PrimaryCategoryId.Value) &&
                 product.Translations.Any(translation =>
-                    translation.LanguageCode == language))
-            .GroupBy(product => product.PrimaryCategoryId!.Value)
+                    translation.LanguageCode == language || translation.LanguageCode == "tr"))
+            .SelectMany(product => product.Categories)
+            .Where(link => navigationCategoryIds.Contains(link.CategoryId))
+            .GroupBy(link => link.CategoryId)
             .Select(group => new { CategoryId = group.Key, Count = group.Count() })
             .ToDictionaryAsync(item => item.CategoryId, item => item.Count,
                 cancellationToken);
@@ -118,19 +120,16 @@ internal sealed class CatalogQueryService(
         var brandRows = await dbContext.Brands
             .AsNoTracking()
             .Where(brand =>
-                brand.IsPublished &&
-                brand.Translations.Any(translation =>
-                    translation.LanguageCode == language))
+                dbContext.Products.Any(product => product.BrandId == brand.Id && product.IsPublished))
             .Select(brand => new
             {
                 brand.SortOrder,
                 brand.Id,
                 brand.Name,
                 Slug = brand.Translations
-                    .Where(translation =>
-                        translation.LanguageCode == language)
+                    .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                     .Select(translation => translation.Slug)
-                    .Single(),
+                    .SingleOrDefault(),
             })
             .OrderBy(item => item.SortOrder)
             .ThenBy(item => item.Name)
@@ -139,42 +138,23 @@ internal sealed class CatalogQueryService(
             .Select(item => new CatalogBrandSummary(
                 item.Id,
                 item.Name,
-                item.Slug))
+                item.Slug ?? item.Id.ToString()))
             .ToArray();
 
-        var tagRows = await dbContext.Tags
+        var usageValues = await dbContext.ProductAttributeValues
             .AsNoTracking()
-            .Where(tag =>
-                tag.IsActive &&
-                tag.Translations.Any(translation =>
-                    translation.LanguageCode == language))
-            .Select(tag => new
-            {
-                tag.Id,
-                tag.Code,
-                Name = tag.Translations
-                    .Where(translation =>
-                        translation.LanguageCode == language)
-                    .Select(translation => translation.Name)
-                    .Single(),
-                Slug = tag.Translations
-                    .Where(translation =>
-                        translation.LanguageCode == language)
-                    .Select(translation => translation.Slug)
-                    .Single(),
-            })
-            .OrderBy(tag => tag.Name)
-            .ThenBy(tag => tag.Id)
+            .Where(value => value.TextValue != null &&
+                dbContext.Attributes.Any(attribute => attribute.Id == value.AttributeId &&
+                    attribute.Code == "IMPORT_USAGE_AREA") &&
+                dbContext.Products.Any(product => product.Id == value.ProductId && product.IsPublished))
+            .Select(value => value.TextValue!)
+            .Distinct()
             .ToListAsync(cancellationToken);
-        var tags = tagRows
-            .Select(item => new CatalogTagSummary(
-                item.Id,
-                item.Code,
-                item.Name,
-                item.Slug))
+        var tags = usageValues.OrderBy(value => value)
+            .Select(value => new CatalogTagSummary(Guid.Empty, "IMPORT_USAGE_AREA", value, value))
             .ToArray();
 
-        return new CatalogNavigation(sections, categories, brands, tags);
+        return new CatalogNavigation(sections, categories, brands, [], tags);
     }
 
     public async Task<IReadOnlyList<CatalogBrandListItem>> GetBrandsAsync(
@@ -188,10 +168,9 @@ internal sealed class CatalogQueryService(
             .Where(brand =>
                 brand.IsPublished &&
                 brand.Translations.Any(translation =>
-                    translation.LanguageCode == language))
+                    (translation.LanguageCode == language || translation.LanguageCode == "tr")))
             .SelectMany(brand => brand.Translations
-                .Where(translation =>
-                    translation.LanguageCode == language)
+                .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                 .Select(translation => new
                 {
                     brand.Id,
@@ -238,11 +217,11 @@ internal sealed class CatalogQueryService(
             .Where(item =>
                 item.IsPublished &&
                 item.Translations.Any(translation =>
-                    translation.LanguageCode == language &&
+                    (translation.LanguageCode == language || translation.LanguageCode == "tr") &&
                     translation.Slug == normalizedSlug))
             .SelectMany(item => item.Translations
                 .Where(translation =>
-                    translation.LanguageCode == language &&
+                    (translation.LanguageCode == language || translation.LanguageCode == "tr") &&
                     translation.Slug == normalizedSlug)
                 .Select(translation => new
                 {
@@ -265,10 +244,9 @@ internal sealed class CatalogQueryService(
                 product.BrandId == brand.Id &&
                 product.IsPublished &&
                 product.Translations.Any(translation =>
-                    translation.LanguageCode == language))
+                    (translation.LanguageCode == language || translation.LanguageCode == "tr")))
             .OrderBy(product => product.Translations
-                .Where(translation =>
-                    translation.LanguageCode == language)
+                .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                 .Select(translation => translation.Name)
                 .Single())
             .ThenBy(product => product.Id)
@@ -276,18 +254,15 @@ internal sealed class CatalogQueryService(
                 product.Id,
                 product.SKU,
                 product.Translations
-                    .Where(translation =>
-                        translation.LanguageCode == language)
+                    .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                     .Select(translation => translation.Name)
                     .Single(),
                 product.Translations
-                    .Where(translation =>
-                        translation.LanguageCode == language)
+                    .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                     .Select(translation => translation.Slug)
                     .Single(),
                 product.Translations
-                    .Where(translation =>
-                        translation.LanguageCode == language)
+                    .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                     .Select(translation => translation.ShortDescription)
                     .Single(),
                 new CatalogBrandSummary(
@@ -299,8 +274,7 @@ internal sealed class CatalogQueryService(
                         category.Id == product.PrimaryCategoryId &&
                         category.IsPublished)
                     .SelectMany(category => category.Translations
-                        .Where(translation =>
-                            translation.LanguageCode == language)
+                        .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                         .Select(translation =>
                             new CatalogCategorySummary(
                                 category.Id,
@@ -339,8 +313,7 @@ internal sealed class CatalogQueryService(
                 category => category.Id,
                 (productCategory, category) => category)
             .SelectMany(category => category.Translations
-                .Where(translation =>
-                    translation.LanguageCode == language)
+                .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                 .Select(translation => new
                 {
                     category.Id,
@@ -390,18 +363,18 @@ internal sealed class CatalogQueryService(
             .Where(product =>
                 product.IsPublished &&
                 product.Translations.Any(translation =>
-                    translation.LanguageCode == language));
+                    (translation.LanguageCode == language || translation.LanguageCode == "tr")));
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var search = request.Search.Trim();
             products = products.Where(product =>
-                product.SKU.Contains(search) ||
+                EF.Functions.Collate(product.SKU, "Latin1_General_100_CI_AI").Contains(search) ||
                 product.Translations.Any(translation =>
-                    translation.LanguageCode == language &&
-                    (translation.Name.Contains(search) ||
+                    (translation.LanguageCode == language || translation.LanguageCode == "tr") &&
+                    (EF.Functions.Collate(translation.Name, "Latin1_General_100_CI_AI").Contains(search) ||
                      translation.ShortDescription != null &&
-                     translation.ShortDescription.Contains(search))));
+                     EF.Functions.Collate(translation.ShortDescription, "Latin1_General_100_CI_AI").Contains(search))));
         }
 
         if (!string.IsNullOrWhiteSpace(request.SectionSlug))
@@ -415,7 +388,7 @@ internal sealed class CatalogQueryService(
                             section.Id == category.ProductSectionId &&
                             section.IsPublished &&
                             section.Translations.Any(translation =>
-                                translation.LanguageCode == language &&
+                                (translation.LanguageCode == language || translation.LanguageCode == "tr") &&
                                 translation.Slug == slug)))));
         }
 
@@ -424,12 +397,13 @@ internal sealed class CatalogQueryService(
             var slug = request.CategorySlug.Trim().ToLowerInvariant();
             var categoryLocations = await dbContext.Categories
                 .AsNoTracking()
-                .SelectMany(category => category.Translations
-                    .Where(translation => translation.LanguageCode == language)
-                    .Select(translation => new CategoryLocation(
+                .Select(category => new CategoryLocation(
                         category.Id,
                         category.ParentId,
-                        translation.Slug)))
+                        category.Translations
+                            .Where(text => text.LanguageCode == language || text.LanguageCode == "tr")
+                            .OrderByDescending(text => text.LanguageCode == language)
+                            .Select(text => text.Slug).First()))
                 .ToListAsync(cancellationToken);
             var selected = categoryLocations.SingleOrDefault(category =>
                 category.Slug == slug);
@@ -437,34 +411,37 @@ internal sealed class CatalogQueryService(
                 ? Array.Empty<Guid>()
                 : GetDescendantCategoryIds(selected.Id, categoryLocations);
             products = products.Where(product =>
-                product.PrimaryCategoryId.HasValue &&
-                categoryIds.Contains(product.PrimaryCategoryId.Value));
+                product.Categories.Any(link => categoryIds.Contains(link.CategoryId)));
         }
 
         if (!string.IsNullOrWhiteSpace(request.BrandSlug))
         {
             var slug = request.BrandSlug.Trim().ToLowerInvariant();
+            var brandId = Guid.TryParse(slug, out var parsedBrandId) ? parsedBrandId : Guid.Empty;
             products = products.Where(product =>
                 product.BrandId.HasValue &&
                 dbContext.Brands.Any(brand =>
                     brand.Id == product.BrandId &&
-                    brand.IsPublished &&
-                    brand.Translations.Any(translation =>
-                        translation.LanguageCode == language &&
-                        translation.Slug == slug)));
+                    (brand.Id == brandId || brand.Translations.Any(translation =>
+                        (translation.LanguageCode == language || translation.LanguageCode == "tr") &&
+                        translation.Slug == slug))));
         }
 
         if (!string.IsNullOrWhiteSpace(request.TagSlug))
         {
-            var slug = request.TagSlug.Trim().ToLowerInvariant();
+            var slug = request.TagSlug.Trim();
+            products = products.Where(product => product.Tags.Any(link =>
+                dbContext.Tags.Any(tag => tag.Id == link.TagId && tag.IsActive &&
+                    tag.Translations.Any(text => (text.LanguageCode == language || text.LanguageCode == "tr") && text.Slug == slug))));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.UsageArea))
+        {
+            var usage = request.UsageArea.Trim();
             products = products.Where(product =>
-                product.Tags.Any(productTag =>
-                    dbContext.Tags.Any(tag =>
-                        tag.Id == productTag.TagId &&
-                        tag.IsActive &&
-                        tag.Translations.Any(translation =>
-                            translation.LanguageCode == language &&
-                            translation.Slug == slug))));
+                dbContext.ProductAttributeValues.Any(value => value.ProductId == product.Id &&
+                    value.TextValue == usage && dbContext.Attributes.Any(attribute =>
+                        attribute.Id == value.AttributeId && attribute.Code == "IMPORT_USAGE_AREA")));
         }
 
         products = ApplyAttributeFilters(products, request.AttributeFilters);
@@ -474,8 +451,7 @@ internal sealed class CatalogQueryService(
         {
             CatalogProductSort.NameDescending =>
                 products.OrderByDescending(product => product.Translations
-                        .Where(translation =>
-                            translation.LanguageCode == language)
+                        .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                         .Select(translation => translation.Name)
                         .Single())
                     .ThenBy(product => product.Id),
@@ -483,8 +459,7 @@ internal sealed class CatalogQueryService(
                 products.OrderByDescending(product => product.UpdatedAt)
                     .ThenBy(product => product.Id),
             _ => products.OrderBy(product => product.Translations
-                    .Where(translation =>
-                        translation.LanguageCode == language)
+                    .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                     .Select(translation => translation.Name)
                     .Single())
                 .ThenBy(product => product.Id),
@@ -494,27 +469,25 @@ internal sealed class CatalogQueryService(
             product.Id,
             product.SKU,
             product.Translations
-                .Where(translation => translation.LanguageCode == language)
+                .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                 .Select(translation => translation.Name)
                 .Single(),
             product.Translations
-                .Where(translation => translation.LanguageCode == language)
+                .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                 .Select(translation => translation.Slug)
                 .Single(),
             product.Translations
-                .Where(translation => translation.LanguageCode == language)
+                .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                 .Select(translation => translation.ShortDescription)
                 .Single(),
             dbContext.Brands
                 .Where(brand =>
-                    brand.Id == product.BrandId &&
-                    brand.IsPublished)
+                    brand.Id == product.BrandId)
                 .Select(brand => new CatalogBrandSummary(
                     brand.Id,
                     brand.Name,
                     brand.Translations
-                        .Where(translation =>
-                            translation.LanguageCode == language)
+                        .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                         .Select(translation => translation.Slug)
                         .SingleOrDefault()))
                 .SingleOrDefault(),
@@ -522,8 +495,7 @@ internal sealed class CatalogQueryService(
                 .Where(category =>
                     category.Id == product.PrimaryCategoryId)
                 .Select(category => category.Translations
-                    .Where(translation =>
-                        translation.LanguageCode == language)
+                    .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                     .Select(translation => new CatalogCategorySummary(
                         category.Id,
                         translation.Name,
@@ -568,9 +540,9 @@ internal sealed class CatalogQueryService(
         var result = new HashSet<Guid> { rootId };
         var pending = new Queue<Guid>();
         pending.Enqueue(rootId);
-        while (pending.TryDequeue(out var parentId) &&
-               childrenByParent.TryGetValue(parentId, out var children))
+        while (pending.TryDequeue(out var parentId))
         {
+            if (!childrenByParent.TryGetValue(parentId, out var children)) continue;
             foreach (var childId in children)
             {
                 if (result.Add(childId)) pending.Enqueue(childId);
@@ -627,9 +599,8 @@ internal sealed class CatalogQueryService(
         var language = languageCode.ToLowerInvariant();
         var slug = categorySlug.Trim().ToLowerInvariant();
         var categoryId = await dbContext.Categories.AsNoTracking()
-            .Where(category => category.IsPublished &&
-                category.Translations.Any(text =>
-                    text.LanguageCode == language && text.Slug == slug))
+            .Where(category => category.Translations.Any(text =>
+                    (text.LanguageCode == language || text.LanguageCode == "tr") && text.Slug == slug))
             .Select(category => (Guid?)category.Id)
             .SingleOrDefaultAsync(cancellationToken);
         if (!categoryId.HasValue)
@@ -642,7 +613,7 @@ internal sealed class CatalogQueryService(
                 assignment.IsFilterable)
             .Join(dbContext.Attributes.AsNoTracking().Where(attribute =>
                     attribute.IsActive &&
-                    attribute.Translations.Any(text => text.LanguageCode == language)),
+                    attribute.Translations.Any(text => text.LanguageCode == language || text.LanguageCode == "tr")),
                 assignment => assignment.AttributeId,
                 attribute => attribute.Id,
                 (assignment, attribute) => new
@@ -651,8 +622,7 @@ internal sealed class CatalogQueryService(
                     attribute.Code,
                     attribute.DataType,
                     assignment.SortOrder,
-                    Name = attribute.Translations.Where(text =>
-                        text.LanguageCode == language).Select(text => text.Name).Single()
+                    Name = attribute.Translations.Where(text => text.LanguageCode == language || text.LanguageCode == "tr").OrderByDescending(text => text.LanguageCode == language).Take(1).Select(text => text.Name).Single()
                 })
             .OrderBy(item => item.SortOrder).ThenBy(item => item.Name)
             .Take(50)
@@ -668,7 +638,7 @@ internal sealed class CatalogQueryService(
                 dbContext.Products.Any(product =>
                     product.Id == value.ProductId &&
                     product.IsPublished &&
-                    product.Translations.Any(text => text.LanguageCode == language) &&
+                    product.Translations.Any(text => text.LanguageCode == language || text.LanguageCode == "tr") &&
                     product.Categories.Any(link => link.CategoryId == categoryId)))
             .Select(value => new
             {
@@ -679,8 +649,7 @@ internal sealed class CatalogQueryService(
                 value.AttributeOptionId,
                 OptionName = dbContext.Set<AttributeOption>()
                     .Where(option => option.Id == value.AttributeOptionId && option.IsActive)
-                    .Select(option => option.Translations.Where(text =>
-                        text.LanguageCode == language).Select(text => text.Name)
+                    .Select(option => option.Translations.Where(text => text.LanguageCode == language || text.LanguageCode == "tr").OrderByDescending(text => text.LanguageCode == language).Take(1).Select(text => text.Name)
                         .SingleOrDefault()).SingleOrDefault(),
                 UnitSymbol = dbContext.Units.Where(unit => unit.Id == value.UnitId)
                     .Select(unit => unit.Symbol).SingleOrDefault()
@@ -838,11 +807,11 @@ internal sealed class CatalogQueryService(
             .Where(product =>
                 product.IsPublished &&
                 product.Translations.Any(translation =>
-                    translation.LanguageCode == language &&
+                    (translation.LanguageCode == language || translation.LanguageCode == "tr") &&
                     !translation.NoIndex))
             .SelectMany(product => product.Translations
-                .Where(translation => translation.LanguageCode == language &&
-                    !translation.NoIndex)
+                .Where(translation => (translation.LanguageCode == language || translation.LanguageCode == "tr") &&
+                    !translation.NoIndex).OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                 .Select(translation => new CatalogSitemapEntry(
                     translation.Slug,
                     product.UpdatedAt,
@@ -853,8 +822,8 @@ internal sealed class CatalogQueryService(
         var categories = await dbContext.Categories.AsNoTracking()
             .Where(category => category.IsPublished)
             .SelectMany(category => category.Translations
-                .Where(translation => translation.LanguageCode == language &&
-                    !translation.NoIndex)
+                .Where(translation => (translation.LanguageCode == language || translation.LanguageCode == "tr") &&
+                    !translation.NoIndex).OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                 .Select(translation => new CatalogSitemapEntry(
                     translation.Slug, category.UpdatedAt, "category")))
             .OrderBy(item => item.Slug)
@@ -878,7 +847,7 @@ internal sealed class CatalogQueryService(
             .Where(item =>
                 item.IsPublished &&
                 item.Translations.Any(translation =>
-                    translation.LanguageCode == language &&
+                    (translation.LanguageCode == language || translation.LanguageCode == "tr") &&
                     translation.Slug == normalizedSlug))
             .Select(item => new
             {
@@ -887,8 +856,7 @@ internal sealed class CatalogQueryService(
                 item.BrandId,
                 item.UpdatedAt,
                 Translation = item.Translations
-                    .Where(translation =>
-                        translation.LanguageCode == language)
+                    .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                     .Select(translation => new
                     {
                         translation.Name,
@@ -926,14 +894,12 @@ internal sealed class CatalogQueryService(
         var brand = await dbContext.Brands
             .AsNoTracking()
             .Where(item =>
-                item.Id == product.BrandId &&
-                item.IsPublished)
+                item.Id == product.BrandId)
             .Select(item => new CatalogBrandSummary(
                 item.Id,
                 item.Name,
                 item.Translations
-                    .Where(translation =>
-                        translation.LanguageCode == language)
+                    .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                     .Select(translation => translation.Slug)
                     .SingleOrDefault()))
             .SingleOrDefaultAsync(cancellationToken);
@@ -954,8 +920,7 @@ internal sealed class CatalogQueryService(
                     category.Translations,
                 })
             .SelectMany(item => item.Translations
-                .Where(translation =>
-                    translation.LanguageCode == language)
+                .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                 .Select(translation => new
                 {
                     item.IsPrimary,
@@ -991,8 +956,7 @@ internal sealed class CatalogQueryService(
                     tag.Translations,
                 })
             .SelectMany(item => item.Translations
-                .Where(translation =>
-                    translation.LanguageCode == language)
+                .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                 .Select(translation => new
                 {
                     item.SortOrder,
@@ -1019,7 +983,7 @@ internal sealed class CatalogQueryService(
                 dbContext.Attributes.Where(attribute =>
                     attribute.IsActive &&
                     attribute.Translations.Any(translation =>
-                        translation.LanguageCode == language)),
+                        (translation.LanguageCode == language || translation.LanguageCode == "tr"))),
                 value => value.AttributeId,
                 attribute => attribute.Id,
                 (value, attribute) => new
@@ -1028,8 +992,7 @@ internal sealed class CatalogQueryService(
                     Attribute = attribute,
                 })
             .OrderBy(item => item.Attribute.Translations
-                .Where(translation =>
-                    translation.LanguageCode == language)
+                .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                 .Select(translation => translation.Name)
                 .Single())
             .ThenBy(item => item.Value.Sequence)
@@ -1037,8 +1000,7 @@ internal sealed class CatalogQueryService(
                 item.Value.Id,
                 item.Attribute.Id,
                 item.Attribute.Translations
-                    .Where(translation =>
-                        translation.LanguageCode == language)
+                    .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                     .Select(translation => translation.Name)
                     .Single(),
                 item.Attribute.DataType,
@@ -1052,8 +1014,7 @@ internal sealed class CatalogQueryService(
                         option.Id == item.Value.AttributeOptionId &&
                         option.IsActive)
                     .Select(option => option.Translations
-                        .Where(translation =>
-                            translation.LanguageCode == language)
+                        .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                         .Select(translation => translation.Name)
                         .SingleOrDefault())
                     .SingleOrDefault(),
@@ -1118,7 +1079,7 @@ internal sealed class CatalogQueryService(
         var relations = await dbContext.ProductRelations
             .AsNoTracking()
             .Where(relation =>
-                relation.IsActive &&
+                relation.IsActive && relation.SourceProductId != relation.TargetProductId &&
                 relation.Origin == ProductRelationOrigin.Manual &&
                 relation.RelationType == relationType &&
                 (relation.SourceProductId == productId ||
@@ -1152,35 +1113,30 @@ internal sealed class CatalogQueryService(
                 relatedIds.Contains(item.Id) &&
                 item.IsPublished &&
                 item.Translations.Any(translation =>
-                    translation.LanguageCode == language))
+                    (translation.LanguageCode == language || translation.LanguageCode == "tr")))
             .Select(item => new CatalogProductSummary(
                 item.Id,
                 item.SKU,
                 item.Translations
-                    .Where(translation =>
-                        translation.LanguageCode == language)
+                    .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                     .Select(translation => translation.Name)
                     .Single(),
                 item.Translations
-                    .Where(translation =>
-                        translation.LanguageCode == language)
+                    .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                     .Select(translation => translation.Slug)
                     .Single(),
                 item.Translations
-                    .Where(translation =>
-                        translation.LanguageCode == language)
+                    .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                     .Select(translation => translation.ShortDescription)
                     .Single(),
                 dbContext.Brands
                     .Where(brand =>
-                        brand.Id == item.BrandId &&
-                        brand.IsPublished)
+                        brand.Id == item.BrandId)
                     .Select(brand => new CatalogBrandSummary(
                         brand.Id,
                         brand.Name,
                         brand.Translations
-                            .Where(translation =>
-                                translation.LanguageCode == language)
+                            .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                             .Select(translation => translation.Slug)
                             .SingleOrDefault()))
                     .SingleOrDefault(),
@@ -1189,8 +1145,7 @@ internal sealed class CatalogQueryService(
                         category.Id == item.PrimaryCategoryId &&
                         category.IsPublished)
                     .Select(category => category.Translations
-                        .Where(translation =>
-                            translation.LanguageCode == language)
+                        .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                         .Select(translation => new CatalogCategorySummary(
                             category.Id,
                             translation.Name,
@@ -1254,8 +1209,8 @@ internal sealed class CatalogQueryService(
                 })
             .SelectMany(item => item.Asset.Translations
                 .Where(translation =>
-                    translation.LanguageCode == language &&
-                    translation.AltText != null)
+                    (translation.LanguageCode == language || translation.LanguageCode == "tr") &&
+                    translation.AltText != null).OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                 .Select(translation => new
                 {
                     item.ProductId,
@@ -1320,8 +1275,8 @@ internal sealed class CatalogQueryService(
                 })
             .SelectMany(item => item.Translations
                 .Where(translation =>
-                    translation.LanguageCode == language &&
-                    translation.AltText != null)
+                    (translation.LanguageCode == language || translation.LanguageCode == "tr") &&
+                    translation.AltText != null).OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                 .Select(translation => new
                 {
                     item.BrandId,
@@ -1373,8 +1328,7 @@ internal sealed class CatalogQueryService(
                     asset.Translations,
                 })
             .SelectMany(item => item.Translations
-                .Where(translation =>
-                    translation.LanguageCode == language)
+                .Where(translation => translation.LanguageCode == language || translation.LanguageCode == "tr").OrderByDescending(translation => translation.LanguageCode == language).Take(1)
                 .Select(translation => new
                 {
                     item.SortOrder,
@@ -1413,6 +1367,7 @@ internal sealed class CatalogQueryService(
         ValidateOptionalText(request.CategorySlug, 250, nameof(request.CategorySlug));
         ValidateOptionalText(request.BrandSlug, 200, nameof(request.BrandSlug));
         ValidateOptionalText(request.TagSlug, 200, nameof(request.TagSlug));
+        ValidateOptionalText(request.UsageArea, 2000, nameof(request.UsageArea));
         if (!Enum.IsDefined(request.Sort))
         {
             throw new ArgumentOutOfRangeException(nameof(request));

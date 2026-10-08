@@ -189,6 +189,7 @@ public static class DependencyInjection
         services.AddScoped<IImportIssueReportWriter, ImportIssueCsvWriter>();
         services.AddScoped<IImportPublishingRepository, ImportPublishingRepository>();
         services.AddScoped<ImportPublishingService>();
+        services.AddScoped<IImportDeletionService, ImportDeletionService>();
         services.AddScoped<IImportReferenceResolver, ImportReferenceResolver>();
         services.AddScoped<ImportStagingService>();
         services.AddSingleton<IProductImportMappingService, ProductImportMappingService>();

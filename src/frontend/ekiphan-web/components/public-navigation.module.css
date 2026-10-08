@@ -181,8 +181,6 @@
     transform 180ms ease;
 }
 
-.productsMenu:hover .productsSubmenu,
-.productsMenu:focus-within .productsSubmenu,
 .productsMenu[open] .productsSubmenu {
   opacity: 1;
 
@@ -292,8 +290,6 @@
    Hover / focus / açık details
 */
 
-.productsMenuMega:hover .productsMegaPanel,
-.productsMenuMega:focus-within .productsMegaPanel,
 .productsMenuMega[open] .productsMegaPanel {
   display: block;
 
@@ -898,6 +894,8 @@
 .mobileNavUtilities {
   display: none;
 }
+
+@media(min-width:901px) { .productsMenuMega .productsMegaPanel { width:min(52rem,calc(100vw - 3rem))!important; max-width:calc(100vw - 3rem)!important; padding:1.5rem!important; } }
 
 @media (max-width: 900px) {
   .mobileNavUtilities {

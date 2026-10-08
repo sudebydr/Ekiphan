@@ -62,7 +62,7 @@ export async function generateMetadata({ params, searchParams }: {
   try {
     const product = await getProduct(slug, language);
     const description = product.metaDescription ?? product.shortDescription ?? `${product.name} ürün özellikleri ve detayları.`;
-    const path = `/katalog/${encodeURIComponent(product.slug)}`;
+    const path = `${en ? "/en/products" : "/katalog"}/${encodeURIComponent(product.slug)}`;
     return {
       title: product.metaTitle ?? product.name,
       description,
@@ -70,13 +70,13 @@ export async function generateMetadata({ params, searchParams }: {
         canonical: product.canonicalUrl ?? path,
         languages: Object.fromEntries((product.alternates ?? []).map((item) => [
           item.languageCode === "tr" ? "tr-TR" : "en",
-          `/katalog/${encodeURIComponent(item.slug)}?lang=${item.languageCode}`
+          `${item.languageCode === "en" ? "/en/products" : "/katalog"}/${encodeURIComponent(item.slug)}`
         ]))
       },
       robots: { index: !product.noIndex, follow: !product.noFollow },
       openGraph: {
         type: "website",
-        locale: "tr_TR",
+        locale: en ? "en_US" : "tr_TR",
         title: product.openGraphTitle ?? product.metaTitle ?? product.name,
         description: product.openGraphDescription ?? description,
         url: product.canonicalUrl ?? path,
@@ -133,8 +133,8 @@ export default async function ProductDetailPage({ params, searchParams }: {
   const category = product.categories[0]?.name ?? "—";
   const specs = quickSpecifications(product, en);
   const groups = groupedAttributes(product.attributes, en);
-  const similar = uniqueProducts(product.similarProducts);
-  const complementary = uniqueProducts(product.complementaryProducts);
+  const similar = uniqueProducts(product.similarProducts.filter(item => item.id !== product.id));
+  const complementary = uniqueProducts(product.complementaryProducts.filter(item => item.id !== product.id));
   const applicationAreas = product.attributes
     .filter(attribute => attribute.name.toLocaleLowerCase(en ? "en-US" : "tr-TR").includes(en ? "application area" : "kullanım alan"))
     .map((attribute) => attributeValue(attribute, en)).filter(value => value !== "—");

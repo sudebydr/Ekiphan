@@ -44,6 +44,7 @@ public sealed class EkiphanDbContext(DbContextOptions<EkiphanDbContext> options)
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
 
     public DbSet<ProductRelation> ProductRelations => Set<ProductRelation>();
+    public DbSet<PendingProductRelation> PendingProductRelations => Set<PendingProductRelation>();
 
     public DbSet<MediaAsset> MediaAssets => Set<MediaAsset>();
     public DbSet<MediaVariant> MediaVariants => Set<MediaVariant>();

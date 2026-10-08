@@ -174,8 +174,7 @@
   overflow: hidden;
   background: #f7f4ef;
   filter: saturate(0.88) contrast(1.02);
-  transform: scale(1.001);
-  transition: transform 700ms cubic-bezier(.2,.7,.2,1), filter 500ms ease;
+  transition: filter 500ms ease;
 }
 .cover img{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center;pointer-events:none}
 .coverPlaceholder{display:grid;width:100%;height:100%;place-items:center;color:#8b2440;font-size:1rem;font-weight:800;letter-spacing:.16em}
@@ -190,7 +189,6 @@
 .catalogCard:hover .cover,
 .catalogCard:focus-visible .cover {
   filter: saturate(1) contrast(1.03);
-  transform: scale(1.055);
 }
 
 .cardContent {

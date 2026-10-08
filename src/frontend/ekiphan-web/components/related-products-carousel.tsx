@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import styles from "../app/katalog/product-detail.module.css";
 
 type Item = { id: string; slug: string; name: string; sku: string; category: string; brand: string; image?: { url: string; altText: string } | null };
@@ -35,7 +35,7 @@ export function RelatedProductsCarousel({ items, locale = "tr" }: { items: Item[
   useEffect(() => setIndex((current) => Math.min(current, Math.max(0, items.length - perView))), [items.length, perView]);
   if (!items.length) return null;
 
-  return <div className={styles.relatedCarousel}>
+  return <div className={styles.relatedCarousel} style={{ "--related-per-view": perView } as CSSProperties}>
     <button type="button" className={`${styles.relatedArrow} ${styles.relatedPrev}`} onClick={() => move(-1)} disabled={index === 0} aria-label={en ? "Previous products" : "Önceki ürünler"}>←</button>
     <div className={styles.relatedViewport} ref={viewportRef} onTouchStart={(event) => { touchStart.current = event.touches[0]?.clientX ?? null; }} onTouchEnd={(event) => { const start = touchStart.current; const end = event.changedTouches[0]?.clientX; if (start !== null && end !== undefined && Math.abs(start - end) > 42) move(start > end ? 1 : -1); touchStart.current = null; }}>
       <div className={styles.relatedTrack} style={{ transform: `translateX(-${index * step}px)` }}>

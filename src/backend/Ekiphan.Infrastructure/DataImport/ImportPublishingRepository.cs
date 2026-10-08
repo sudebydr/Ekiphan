@@ -218,99 +218,116 @@ internal sealed class ImportPublishingRepository(EkiphanDbContext dbContext)
         IReadOnlyCollection<string> similarSkus, IReadOnlyCollection<string> complementarySkus,
         CancellationToken cancellationToken = default)
     {
-        var requested = similarSkus.Concat(complementarySkus).Select(SkuNormalizer.Normalize).Distinct(StringComparer.Ordinal).ToArray();
-        var targets = await dbContext.Products.IgnoreQueryFilters().Where(product => requested.Contains(product.SKU) && !product.IsDeleted)
-            .ToDictionaryAsync(product => SkuNormalizer.Normalize(product.SKU), StringComparer.Ordinal, cancellationToken);
-        var missing = requested.Where(sku => !targets.ContainsKey(sku)).ToArray();
-        async Task Add(IReadOnlyCollection<string> skus, ProductRelationType type)
-        {
-            var targetIds = skus.Select(SkuNormalizer.Normalize).Where(targets.ContainsKey).Select(sku => targets[sku].Id)
-                .Where(id => id != sourceProductId).Distinct().ToArray();
-            var existing = dbContext.ChangeTracker.Entries<ProductRelation>()
-                .Where(entry => entry.State != EntityState.Deleted &&
-                    entry.Entity.SourceProductId == sourceProductId &&
-                    entry.Entity.RelationType == type && targetIds.Contains(entry.Entity.TargetProductId))
-                .Select(entry => entry.Entity.TargetProductId)
-                .ToHashSet();
-            var persisted = await dbContext.ProductRelations
-                .Where(relation => relation.SourceProductId == sourceProductId &&
-                    relation.RelationType == type && targetIds.Contains(relation.TargetProductId))
-                .Select(relation => relation.TargetProductId)
-                .ToListAsync(cancellationToken);
-            existing.UnionWith(persisted);
-            var order = 0;
-            foreach (var id in targetIds.Where(id => existing.Add(id)))
-                dbContext.ProductRelations.Add(new ProductRelation(Guid.NewGuid(), sourceProductId, id, type, false, order++));
-        }
-        await Add(similarSkus, ProductRelationType.Similar);
-        await Add(complementarySkus, ProductRelationType.Complementary);
-        return missing;
+        await ApplyRelationsBatchAsync(
+            [new ImportRelationRequest(Guid.NewGuid(), sourceProductId, similarSkus, complementarySkus)],
+            cancellationToken);
+        return [];
     }
 
     public async Task<IReadOnlyDictionary<Guid, IReadOnlyList<string>>> ApplyRelationsBatchAsync(
         IReadOnlyCollection<ImportRelationRequest> requests,
         CancellationToken cancellationToken = default)
     {
-        if (requests.Count == 0)
-            return new Dictionary<Guid, IReadOnlyList<string>>();
+        // Include unsaved pending entries when called more than once in a transaction.
+        var pending = await dbContext.PendingProductRelations.ToListAsync(cancellationToken);
+        pending = pending.Concat(dbContext.ChangeTracker.Entries<PendingProductRelation>()
+                .Where(entry => entry.State != EntityState.Deleted)
+                .Select(entry => entry.Entity))
+            .DistinctBy(item => item.Id)
+            .Where(item => dbContext.Entry(item).State != EntityState.Deleted).ToList();
 
         var requestedSkus = requests.SelectMany(request => request.SimilarSkus.Concat(request.ComplementarySkus))
+            .Concat(pending.Select(item => item.TargetNormalizedSku))
             .Select(SkuNormalizer.Normalize).Distinct(StringComparer.Ordinal).ToArray();
         var targets = new Dictionary<string, Product>(StringComparer.Ordinal);
         foreach (var batch in requestedSkus.Chunk(SkuQueryBatchSize))
         {
             var products = await dbContext.Products.IgnoreQueryFilters()
-                .Where(product => batch.Contains(product.SKU) && !product.IsDeleted)
+                .Where(product => batch.Contains(product.NormalizedSku) && !product.IsDeleted)
                 .ToListAsync(cancellationToken);
             foreach (var product in products)
                 targets[SkuNormalizer.Normalize(product.SKU)] = product;
         }
 
-        var sourceIds = requests.Select(request => request.SourceProductId).Distinct().ToArray();
-        var targetIds = targets.Values.Select(product => product.Id).Distinct().ToArray();
+        var sourceIds = requests.Select(request => request.SourceProductId)
+            .Concat(pending.Select(item => item.SourceProductId)).Distinct().ToArray();
+        var sources = new Dictionary<Guid, Product>();
         var relationKeys = dbContext.ChangeTracker.Entries<ProductRelation>()
             .Where(entry => entry.State != EntityState.Deleted)
             .Select(entry => (entry.Entity.SourceProductId, entry.Entity.TargetProductId, entry.Entity.RelationType))
             .ToHashSet();
-        if (targetIds.Length > 0)
+        var sortOrders = new Dictionary<(Guid SourceId, ProductRelationType Type), int>();
+        foreach (var batch in sourceIds.Chunk(SkuQueryBatchSize))
         {
-            foreach (var batch in sourceIds.Chunk(SkuQueryBatchSize))
+            foreach (var product in await dbContext.Products.Where(product => batch.Contains(product.Id))
+                         .ToListAsync(cancellationToken))
+                sources[product.Id] = product;
+            var persisted = await dbContext.ProductRelations.Where(relation => batch.Contains(relation.SourceProductId))
+                .ToListAsync(cancellationToken);
+            foreach (var relation in persisted)
             {
-                var persisted = await dbContext.ProductRelations
-                    .Where(relation => batch.Contains(relation.SourceProductId) && targetIds.Contains(relation.TargetProductId))
-                    .Select(relation => new { relation.SourceProductId, relation.TargetProductId, relation.RelationType })
-                    .ToListAsync(cancellationToken);
-                foreach (var relation in persisted)
-                    relationKeys.Add((relation.SourceProductId, relation.TargetProductId, relation.RelationType));
+                relationKeys.Add((relation.SourceProductId, relation.TargetProductId, relation.RelationType));
+                ReserveOrder(relation.SourceProductId, relation.RelationType, relation.SortOrder);
             }
         }
+        foreach (var entry in dbContext.ChangeTracker.Entries<ProductRelation>().Where(entry => entry.State != EntityState.Deleted))
+            ReserveOrder(entry.Entity.SourceProductId, entry.Entity.RelationType, entry.Entity.SortOrder);
+        foreach (var item in pending)
+            ReserveOrder(item.SourceProductId, item.RelationType, item.SortOrder);
 
-        var missingByRow = new Dictionary<Guid, IReadOnlyList<string>>();
-        var sortOrders = new Dictionary<(Guid SourceId, ProductRelationType Type), int>();
+        var pendingKeys = pending.ToDictionary(item =>
+            (item.SourceProductId, item.TargetNormalizedSku, item.RelationType));
+        foreach (var item in pending)
+        {
+            if (!sources.ContainsKey(item.SourceProductId)) continue;
+            if (!targets.TryGetValue(item.TargetNormalizedSku, out var target)) continue;
+            AddResolved(item.SourceProductId, target.Id, item.RelationType, item.SortOrder);
+            dbContext.PendingProductRelations.Remove(item);
+            pendingKeys.Remove((item.SourceProductId, item.TargetNormalizedSku, item.RelationType));
+        }
+
         foreach (var request in requests)
         {
-            var requested = request.SimilarSkus.Concat(request.ComplementarySkus)
-                .Select(SkuNormalizer.Normalize).Distinct(StringComparer.Ordinal).ToArray();
-            missingByRow[request.RowId] = requested.Where(sku => !targets.ContainsKey(sku)).ToArray();
+            if (!sources.TryGetValue(request.SourceProductId, out var source)) continue;
             Add(request.SimilarSkus, ProductRelationType.Similar);
             Add(request.ComplementarySkus, ProductRelationType.Complementary);
 
             void Add(IReadOnlyCollection<string> skus, ProductRelationType type)
             {
-                foreach (var targetId in skus.Select(SkuNormalizer.Normalize).Where(targets.ContainsKey).Select(sku => targets[sku].Id)
-                             .Where(id => id != request.SourceProductId).Distinct())
+                foreach (var sku in skus.Select(SkuNormalizer.Normalize).Distinct(StringComparer.Ordinal))
                 {
-                    var key = (request.SourceProductId, targetId, type);
-                    if (!relationKeys.Add(key)) continue;
-                    var orderKey = (request.SourceProductId, type);
-                    var sortOrder = sortOrders.GetValueOrDefault(orderKey);
-                    sortOrders[orderKey] = sortOrder + 1;
-                    dbContext.ProductRelations.Add(new ProductRelation(Guid.NewGuid(), request.SourceProductId,
-                        targetId, type, false, sortOrder));
+                    if (sku == SkuNormalizer.Normalize(source.SKU)) continue;
+                    var pendingKey = (source.Id, sku, type);
+                    if (pendingKeys.ContainsKey(pendingKey)) continue;
+                    if (targets.TryGetValue(sku, out var target) &&
+                        relationKeys.Contains((source.Id, target.Id, type))) continue;
+                    var order = sortOrders.GetValueOrDefault((source.Id, type));
+                    ReserveOrder(source.Id, type, order);
+                    if (target is not null)
+                        AddResolved(source.Id, target.Id, type, order);
+                    else
+                    {
+                        var item = new PendingProductRelation(source.Id, sku, type, order);
+                        dbContext.PendingProductRelations.Add(item);
+                        pendingKeys.Add(pendingKey, item);
+                    }
                 }
             }
         }
-        return missingByRow;
+        // Missing targets are persisted as pending, never validation issues.
+        return requests.ToDictionary(request => request.RowId, _ => (IReadOnlyList<string>)Array.Empty<string>());
+
+        void ReserveOrder(Guid sourceId, ProductRelationType type, int order)
+        {
+            var key = (sourceId, type);
+            sortOrders[key] = Math.Max(sortOrders.GetValueOrDefault(key), order + 1);
+        }
+
+        void AddResolved(Guid sourceId, Guid targetId, ProductRelationType type, int order)
+        {
+            if (sourceId == targetId || !relationKeys.Add((sourceId, targetId, type))) return;
+            dbContext.ProductRelations.Add(new ProductRelation(Guid.NewGuid(), sourceId, targetId, type, false, order));
+        }
     }
 
     private static string AttributeTitle(string code) => code switch

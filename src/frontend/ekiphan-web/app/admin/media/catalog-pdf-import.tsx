@@ -209,7 +209,8 @@ export function CatalogPdfImport() {
   );
 }
 
-export function SingleCatalogPdfUpload({ onUploaded }: { onUploaded: () => Promise<void> }) {
+export function SingleCatalogPdfUpload({ onUploaded, catalogs = [] }: { onUploaded: () => Promise<void>; catalogs?: { id: string; title: string }[] }) {
+  const [replaceId, setReplaceId] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [busy, setBusy] = useState(false);
@@ -229,11 +230,12 @@ export function SingleCatalogPdfUpload({ onUploaded }: { onUploaded: () => Promi
     setBusy(true); setError(null); setMessage(null);
     try {
       const form = new FormData(); form.set("file", file); form.set("title", title.trim());
+      if (replaceId) form.set("replaceId", replaceId);
       const response = await fetch("/api/admin/catalog-pdf-import/single", { method: "POST", body: form });
       if (!response.ok) throw new Error(await readError(response));
       const result = await response.json() as { warning?: string | null };
       setMessage(result.warning ?? "Katalog PDF ve WebP kapağı yüklendi.");
-      setFile(null); setTitle(""); await onUploaded();
+      setFile(null); setTitle(""); setReplaceId(""); await onUploaded();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Katalog PDF yüklenemedi.");
     } finally { setBusy(false); }
@@ -241,6 +243,10 @@ export function SingleCatalogPdfUpload({ onUploaded }: { onUploaded: () => Promi
 
   return <section className={styles.editor} aria-labelledby="single-catalog-title">
     <h2 id="single-catalog-title">Tek Katalog PDF Yükle</h2>
+    <label>Katalog<select value={replaceId} disabled={busy} onChange={event => setReplaceId(event.target.value)}>
+      <option value="">Yeni katalog oluştur</option>
+      {catalogs.map(catalog => <option key={catalog.id} value={catalog.id}>{catalog.title} — PDF ve kapağı güncelle</option>)}
+    </select></label>
     {error && <div className={styles.error} role="alert">{error}</div>}
     {message && <div className={styles.success} role="status">{message}</div>}
     <label>PDF dosyası<input type="file" accept=".pdf,application/pdf" disabled={busy}

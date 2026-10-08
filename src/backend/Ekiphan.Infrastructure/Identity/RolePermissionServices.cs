@@ -22,7 +22,7 @@ internal sealed class UserPermissionService(EkiphanDbContext db,TimeProvider clo
         var roles=roleRows.Select(x=>x.Name).Distinct().Order().ToArray();
         var isSuperAdmin=roleRows.Any(x=>x.IsSystemRole&&x.Name=="SuperAdmin");
         var rolePermissions=isSuperAdmin
-            ?(await db.AdminPermissions.AsNoTracking().Where(x=>x.IsActive).Select(x=>x.Code).ToListAsync(cancellationToken)).ToHashSet(StringComparer.Ordinal)
+            ?AdminPermissionCode.All.ToHashSet(StringComparer.Ordinal)
             :roleRows.Select(x=>x.Code).Concat(AdminPermissionCode.ExpandLegacy(user.Legacy)).ToHashSet(StringComparer.Ordinal);
         var now=clock.GetUtcNow();var active=overrides.Where(x=>!x.ExpiresAt.HasValue||x.ExpiresAt>now).ToArray();
         var allows=active.Where(x=>x.OverrideType==PermissionOverrideType.Allow).Select(x=>x.Code).Distinct().ToArray();var denies=active.Where(x=>x.OverrideType==PermissionOverrideType.Deny).Select(x=>x.Code).Distinct().ToArray();

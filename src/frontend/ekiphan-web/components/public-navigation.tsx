@@ -59,17 +59,16 @@ export function PublicNavigation({
               <summary
                 aria-label={isEnglish ? "Show product categories" : "Ürün kategorilerini göster"}
               >
-                <Link
+                <span
                   className={`${styles.navItem}${
                     isActive
                       ? ` ${styles.active}`
                       : ""
                   }`}
-                  href={destination}
                   aria-current={isActive ? "page" : undefined}
                 >
             {label}
-                </Link>
+                </span>
               </summary>
 
               <ProductsMegaMenu locale={locale} />

@@ -29,7 +29,7 @@ public sealed class PublicMediaUrlResolver : IPublicMediaUrlResolver
 
     public string? Resolve(string? storageKey)
     {
-        if (baseUri is null || !IsSafeStorageKey(storageKey))
+        if (!IsSafeStorageKey(storageKey))
         {
             return null;
         }
@@ -37,6 +37,12 @@ public sealed class PublicMediaUrlResolver : IPublicMediaUrlResolver
         var escapedPath = string.Join(
             '/',
             storageKey!.Split('/').Select(Uri.EscapeDataString));
+
+        if (baseUri is null)
+        {
+            return $"/{escapedPath}";
+        }
+
         return new Uri(baseUri, escapedPath).AbsoluteUri;
     }
 
@@ -49,10 +55,8 @@ public sealed class PublicMediaUrlResolver : IPublicMediaUrlResolver
         storageKey.All(
             character =>
                 char.IsLetterOrDigit(character) ||
-            character is '/' or '-' or '_' or '.');
+                character is '/' or '-' or '_' or '.');
 
-    // Local development commonly serves the API over HTTP. Keep non-loopback
-    // public media endpoints HTTPS-only so a deployment cannot be downgraded.
     private static bool IsLocalHttp(Uri uri) =>
         uri.Scheme == Uri.UriSchemeHttp && uri.IsLoopback;
 }

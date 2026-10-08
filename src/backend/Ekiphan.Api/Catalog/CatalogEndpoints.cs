@@ -103,7 +103,8 @@ internal static class CatalogEndpoints
             !TryGetOptionalText(request, "section", 200, out var section) ||
             !TryGetOptionalText(request, "category", 250, out var category) ||
             !TryGetOptionalText(request, "brand", 200, out var brand) ||
-            !TryGetOptionalText(request, "tag", 200, out var tag))
+            !TryGetOptionalText(request, "tag", 200, out var tag) ||
+            !TryGetOptionalText(request, "usage", 2000, out var usage))
         {
             return Problem(
                 StatusCodes.Status400BadRequest,
@@ -135,7 +136,8 @@ internal static class CatalogEndpoints
                 brand,
                 tag,
                 sort,
-                attributeFilters),
+                attributeFilters,
+                usage),
             cancellationToken);
         return Results.Ok(result);
     }

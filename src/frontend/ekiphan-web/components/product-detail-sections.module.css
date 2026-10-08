@@ -1,4 +1,5 @@
 .details{width:min(calc(100% - 4rem),88rem);margin:0 auto;padding-bottom:clamp(4rem,7vw,6rem)}
+.details p,.details dd,.details h3{overflow-wrap:anywhere}
 .tabList{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid #ded9d1;background:#fbfaf7}
 .tabList button{position:relative;display:flex;min-width:0;min-height:4.8rem;align-items:center;justify-content:center;gap:.65rem;padding:.8rem 1rem;border:0;border-right:1px solid #e4dfd7;background:transparent;color:#716b65;font:inherit;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:color .2s ease,background-color .2s ease}
 .tabList button:last-child{border-right:0}.tabList button svg{width:1.2rem;height:1.2rem;flex:0 0 auto}.tabList button:hover{background:#f4f1eb;color:#24211f}.tabList button[aria-selected=true]{color:#24211f}.tabList button[aria-selected=true] svg{color:#941b37}.tabList button[aria-selected=true]::after{position:absolute;right:18%;bottom:-1px;left:18%;height:2px;background:#941b37;content:""}.tabList button:focus-visible{outline:2px solid #941b37;outline-offset:-3px}

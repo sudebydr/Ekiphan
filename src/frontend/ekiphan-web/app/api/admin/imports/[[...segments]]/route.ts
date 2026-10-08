@@ -14,7 +14,7 @@ function problem(status: number, title: string, detail: string): Response {
   return Response.json({ status, title, detail }, { status });
 }
 
-function isAllowedPath(segments: string[], method: "GET" | "POST"): boolean {
+function isAllowedPath(segments: string[], method: "GET" | "POST" | "DELETE"): boolean {
   if (segments.length === 0) {
     return method === "GET" || method === "POST";
   }
@@ -24,12 +24,13 @@ function isAllowedPath(segments: string[], method: "GET" | "POST"): boolean {
   }
 
   if (segments.length === 1) {
-    return method === "GET";
+    return method === "GET" || method === "DELETE";
   }
 
   if (segments.length !== 2) {
     return false;
   }
+  if (method === "DELETE") return false;
 
   return method === "GET"
     ? segments[1] === "issues" || segments[1] === "issues.csv"
@@ -39,7 +40,7 @@ function isAllowedPath(segments: string[], method: "GET" | "POST"): boolean {
 async function proxy(
   request: NextRequest,
   context: RouteContext,
-  method: "GET" | "POST"
+  method: "GET" | "POST" | "DELETE"
 ): Promise<Response> {
   const { segments = [] } = await context.params;
   if (!isAllowedPath(segments, method)) {
@@ -65,7 +66,7 @@ async function proxy(
     );
   }
 
-  if (method === "POST") {
+  if (method !== "GET") {
     const requestHeaders = await headers();
     const origin = request.headers.get("origin");
     const host = requestHeaders.get("host");
@@ -140,4 +141,8 @@ export function GET(request: NextRequest, context: RouteContext) {
 
 export function POST(request: NextRequest, context: RouteContext) {
   return proxy(request, context, "POST");
+}
+
+export function DELETE(request: NextRequest, context: RouteContext) {
+  return proxy(request, context, "DELETE");
 }

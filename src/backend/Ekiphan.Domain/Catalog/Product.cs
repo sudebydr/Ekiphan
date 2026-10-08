@@ -61,6 +61,15 @@ public sealed class Product : Entity
 
     public Guid? ImportedByBatchId { get; private set; }
 
+    public Guid? CreatedByImportJobId { get; private set; }
+
+    public void SetImportCreationOwner(Guid jobId)
+    {
+        if (jobId == Guid.Empty) throw new ArgumentException("Import job is required.", nameof(jobId));
+        if (CreatedByImportJobId.HasValue) throw new InvalidOperationException("Import creation owner cannot be replaced.");
+        CreatedByImportJobId = jobId;
+    }
+
     public DateTimeOffset? DeletedAt { get; private set; }
 
     public IReadOnlyCollection<ProductCategory> Categories => _categories;

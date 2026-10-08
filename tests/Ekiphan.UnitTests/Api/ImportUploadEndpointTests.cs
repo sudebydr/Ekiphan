@@ -253,6 +253,53 @@ public sealed class ImportUploadEndpointTests
         Assert.Single(repository.Products);
     }
 
+    [Fact]
+    public async Task DeleteRequiresAuthentication()
+    {
+        await using var factory = CreateFactory(JwtSettings());
+        using var client = factory.CreateClient();
+        using var response = await client.DeleteAsync($"/api/admin/imports/{Guid.NewGuid()}");
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteRequiresRollbackPermissionInAdditionToImportManagement()
+    {
+        await using var factory = CreateFactory(JwtSettings());
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", CreateAccessToken());
+        using var response = await client.DeleteAsync($"/api/admin/imports/{Guid.NewGuid()}");
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AuthorizedDeleteCallsDeletionService()
+    {
+        var deletion = new StubDeletionService();
+        await using var factory = CreateFactory(JwtSettings(), services =>
+        {
+            services.RemoveAll<IImportDeletionService>();
+            services.AddSingleton<IImportDeletionService>(deletion);
+        });
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
+            CreateAccessToken("imports.manage", "products.import.rollback"));
+        var jobId = Guid.NewGuid();
+        using var response = await client.DeleteAsync($"/api/admin/imports/{jobId}");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(jobId, deletion.DeletedJobId);
+    }
+
+    private sealed class StubDeletionService : IImportDeletionService
+    {
+        public Guid? DeletedJobId { get; private set; }
+        public Task<ImportDeletionResult> DeleteAsync(Guid jobId, CancellationToken cancellationToken = default)
+        {
+            DeletedJobId = jobId;
+            return Task.FromResult(new ImportDeletionResult(1, 2, 3));
+        }
+    }
+
     private static WebApplicationFactory<Program> CreateFactory(
         IReadOnlyDictionary<string, string?>? settings = null,
         Action<IServiceCollection>? configureServices = null)
@@ -293,7 +340,7 @@ public sealed class ImportUploadEndpointTests
         };
 
     private static string CreateAccessToken(
-        string permission = "imports.manage")
+        string permission = "imports.manage", string? additionalPermission = null)
     {
         var descriptor = new SecurityTokenDescriptor
         {
@@ -306,7 +353,7 @@ public sealed class ImportUploadEndpointTests
                 ["jti"] = Guid.NewGuid().ToString("N"),
                 ["security_stamp"] =
                     TestAdminAuthenticationService.SecurityStamp,
-                ["permission"] = permission
+                ["permission"] = additionalPermission == null ? permission : new[] { permission, additionalPermission }
             },
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SigningKey)),

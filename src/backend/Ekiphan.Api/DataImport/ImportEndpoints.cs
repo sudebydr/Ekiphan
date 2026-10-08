@@ -50,11 +50,14 @@ internal static class ImportEndpoints
             group.MapGet("/{jobId:guid}", GetAsync);
             group.MapGet("/{jobId:guid}/issues", ListIssuesAsync);
             group.MapGet("/{jobId:guid}/issues.csv", DownloadIssuesAsync);
+            group.MapDelete("/{jobId:guid}", DeleteAsync)
+                .RequireAuthorization("ProductsImportRollback");
             return;
         }
 
         endpoints.MapGet("/api/admin/imports", AuthenticationUnavailable)
             .RequireRateLimiting("import-read");
+        endpoints.MapDelete("/api/admin/imports/{jobId:guid}", AuthenticationUnavailableForJob);
         endpoints.MapGet(
                 "/api/admin/imports/{jobId:guid}",
                 AuthenticationUnavailableForJob)
@@ -324,6 +327,25 @@ internal static class ImportEndpoints
             return Problem(
                 StatusCodes.Status409Conflict,
                 "Referans veri çakışması nedeniyle import yayınlanamadı. Ürün değişiklikleri kaydedilmedi.");
+        }
+    }
+
+    private static async Task<IResult> DeleteAsync(Guid jobId, IImportDeletionService deletionService,
+        ILoggerFactory loggerFactory, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Results.Ok(await deletionService.DeleteAsync(jobId, cancellationToken));
+        }
+        catch (ImportJobNotFoundException) { return Results.NotFound(); }
+        catch (InvalidOperationException exception)
+        {
+            return Problem(StatusCodes.Status409Conflict, exception.Message);
+        }
+        catch (DbUpdateException exception)
+        {
+            LogPublishFailure(loggerFactory.CreateLogger("Ekiphan.Api.DataImport.ImportDeletion"), jobId, exception);
+            return Problem(StatusCodes.Status409Conflict, "İlişkili kayıt çakışması nedeniyle import silinemedi. İşlem geri alındı.");
         }
     }
 

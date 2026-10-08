@@ -23,6 +23,8 @@ public sealed class ImportPublishingServiceTests
         var product = repository.Products.Single(item => item.SKU == "NEW-1");
         Assert.Equal("NEW-1", product.SKU);
         Assert.True(product.IsPublished);
+        Assert.Equal(job.Id, product.CreatedByImportJobId);
+        Assert.Null(repository.Products.Single(item => item.SKU == "OLD-1").CreatedByImportJobId);
         var translation = Assert.Single(product.Translations);
         Assert.Equal("tr", translation.LanguageCode);
         Assert.Equal("Yeni Ürün", translation.Name);
@@ -139,7 +141,7 @@ public sealed class ImportPublishingServiceTests
         Assert.Equal(["M1"], saved.Values["MODEL_SERIES"]);
         Assert.Contains(repository.Relations, relation => relation.Similar.SequenceEqual(["LATER"]));
         Assert.Contains(repository.Relations, relation => relation.Complementary.SequenceEqual(["MISSING"]));
-        Assert.Contains(source.Issues, issue => issue.Code == "RELATED_SKU_NOT_FOUND" && issue.RawValue == "MISSING");
+        Assert.DoesNotContain(source.Issues, issue => issue.Code == "RELATED_SKU_NOT_FOUND");
     }
 
     [Fact]

@@ -862,6 +862,15 @@
 
 /* ---------- Duyarlı ---------- */
 
+.categoryRow { min-width:0; cursor:pointer; }
+.categoryRow > a { min-width:0; flex:1; }
+.option { overflow-wrap:anywhere; }
+.subList { padding-left:.75rem; }
+.filterCurrent { max-width:10rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.filterPanel > summary { min-height:2.75rem; cursor:pointer; }
+.results { min-width:0; }
+@media(max-width:40rem) { .catalogToolbar { flex-wrap:wrap; gap:1rem; } .toolbarActions { flex-wrap:wrap; } .pagination { gap:.5rem; flex-wrap:wrap; } }
+
 @media (min-width: 58.0625rem) and (max-width: 72rem) {
   .productGrid,
   .loadingGrid {

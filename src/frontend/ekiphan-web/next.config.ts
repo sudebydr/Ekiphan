@@ -6,7 +6,7 @@ const contentSecurityPolicy = [
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  "img-src 'self' data: https:",
+  "img-src 'self' data: blob: https:",
   "media-src 'self' https:",
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
@@ -63,6 +63,11 @@ const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
   reactStrictMode: true,
+  async rewrites() {
+    const api = process.env.EKIPHAN_API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL;
+    if (!api || !["localhost", "127.0.0.1", "[::1]"].includes(new URL(api).hostname)) return [];
+    return [{ source: "/media/:path*", destination: `${api.replace(/\/+$/, "")}/media/:path*` }];
+  },
   async headers() {
     return [
       {

@@ -19,6 +19,7 @@ export function CatalogGallery({ catalogs, locale = "tr" }: { catalogs: Catalog[
   const en = locale === "en";
   const [selected, setSelected] = useState<Catalog | null>(null);
   const [page, setPage] = useState(0);
+  const [failedCovers, setFailedCovers] = useState<Set<string>>(() => new Set());
   const totalPages = Math.ceil(catalogs.length / PAGE_SIZE);
   const visibleCatalogs = catalogs.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
@@ -46,9 +47,9 @@ export function CatalogGallery({ catalogs, locale = "tr" }: { catalogs: Catalog[
           {visibleCatalogs.map((catalog, index) => (
             <button className={styles.catalogCard} key={catalog.id} onClick={() => setSelected(catalog)} type="button">
               <span className={styles.cover} aria-hidden="true">
-                {catalog.image === "/images/catalog-placeholder.webp"
+                {!catalog.image || catalog.image === "/images/catalog-placeholder.webp" || failedCovers.has(catalog.image)
                   ? <span className={styles.coverPlaceholder}>PDF</span>
-                  : <img src={catalog.image} alt="" />}
+                  : <img src={catalog.image} alt="" onError={() => setFailedCovers(previous => new Set(previous).add(catalog.image))} />}
               </span>
               <span className={styles.cardOverlay} aria-hidden="true" />
               <span className={styles.cardContent}>

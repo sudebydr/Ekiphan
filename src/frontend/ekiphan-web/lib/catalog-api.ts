@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type {
   CatalogNavigation,
   CatalogBrandDetail,
@@ -63,14 +64,21 @@ async function getJson<T>(path: string): Promise<T> {
     );
   }
 
+  const api = new URL(apiBaseUrl());
+  if (["localhost", "127.0.0.1", "[::1]"].includes(api.hostname)) {
+    return JSON.parse(await response.text(), (_key, value: unknown) => {
+      if (typeof value !== "string" || !value.startsWith(`${api.origin}/media/`)) return value;
+      return value.slice(api.origin.length);
+    }) as T;
+  }
   return (await response.json()) as T;
 }
 
-export async function getCatalogNavigation(language: "tr" | "en" = "tr"): Promise<CatalogNavigation> {
+export const getCatalogNavigation = cache(async (language: "tr" | "en" = "tr"): Promise<CatalogNavigation> => {
   if (isDemoProductsEnabled()) return getDemoCatalogNavigation();
   try { return await getJson(`/api/catalog/${language}/navigation`); }
   catch (error) { if (language === "en") return getJson("/api/catalog/tr/navigation"); throw error; }
-}
+});
 export async function getCatalogFacets(category: string, language: "tr" | "en" = "tr"): Promise<CatalogFacet[]> {
   if (isDemoProductsEnabled()) return [];
 
@@ -97,10 +105,12 @@ export type CatalogPdfDocument = { id: string; slug: string; title: string; file
 export async function getCatalogPdfDocuments(): Promise<CatalogPdfDocument[]> {
   try {
     const documents = await getJson<CatalogPdfDocument[]>("/api/catalogs/documents");
+    const localApi = ["localhost", "127.0.0.1", "[::1]"].includes(new URL(apiBaseUrl()).hostname);
     return documents.map((document) => ({
       ...document,
       url: document.url.startsWith("/") ? `${apiBaseUrl()}${document.url}` : document.url,
-      coverUrl: document.coverUrl.startsWith("/media/") ? `${apiBaseUrl()}${document.coverUrl}` : document.coverUrl
+      // Local /media rewrites keep covers same-origin and allowed by img-src 'self'.
+      coverUrl: !localApi && document.coverUrl.startsWith("/media/") ? `${apiBaseUrl()}${document.coverUrl}` : document.coverUrl
     }));
   } catch {
     return [];

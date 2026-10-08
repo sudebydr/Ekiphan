@@ -130,6 +130,56 @@ public sealed class ImportPublishingRepositoryTests
         Assert.Equal(targets.Length, await db.ProductRelations.CountAsync());
     }
 
+    [Fact]
+    public async Task MissingRelationsResolveOnLaterImportWithoutDuplicatesAndKeepOrder()
+    {
+        await using var db = CreateDb();
+        var (source, existing) = await SeedProductsAsync(db, "SOURCE", "EXISTING");
+        var repository = new ImportPublishingRepository(db);
+        var request = new ImportRelationRequest(Guid.NewGuid(), source.Id,
+            ["LATER", "EXISTING", "SOURCE", "LATER"], ["LATER"]);
+
+        var result = await repository.ApplyRelationsBatchAsync([request]);
+        await repository.ApplyRelationsBatchAsync([request]);
+        await db.SaveChangesAsync();
+        Assert.All(result.Values, missing => Assert.Empty(missing));
+        Assert.Equal(2, await db.PendingProductRelations.CountAsync());
+        Assert.Equal(1, (await db.ProductRelations.SingleAsync()).SortOrder);
+        Assert.All(await db.PendingProductRelations.ToListAsync(), item => Assert.Equal(0, item.SortOrder));
+
+        var later = new Product(Guid.NewGuid(), "LATER");
+        db.Products.Add(later);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        // A different import with no outgoing relations still resolves earlier pending links.
+        await repository.ApplyRelationsBatchAsync([new ImportRelationRequest(Guid.NewGuid(), later.Id, [], [])]);
+        await repository.SaveChangesAsync();
+        await repository.ApplyRelationsBatchAsync([request]);
+        await repository.SaveChangesAsync();
+
+        Assert.Empty(await db.PendingProductRelations.ToListAsync());
+        var relations = await db.ProductRelations.ToListAsync();
+        Assert.Equal(3, relations.Count);
+        Assert.Equal(2, relations.Count(item => item.TargetProductId == later.Id && item.SortOrder == 0));
+        Assert.DoesNotContain(relations, item => item.SourceProductId == item.TargetProductId);
+    }
+
+    [Fact]
+    public async Task PendingRelationResolvesCanonicalUnicodeSkuAndReusesExistingRelation()
+    {
+        await using var db = CreateDb();
+        var (source, target) = await SeedProductsAsync(db, "SOURCE", "TARGET-I");
+        db.PendingProductRelations.Add(new PendingProductRelation(source.Id, "target-İ", ProductRelationType.Similar, 7));
+        db.ProductRelations.Add(new ProductRelation(Guid.NewGuid(), source.Id, target.Id, ProductRelationType.Similar, false, 7));
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        var repository = new ImportPublishingRepository(db);
+        await repository.ApplyRelationsBatchAsync([]);
+        await repository.SaveChangesAsync();
+        Assert.Empty(await db.PendingProductRelations.ToListAsync());
+        Assert.Single(await db.ProductRelations.ToListAsync());
+    }
+
     private static EkiphanDbContext CreateDb() => new(
         new DbContextOptionsBuilder<EkiphanDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString("N"))

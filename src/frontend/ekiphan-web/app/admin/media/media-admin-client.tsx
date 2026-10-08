@@ -359,7 +359,9 @@ export function MediaAdminClient() {
           <small>Önerilen format: WebP · Maksimum dosya boyutu: 4 MB · Ürüne aşağıdaki manuel medya atama alanından bağlayın.</small>
           <small>Tehdit tarayıcısı yapılandırılmamışsa sistem güvenlik gereği yüklemeyi reddeder.</small>
         </form>
-        <SingleCatalogPdfUpload onUploaded={load} />
+        <SingleCatalogPdfUpload onUploaded={load} catalogs={library.assets
+          .filter(asset => asset.assetType === "Pdf" && asset.url?.includes("/media/catalogs/"))
+          .map(asset => ({ id: asset.id, title: assetName(asset) }))} />
         <form className={styles.editor} onSubmit={createVideo}><h2>Harici video</h2>
           <label>HTTPS video adresi<input type="url" pattern="https://.*" required value={externalUrl} onChange={(e) => setExternalUrl(e.target.value)} /></label>
           <label>Türkçe başlık<input required maxLength={250} value={title} onChange={(e) => setTitle(e.target.value)} /></label>

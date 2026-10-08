@@ -64,6 +64,7 @@ export type CatalogSitemapEntry = {
 };
 
 export type CatalogNavigation = {
+  usageAreas?: Array<{ id: string; code: string; name: string; slug: string }>;
   sections: Array<{
     id: string;
     code: string;

@@ -57,6 +57,7 @@ public sealed class ImportPublishingService(
                     else
                     {
                         product = CreateProduct(row);
+                        product.SetImportCreationOwner(job.Id);
                         repository.AddProduct(product);
                         existingProducts = new Dictionary<string, Product>(existingProducts, StringComparer.OrdinalIgnoreCase)
                         {
@@ -123,16 +124,7 @@ public sealed class ImportPublishingService(
                     var (similar, complementary) = ReadRelations(row);
                     return new ImportRelationRequest(row.Id, product.Id, similar, complementary);
                 }).ToArray();
-                var missingByRow = await repository.ApplyRelationsBatchAsync(relationRequests, transactionCancellationToken);
-                foreach (var row in validRows)
-                {
-                    foreach (var missingSku in missingByRow.GetValueOrDefault(row.Id, []))
-                    {
-                        row.AddIssue(Guid.NewGuid(), ImportIssueSeverity.Warning, "RELATED_SKU_NOT_FOUND",
-                            "Related product SKU was not found; the product import continued.", "relation", missingSku);
-                        repository.AddIssue(row.Issues.Last());
-                    }
-                }
+                await repository.ApplyRelationsBatchAsync(relationRequests, transactionCancellationToken);
 
                 job.CompletePublishing(timeProvider.GetUtcNow());
                 await repository.SaveChangesAsync(transactionCancellationToken);

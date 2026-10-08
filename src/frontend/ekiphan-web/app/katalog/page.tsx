@@ -63,6 +63,7 @@ function productQuery(params: SearchParams): URLSearchParams {
     "category",
     "brand",
     "tag",
+    "usage",
     "sort",
     "page"
   ]) {
@@ -97,7 +98,7 @@ function filterHref(query: URLSearchParams, key: string, value: string | undefin
 /** Filtre bağlantılarının temeli: şu anki tüm seçimler (sayfa hariç). */
 function baseFilterQuery(params: SearchParams, isEnglish = false): string {
   const query = new URLSearchParams();
-  for (const key of ["q", "section", "category", "brand", "tag", "sort"]) {
+  for (const key of ["q", "section", "category", "brand", "tag", "usage", "sort"]) {
     const value = one(params[key]).trim();
     if (value) query.set(key, value);
   }
@@ -109,7 +110,7 @@ function baseFilterQuery(params: SearchParams, isEnglish = false): string {
 
 function buildOptions(
   baseQuery: string,
-  key: "section" | "brand" | "tag",
+  key: "section" | "brand" | "usage",
   allLabel: string,
   items: { slug: string | null; name: string }[],
   selected: string
@@ -233,13 +234,13 @@ export default async function CatalogPage({
           }`
         }
       : null,
-    one(params.tag).trim()
+    one(params.usage).trim()
       ? {
-          key: "tag",
-          label: `${isEnglish ? "Tag" : "Etiket"}: ${
-            navigation?.tags.find(
-              (item) => item.slug === one(params.tag).trim()
-            )?.name ?? one(params.tag).trim()
+          key: "usage",
+          label: `${isEnglish ? "Usage area" : "Kullanım alanı"}: ${
+            navigation?.usageAreas?.find(
+              (item) => item.slug === one(params.usage).trim()
+            )?.name ?? one(params.usage).trim()
           }`
         }
       : null,
@@ -264,13 +265,11 @@ export default async function CatalogPage({
 
   const baseQuery = baseFilterQuery(params, isEnglish);
   if (isEnglish) linkQuery.set("lang", "en");
-  const sectionValue = one(params.section).trim();
   const brandValue = one(params.brand).trim();
-  const tagValue = one(params.tag).trim();
+  const tagValue = one(params.usage).trim();
   const sortValue = one(params.sort).trim() || "Name";
-  const sectionOptions = buildOptions(baseQuery, "section", isEnglish ? "All groups" : "Tüm gruplar", navigation?.sections ?? [], sectionValue);
   const brandOptions = buildOptions(baseQuery, "brand", isEnglish ? "All brands" : "Tüm markalar", navigation?.brands ?? [], brandValue);
-  const tagOptions = buildOptions(baseQuery, "tag", isEnglish ? "All tags" : "Tüm etiketler", navigation?.tags ?? [], tagValue);
+  const tagOptions = buildOptions(baseQuery, "usage", isEnglish ? "All usage areas" : "Tüm kullanım alanları", navigation?.usageAreas ?? [], tagValue);
   const sortOptions: FilterOption[] = [
     { value: "Name", label: isEnglish ? "Name A–Z" : "Ada göre A–Z" },
     { value: "NameDescending", label: isEnglish ? "Name Z–A" : "Ada göre Z–A" },
@@ -289,7 +288,7 @@ export default async function CatalogPage({
 
       <div className={styles.catalogLayout}>
         <CatalogFilterForm className={styles.filters}>
-          {(["section", "category", "brand", "tag", "sort"] as const).map((key) => {
+          {(["section", "category", "brand", "tag", "usage", "sort"] as const).map((key) => {
             const value = one(params[key]).trim();
             return value ? <input key={key} type="hidden" name={key} value={value} /> : null;
           })}
@@ -308,10 +307,9 @@ export default async function CatalogPage({
                     <input key={searchValue} id="catalog-search" name="q" type="search" minLength={2} maxLength={100} defaultValue={searchValue} placeholder={isEnglish ? "Product name or code" : "Ürün adı veya kodu"} />
                   </div>
                 </details>
-                <FilterOptionGroup title={isEnglish ? "Product group" : "Ürün grubu"} options={sectionOptions} />
                 {navigation && <CatalogCategoryFilter categories={navigation.categories} selectedSlug={one(params.category).trim()} baseQuery={baseQuery} isEnglish={isEnglish} />}
-                <FilterOptionGroup title="Marka" options={brandOptions} />
-                <FilterOptionGroup title={isEnglish ? "Usage tag" : "Kullanım etiketi"} options={tagOptions} />
+                <FilterOptionGroup title={isEnglish ? "Brand" : "Marka"} options={brandOptions} />
+                <FilterOptionGroup title={isEnglish ? "Usage area" : "Kullanım alanı"} options={tagOptions} />
                 <DynamicCatalogFilters facets={facets} selected={attributeFilters} baseQuery={baseQuery} />
                 <FilterOptionGroup title={isEnglish ? "Sort" : "Sıralama"} options={sortOptions} open={Boolean(one(params.sort).trim())} />
                 <div className={styles.filterActions}>

@@ -26,6 +26,10 @@ internal sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(product => product.RowVersion)
             .IsRowVersion();
         builder.HasIndex(product => product.ImportedByBatchId);
+        builder.HasOne<Ekiphan.Domain.DataImport.ImportJob>()
+            .WithMany()
+            .HasForeignKey(product => product.CreatedByImportJobId)
+            .OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Ekiphan.Domain.DataImport.ImportBatch>()
             .WithMany()
             .HasForeignKey(product => product.ImportedByBatchId)

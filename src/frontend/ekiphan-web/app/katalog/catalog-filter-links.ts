@@ -1,6 +1,6 @@
 /** /katalog filtre bağlantılarını üreten saf yardımcılar (sunucu ve istemci bileşenleri paylaşır). */
 
-type SingleKey = "section" | "category" | "brand" | "tag" | "sort";
+type SingleKey = "section" | "category" | "brand" | "usage" | "sort";
 
 function finish(next: URLSearchParams): string {
   next.delete("page");

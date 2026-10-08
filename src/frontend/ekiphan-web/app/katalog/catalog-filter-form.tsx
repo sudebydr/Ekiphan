@@ -1,8 +1,8 @@
 ﻿"use client";
 
 import type { FormEvent, ReactNode } from "react";
-import { useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useTransition } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 type CatalogFilterFormProps = {
   children: ReactNode;
@@ -16,6 +16,12 @@ type CatalogFilterFormProps = {
  */
 export function CatalogFilterForm({ children, className }: CatalogFilterFormProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    const panel = formRef.current?.querySelector<HTMLDetailsElement>("details");
+    if (panel) panel.open = !window.matchMedia("(max-width: 58rem)").matches;
+  }, []);
   const [isPending, startTransition] = useTransition();
 
   const applyFilters = (form: HTMLFormElement) => {
@@ -28,12 +34,13 @@ export function CatalogFilterForm({ children, className }: CatalogFilterFormProp
     query.delete("pageSize");
     const suffix = query.toString();
     startTransition(() =>
-      router.replace(suffix ? `/katalog?${suffix}` : "/katalog", { scroll: false })
+      router.replace(suffix ? `${pathname}?${suffix}` : pathname, { scroll: false })
     );
   };
 
   return (
     <form
+      ref={formRef}
       className={className}
       onSubmit={(event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();

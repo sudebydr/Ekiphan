@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import type {
   ImportIssue,
   ImportJobDetail,
@@ -39,6 +40,10 @@ function formatDate(value: string | null): string {
 }
 
 export function ImportAdminClient() {
+  const router = useRouter();
+  const deleteDialog = useRef<HTMLDialogElement>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ImportJobSummary | null>(null);
+  const [productTotal, setProductTotal] = useState<number | null>(null);
   const [jobs, setJobs] = useState<PagedResult<ImportJobSummary> | null>(null);
   const [selectedJob, setSelectedJob] = useState<ImportJobDetail | null>(null);
   const [issues, setIssues] = useState<PagedResult<ImportIssue> | null>(null);
@@ -47,6 +52,34 @@ export function ImportAdminClient() {
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (deleteTarget) deleteDialog.current?.showModal();
+    else deleteDialog.current?.close();
+  }, [deleteTarget]);
+
+  async function deleteImport() {
+    if (!deleteTarget || busy) return;
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const response = await fetch(`/api/admin/imports/${deleteTarget.id}`, { method: "DELETE" });
+      if (!response.ok) throw new Error(await readError(response));
+      const result = await response.json() as { deletedProducts: number; restoredPendingRelations: number; totalProducts: number };
+      setProductTotal(result.totalProducts);
+      setMessage(`Import silindi: ${result.deletedProducts} ürün silindi, ${result.restoredPendingRelations} ilişki pending durumuna taşındı.`);
+      if (selectedJob?.id === deleteTarget.id) { setSelectedJob(null); setIssues(null); }
+      setDeleteTarget(null);
+      const nextPage = jobs?.items.length === 1 && page > 1 ? page - 1 : page;
+      setPage(nextPage);
+      await loadJobs(nextPage);
+      router.refresh();
+    } catch (reason) {
+      setDeleteTarget(null);
+      setError(reason instanceof Error ? reason.message : "Import silinemedi.");
+    } finally { setBusy(false); }
+  }
 
   const loadJobs = useCallback(async (requestedPage: number) => {
     setError(null);
@@ -170,6 +203,17 @@ export function ImportAdminClient() {
 
   return (
     <main className={styles.page}>
+      <dialog ref={deleteDialog} className={styles.deleteDialog}
+        aria-labelledby="delete-import-title" aria-describedby="delete-import-description"
+        onCancel={(event) => { event.preventDefault(); if (!busy) setDeleteTarget(null); }}>
+        <h2 id="delete-import-title">Importu sil</h2>
+        <p id="delete-import-description">Bu import ve ona ait ürünler kalıcı silinecek.</p>
+        <p>{deleteTarget?.originalFileName}</p>
+        <div className={styles.actions}>
+          <button autoFocus onClick={() => setDeleteTarget(null)} disabled={busy}>İptal</button>
+          <button onClick={() => void deleteImport()} disabled={busy}>{busy ? "Siliniyor…" : "Evet, Sil"}</button>
+        </div>
+      </dialog>
       <header className={styles.header}>
         <div>
           <p className={styles.eyebrow}>EKİPHAN · ADMIN</p>
@@ -203,6 +247,7 @@ export function ImportAdminClient() {
 
       {error && <div className={styles.error} role="alert">{error}</div>}
       {message && <div className={styles.success} role="status">{message}</div>}
+      {productTotal !== null && <p role="status">Toplam ürün: {productTotal}</p>}
 
       <section className={styles.card} aria-labelledby="upload-title">
         <div>
@@ -262,7 +307,10 @@ export function ImportAdminClient() {
                   <td>{job.totalRowCount}</td>
                   <td>{job.invalidRowCount}</td>
                   <td>{formatDate(job.createdAt)}</td>
-                  <td><button className={styles.textButton} onClick={() => void selectJob(job.id)} disabled={busy}>İncele</button></td>
+                  <td>
+                    <button className={styles.textButton} onClick={() => void selectJob(job.id)} disabled={busy}>İncele</button>
+                    <button className={styles.textButton} onClick={() => setDeleteTarget(job)} disabled={busy}>Sil</button>
+                  </td>
                 </tr>
               ))}
             </tbody>

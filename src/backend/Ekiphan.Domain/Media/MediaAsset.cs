@@ -33,6 +33,14 @@ public sealed class MediaAsset : Entity
     public string? Sha256Checksum { get; private set; }
 
     public string? ExternalUrl { get; private set; }
+    public Guid? CoverMediaAssetId { get; private set; }
+
+    public void SetCover(Guid? id)
+    {
+        if (AssetType != MediaAssetType.Pdf || id == Id || id == Guid.Empty)
+            throw new ArgumentException("Invalid PDF cover identifier.", nameof(id));
+        CoverMediaAssetId = id;
+    }
 
     public DateTimeOffset? ArchivedAt { get; private set; }
 
@@ -243,6 +251,24 @@ public sealed class MediaAsset : Entity
         Status = MediaStatus.Active;
         ArchivedAt = null;
         ProcessingStatus = MediaProcessingStatus.Completed;
+    }
+
+    public void ReplacePdfFile(string fileName, string storageKey, long size, string checksum)
+    {
+        if (AssetType != MediaAssetType.Pdf) throw new InvalidOperationException("Only PDF files can be replaced.");
+        var validated = CreateFile(Id, AssetType, fileName, storageKey, "application/pdf", size, checksum, StorageProvider);
+        OriginalFileName = validated.OriginalFileName;
+        StorageKey = validated.StorageKey;
+        FileSizeBytes = validated.FileSizeBytes;
+        Sha256Checksum = validated.Sha256Checksum;
+    }
+
+    public void RepairImageFile(long size, string checksum)
+    {
+        if (AssetType != MediaAssetType.Image) throw new InvalidOperationException("Only images can be repaired.");
+        var validated = CreateFile(Id, AssetType, OriginalFileName!, StorageKey!, MimeType!, size, checksum, StorageProvider);
+        FileSizeBytes = validated.FileSizeBytes;
+        Sha256Checksum = validated.Sha256Checksum;
     }
 
     public void BeginProcessing(Guid? userId = null)

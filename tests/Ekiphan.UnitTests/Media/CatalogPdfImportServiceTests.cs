@@ -1,5 +1,6 @@
 using System.IO.Compression;
 using System.Text;
+using System.Globalization;
 using Ekiphan.Domain.Media;
 using Ekiphan.Infrastructure.CatalogPdfImport;
 using Ekiphan.Infrastructure.Media;
@@ -176,6 +177,141 @@ public sealed class CatalogPdfImportServiceTests
         }
     }
 
+    [Fact]
+    public async Task BackfillRepairsMissingCoverWithoutDuplicatingRecordAndIsIdempotent()
+    {
+        await using var db = CreateContext();
+        var root = Path.Combine(Path.GetTempPath(), $"ekiphan-cover-repair-{Guid.NewGuid():N}");
+        try
+        {
+            var service = new CatalogPdfImportService(db, new LocalMediaFileStorage(root), new StubCoverRenderer());
+            var bytes = Encoding.ASCII.GetBytes("%PDF-test");
+            var result = await service.UploadSingleAsync(new MemoryStream(bytes), "repair.pdf", bytes.Length, null);
+            File.Delete(Path.Combine(root, "catalogs", "repair", "repair-cover.webp"));
+            Assert.Equal("/images/catalog-placeholder.webp", Assert.Single(await service.GetPublicDocumentsAsync()).CoverUrl);
+            var backfill = await service.BackfillCoversAsync();
+            Assert.Equal(1, backfill.Created);
+            Assert.Equal(0, backfill.Failed);
+            Assert.Equal(2, await db.MediaAssets.CountAsync());
+            Assert.Equal(1, (await service.BackfillCoversAsync()).Skipped);
+            Assert.Equal(result.CoverUrl, Assert.Single(await service.GetPublicDocumentsAsync()).CoverUrl);
+        }
+        finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
+
+    [Fact]
+    public async Task ReplacementKeepsPdfIdentityAndOriginalFileButRefreshesCoverUrl()
+    {
+        await using var db = CreateContext();
+        var root = Path.Combine(Path.GetTempPath(), $"ekiphan-cover-replace-{Guid.NewGuid():N}");
+        try
+        {
+            var service = new CatalogPdfImportService(db, new LocalMediaFileStorage(root), new StubCoverRenderer());
+            var bytes = Encoding.ASCII.GetBytes("%PDF-test");
+            var original = await service.UploadSingleAsync(new MemoryStream(bytes), "replace.pdf", bytes.Length, null);
+            var changed = Encoding.ASCII.GetBytes("%PDF-changed");
+            var result = await service.ReplaceAsync(original.MediaAssetId, new MemoryStream(changed), "updated.pdf", changed.Length, "Updated");
+            Assert.Equal(original.MediaAssetId, result.MediaAssetId);
+            Assert.NotEqual(original.CoverUrl, result.CoverUrl);
+            Assert.Null(result.Warning);
+            Assert.True(File.Exists(Path.Combine(root, "catalogs", "replace", "replace.pdf")));
+            Assert.Single(await db.MediaAssets.Where(x => x.AssetType == MediaAssetType.Pdf).ToListAsync());
+            Assert.Equal(result.CoverUrl, Assert.Single(await service.GetPublicDocumentsAsync()).CoverUrl);
+        }
+        finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
+
+    [Fact]
+    public async Task ZipUploadUsesTheSharedCoverRenderer()
+    {
+        await using var db = CreateContext();
+        var root = Path.Combine(Path.GetTempPath(), $"ekiphan-cover-zip-{Guid.NewGuid():N}");
+        try
+        {
+            var service = new CatalogPdfImportService(db, new LocalMediaFileStorage(root), new StubCoverRenderer());
+            await using var zip = CreateZip(["synthetic.pdf"]);
+            var result = await service.ExecuteAsync(zip, "synthetic.zip", zip.Length);
+            Assert.Equal(1, result.Created);
+            Assert.EndsWith("-cover.webp", Assert.Single(await service.GetPublicDocumentsAsync()).CoverUrl);
+        }
+        finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
+
+    [Fact]
+    public async Task IdenticalCoversAreReusedAcrossDifferentPdfsWithoutDuplicateHashRecords()
+    {
+        await using var db = CreateContext();
+        var root = Path.Combine(Path.GetTempPath(), $"ekiphan-cover-reuse-{Guid.NewGuid():N}");
+        try
+        {
+            var service = new CatalogPdfImportService(db, new LocalMediaFileStorage(root), new ConstantCoverRenderer());
+            var bytes = Encoding.ASCII.GetBytes("%PDF-test");
+            var first = await service.UploadSingleAsync(new MemoryStream(bytes), "first.pdf", bytes.Length, null);
+            var secondBytes = Encoding.ASCII.GetBytes("%PDF-different");
+            var second = await service.UploadSingleAsync(new MemoryStream(secondBytes), "second.pdf", secondBytes.Length, null);
+            Assert.Equal(first.CoverUrl, second.CoverUrl);
+            Assert.Single(await db.MediaAssets.Where(x => x.AssetType == MediaAssetType.Image).ToListAsync());
+            Assert.All(await service.GetPublicDocumentsAsync(), x => Assert.Equal(first.CoverUrl, x.CoverUrl));
+        }
+        finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
+
+    [Fact]
+    public async Task BackfillContinuesAfterAnUnreadablePdf()
+    {
+        await using var db = CreateContext();
+        var root = Path.Combine(Path.GetTempPath(), $"ekiphan-cover-continue-{Guid.NewGuid():N}");
+        try
+        {
+            var service = new CatalogPdfImportService(db, new LocalMediaFileStorage(root), new StubCoverRenderer());
+            var bytes = Encoding.ASCII.GetBytes("%PDF-test");
+            var first = await service.UploadSingleAsync(new MemoryStream(bytes), "missing.pdf", bytes.Length, null);
+            var secondBytes = Encoding.ASCII.GetBytes("%PDF-different");
+            await service.UploadSingleAsync(new MemoryStream(secondBytes), "good.pdf", secondBytes.Length, null);
+            File.Delete(Path.Combine(root, "catalogs", "missing", "missing.pdf"));
+            File.Delete(Path.Combine(root, "catalogs", "missing", "missing-cover.webp"));
+            File.Delete(Path.Combine(root, "catalogs", "good", "good-cover.webp"));
+            var result = await service.BackfillCoversAsync();
+            Assert.Equal(1, result.Failed);
+            Assert.Equal(1, result.Created);
+            Assert.EndsWith("-cover.webp", (await service.GetPublicDocumentsAsync()).Single(x => x.Id != first.MediaAssetId).CoverUrl);
+        }
+        finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
+
+    [Fact]
+    public async Task RealFirstPageRendererProducesDecodableWebp()
+    {
+        await using var db = CreateContext();
+        var root = Path.Combine(Path.GetTempPath(), $"ekiphan-real-cover-{Guid.NewGuid():N}");
+        try
+        {
+            var objects = new[] {
+                "<< /Type /Catalog /Pages 2 0 R >>",
+                "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+                "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 200] /Contents 4 0 R >>",
+                "<< /Length 0 >>\nstream\n\nendstream"
+            };
+            var pdf = new StringBuilder("%PDF-1.4\n");
+            var offsets = new List<int>();
+            for (var i = 0; i < objects.Length; i++) { offsets.Add(pdf.Length); pdf.Append(CultureInfo.InvariantCulture, $"{i + 1} 0 obj\n{objects[i]}\nendobj\n"); }
+            var xref = pdf.Length;
+            pdf.Append("xref\n0 5\n0000000000 65535 f \n");
+            foreach (var offset in offsets) pdf.Append(CultureInfo.InvariantCulture, $"{offset:D10} 00000 n \n");
+            pdf.Append(CultureInfo.InvariantCulture, $"trailer\n<< /Size 5 /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+            var bytes = Encoding.ASCII.GetBytes(pdf.ToString());
+            var result = await new CatalogPdfImportService(db, new LocalMediaFileStorage(root))
+                .UploadSingleAsync(new MemoryStream(bytes), "real.pdf", bytes.Length, "Real");
+            Assert.Null(result.Warning);
+            var cover = await db.MediaAssets.SingleAsync(x => x.AssetType == MediaAssetType.Image);
+            using var image = SixLabors.ImageSharp.Image.Load(Path.Combine(root, cover.StorageKey!));
+            Assert.True(image.Width > 0);
+            Assert.Equal(2, image.Height / image.Width);
+            Assert.Equal(cover.Id, (await db.MediaAssets.SingleAsync(x => x.AssetType == MediaAssetType.Pdf)).CoverMediaAssetId);
+        }
+        finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
+
     private static CatalogPdfImportService Service() => new(null!, null!);
     private static EkiphanDbContext CreateContext() =>
         new(new DbContextOptionsBuilder<EkiphanDbContext>()
@@ -205,6 +341,15 @@ public sealed class CatalogPdfImportServiceTests
     }
 
     private sealed class StubCoverRenderer : IPdfCoverRenderer
+    {
+        public void Render(Stream output, Stream pdf)
+        {
+            output.Write("RIFFxxxxWEBP"u8);
+            pdf.CopyTo(output);
+        }
+    }
+
+    private sealed class ConstantCoverRenderer : IPdfCoverRenderer
     {
         public void Render(Stream output, Stream pdf) => output.Write("RIFFxxxxWEBP"u8);
     }

@@ -60,7 +60,7 @@ async function proxy(
 ): Promise<Response> {
   const { segments = [] } = await context.params;
 
-  if (segments.length !== 1 || !["preview", "execute"].includes(segments[0])) {
+  if (segments.length !== 1 || !["preview", "execute", "single", "backfill-covers"].includes(segments[0])) {
     return problem(404, "Bulunamadı", "İstenen katalog PDF import yolu desteklenmiyor.");
   }
 

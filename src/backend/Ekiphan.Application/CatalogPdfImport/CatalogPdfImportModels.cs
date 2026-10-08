@@ -13,6 +13,7 @@ public interface ICatalogPdfImportService
     Task<CatalogPdfPreview> PreviewAsync(Stream content, string fileName, long length, CancellationToken cancellationToken = default);
     Task<CatalogPdfExecutionResult> ExecuteAsync(Stream content, string fileName, long length, IReadOnlyDictionary<string, string>? titles = null, CancellationToken cancellationToken = default);
     Task<SingleCatalogPdfResult> UploadSingleAsync(Stream content, string fileName, long length, string? title, CancellationToken cancellationToken = default);
+    Task<SingleCatalogPdfResult> ReplaceAsync(Guid id, Stream content, string fileName, long length, string? title, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<CatalogPdfDocument>> GetPublicDocumentsAsync(CancellationToken cancellationToken = default);
     Task<CatalogPdfCoverBackfillResult> BackfillCoversAsync(CancellationToken cancellationToken = default);
 }

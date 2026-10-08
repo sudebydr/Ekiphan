@@ -1,0 +1,38 @@
+.panel { box-sizing:border-box; position:fixed; z-index:3000; left:var(--menu-left,16px); top:var(--menu-top,10rem); width:var(--menu-width,min(55rem,calc(100vw - 32px))); max-width:calc(100vw - 32px); max-height:var(--menu-height,calc(100dvh - 11rem)); display:flex; flex-direction:column; overflow:hidden; padding:1rem; border:1px solid #ded9d1; border-radius:0 0 .75rem .75rem; background:#f8f4ee; box-shadow:0 16px 36px #281e1826; white-space:normal; font-family:Arial,sans-serif; }
+.panel * { box-sizing:border-box; }
+.desktop { display:grid; grid-template-columns:minmax(0,1fr); gap:1rem; min-height:0; overflow:hidden; }
+.desktop[data-selected=true] { grid-template-columns:minmax(0,1fr) minmax(0,1.5fr); }
+.roots { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-content:start; gap:.25rem; overflow-x:hidden; overflow-y:auto; min-height:0; overscroll-behavior:contain; }
+.desktop[data-selected=true] .roots { grid-template-columns:minmax(0,1fr); }
+.roots button,.rootToggle { display:flex; align-items:center; justify-content:space-between; gap:.75rem; width:100%; min-width:0; min-height:44px; padding:.7rem; border:0; border-radius:.25rem; background:transparent; color:#302b28; font:inherit; font-size:.8rem; line-height:1.45; text-align:left; overflow-wrap:anywhere; cursor:pointer; }
+.roots button[aria-expanded=true],.rootToggle[aria-expanded=true] { background:#eae2d8; color:#941b37; }
+.roots span,.rootToggle span { flex:0 0 1rem; text-align:center; }
+.branch { display:flex; flex-direction:column; min-width:0; min-height:0; overflow:hidden; }
+.branchHeader { display:flex; flex-wrap:wrap; align-items:center; gap:.25rem .75rem; flex:0 0 auto; padding-bottom:.5rem; border-bottom:1px solid #ded9d1; }
+.branchHeader button { border:0; background:transparent; padding:.6rem; min-height:44px; color:#941b37; font:inherit; font-size:.8rem; cursor:pointer; }
+.panel a { display:block; min-width:0; color:#302b28; font-size:.8rem; line-height:1.5; text-decoration:none; overflow-wrap:anywhere; }
+.branchHeader a { flex:1 1 10rem; font-weight:600; }
+.childList { min-height:0; margin:0; padding:0; list-style:none; overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; }
+.childList li { display:flex; align-items:stretch; min-width:0; border-bottom:1px solid #e5ded5; }
+.childList a { flex:1; padding:.7rem .5rem; min-height:44px; }
+.childList button { flex:0 0 44px; width:44px; min-height:44px; padding:.5rem; border:0; background:transparent; color:#941b37; font-size:1rem; cursor:pointer; }
+.footer { flex:0 0 auto; margin-top:.75rem; padding:.75rem .5rem 0; border-top:1px solid #ded9d1; }
+.panel a:hover,.panel button:hover { background:#efe8df; color:#941b37; }
+.panel :is(a,button):focus-visible { outline:2px solid #941b37; outline-offset:-2px; }
+.mobile { display:none; }
+@media(min-width:901px) {
+  .panel { height:min(26rem,var(--menu-height,calc(100dvh - 11rem))); }
+  .desktop,.desktop[data-selected=true] { flex:1; grid-template-columns:minmax(0,1fr) minmax(0,1.5fr); grid-template-rows:minmax(0,1fr); }
+  .roots,.desktop[data-selected=true] .roots { grid-template-columns:minmax(0,1fr); padding-right:.75rem; border-right:1px solid #ded9d1; scrollbar-gutter:stable; }
+  .roots a { display:flex; align-items:center; justify-content:space-between; gap:.75rem; width:100%; min-height:44px; padding:.7rem; border-radius:.25rem; }
+  .roots a[aria-current=true] { background:#eae2d8; color:#941b37; }
+  .childList { flex:1; scrollbar-gutter:stable; }
+  .desktopHint { min-width:0; margin:0; padding:1rem; color:#716b65; font-size:.85rem; line-height:1.6; overflow-wrap:anywhere; }
+}
+@media(max-width:900px) {
+  .panel { position:static; width:100%; max-width:100%; max-height:calc(100dvh - 150px); min-height:0; padding:.5rem; box-shadow:none; border-radius:.35rem; }
+  .desktop { display:none; }
+  .mobile { display:block; min-height:0; overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; }
+  .accordion { min-width:0; border-bottom:1px solid #ded9d1; }
+  .branch { max-height:min(40dvh,20rem); padding:0 .25rem .5rem .75rem; }
+}

@@ -11,6 +11,8 @@ internal sealed class MediaAssetConfiguration
     {
         builder.ToTable("MediaAssets");
         builder.HasKey(asset => asset.Id);
+        builder.HasOne<MediaAsset>().WithMany().HasForeignKey(asset => asset.CoverMediaAssetId)
+            .OnDelete(DeleteBehavior.NoAction);
         builder.Property(asset => asset.OriginalFileName).HasMaxLength(260);
         builder.Property(asset => asset.StorageKey)
             .HasMaxLength(500)
