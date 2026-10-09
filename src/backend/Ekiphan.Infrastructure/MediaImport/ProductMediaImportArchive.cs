@@ -137,6 +137,11 @@ public sealed class ProductMediaImportTokenService(TimeProvider clock)
         uploads.TryRemove(token, out _); upload = null!; return false;
     }
     public string CreateValidation(ProductMediaStoredValidation validation) { Purge(); var token = Token(); validations[token] = validation; return token; }
+    public bool TryGetValidation(string token, out ProductMediaStoredValidation validation)
+    {
+        Purge();
+        return validations.TryGetValue(token, out validation!) && !validation.Used;
+    }
     public bool TryUseValidation(string token, out ProductMediaStoredValidation validation)
     {
         Purge();
@@ -193,16 +198,26 @@ public sealed class ZipProductMediaImportArchiveReader(
         string contentType, long length, CancellationToken cancellationToken = default)
     {
         var limits = options.Value;
-        if (!Path.GetExtension(fileName).Equals(".zip", StringComparison.OrdinalIgnoreCase) ||
-            contentType is not ("application/zip" or "application/x-zip-compressed"))
-            throw new ProductMediaImportSecurityException("Only ZIP files are accepted.");
+        if (!(Path.GetExtension(fileName).Equals(".zip", StringComparison.OrdinalIgnoreCase) || Path.GetExtension(fileName).Equals(".rar", StringComparison.OrdinalIgnoreCase)) ||
+            contentType is not ("application/zip" or "application/x-zip-compressed" or "application/vnd.rar" or "application/x-rar-compressed" or "application/octet-stream"))
+            throw new ProductMediaImportSecurityException("Yalnız ZIP veya RAR arşivleri kabul edilir.");
         if (length <= 0 || length > limits.MaxZipBytes) throw new ProductMediaImportSecurityException("ZIP size limit exceeded.");
         if (logger.IsEnabled(LogLevel.Information))
             logger.LogInformation("Product media ZIP upload started. FileName={FileName}", Path.GetFileName(fileName));
-        await temporaryStorage.StoreFileAsync(containerId, "archive", content, cancellationToken);
-        await using var zipStream = await temporaryStorage.OpenReadAsync(containerId, "archive", cancellationToken);
-        if (!HasZipSignature(zipStream)) throw new ProductMediaImportSecurityException("ZIP signature is invalid.");
-        if (HasEncryptedEntries(zipStream)) throw new ProductMediaImportSecurityException("Encrypted ZIP files are not allowed.");
+        // Resumable uploads are already private seekable files; do not copy a GB ZIP again.
+        Stream sourceStream;
+        if (content is FileStream file && file.Position == 0)
+            sourceStream = new FileStream(file.Name, FileMode.Open, FileAccess.Read, FileShare.Read,
+                81920, FileOptions.Asynchronous | FileOptions.SequentialScan);
+        else
+        {
+            await temporaryStorage.StoreFileAsync(containerId, "archive", content, cancellationToken);
+            sourceStream = await temporaryStorage.OpenReadAsync(containerId, "archive", cancellationToken);
+        }
+        await using var zipStream = sourceStream;
+        if (Path.GetExtension(fileName).Equals(".zip", StringComparison.OrdinalIgnoreCase) &&
+            (!HasZipSignature(zipStream) || HasEncryptedEntries(zipStream)))
+            throw new ProductMediaImportSecurityException("ZIP signature is invalid or encrypted.");
         zipStream.Position = 0;
         var zipHash = Convert.ToHexString(await SHA256.HashDataAsync(zipStream, cancellationToken));
         zipStream.Position = 0;
@@ -210,7 +225,7 @@ public sealed class ZipProductMediaImportArchiveReader(
         long extracted = 0; int total = 0;
         try
         {
-            using var archive = new ZipArchive(zipStream, ZipArchiveMode.Read, leaveOpen: true);
+            using var archive = ImportArchive.Open(zipStream, fileName, limits.MaxFileCount, limits.MaxExtractedBytes, limits.MaxCompressionRatio);
             if (archive.Entries.Count > limits.MaxFileCount) throw new ProductMediaImportSecurityException("ZIP entry count limit exceeded.");
             foreach (var entry in archive.Entries)
             {
@@ -224,12 +239,12 @@ public sealed class ZipProductMediaImportArchiveReader(
                 var declaredExtension = Path.GetExtension(entry.Name).ToLowerInvariant();
                 if (entry.Name.Length > 260 || entry.FullName.Length > 500)
                 { result.Add(InvalidEntry(entry, declaredExtension, ProductMediaPreviewFileStatus.SecurityRejected, "FILE_NAME_TOO_LONG", "The ZIP entry name is too long.")); continue; }
-                if (declaredExtension == ".zip") throw new ProductMediaImportSecurityException("Nested ZIP files are not allowed.");
+                if (declaredExtension is ".zip" or ".rar") throw new ProductMediaImportSecurityException("Nested ZIP files are not allowed.");
                 if (entry.Length <= 0 || entry.Length > limits.MaxSingleImageBytes)
                 { result.Add(InvalidEntry(entry, declaredExtension, ProductMediaPreviewFileStatus.Invalid, "IMAGE_SIZE", "Image size limit exceeded.")); continue; }
                 extracted = checked(extracted + entry.Length);
                 if (extracted > limits.MaxExtractedBytes) throw new ProductMediaImportSecurityException("Extracted size limit exceeded.");
-                if (entry.CompressedLength == 0 || entry.Length / Math.Max(1d, entry.CompressedLength) > limits.MaxCompressionRatio)
+                if (!entry.IsSolid && (entry.CompressedLength == 0 || entry.Length / Math.Max(1d, entry.CompressedLength) > limits.MaxCompressionRatio))
                     throw new ProductMediaImportSecurityException("Suspicious ZIP compression ratio detected.");
                 var id = Guid.NewGuid().ToString("N");
                 await using var source = entry.Open();
@@ -269,13 +284,13 @@ public sealed class ZipProductMediaImportArchiveReader(
         return new(containerId, Path.GetFileName(fileName), length, zipHash, total, result);
     }
 
-    private static ProductMediaArchiveEntry InvalidEntry(ZipArchiveEntry e, string ext, ProductMediaPreviewFileStatus status, string code, string message) =>
+    private static ProductMediaArchiveEntry InvalidEntry(ImportArchive.Entry e, string ext, ProductMediaPreviewFileStatus status, string code, string message) =>
         new(Guid.NewGuid().ToString("N"), e.FullName, Path.GetFileName(e.Name), ext, "application/octet-stream", e.Length, e.CompressedLength, string.Empty,
             new(null, ProductMediaDetectedPosition.Unknown, 0, false), status, code, message);
-    private static ProductMediaArchiveEntry SkippedEntry(ZipArchiveEntry e, string code, string message) =>
+    private static ProductMediaArchiveEntry SkippedEntry(ImportArchive.Entry e, string code, string message) =>
         InvalidEntry(e, Path.GetExtension(e.Name).ToLowerInvariant(), ProductMediaPreviewFileStatus.Skipped, code, message);
     private static bool HasZipSignature(Stream s) { Span<byte> b = stackalloc byte[4]; s.Position = 0; return s.Read(b) == 4 && b[0] == 0x50 && b[1] == 0x4B && b[2] is 0x03 or 0x05 or 0x07 && b[3] is 0x04 or 0x06 or 0x08; }
-    private static bool HasEncryptedEntries(Stream stream)
+    internal static bool HasEncryptedEntries(Stream stream)
     {
         if (!stream.CanSeek || stream.Length < 22) return true;
         var tailLength = (int)Math.Min(stream.Length, 65_557); var tail = new byte[tailLength];

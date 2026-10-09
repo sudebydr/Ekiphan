@@ -25,6 +25,11 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Ekiphan.Infrastructure.Monitoring;
 
 var builder = WebApplication.CreateBuilder(args);
+var zipUploadOptions = builder.Configuration.GetSection("ZipUploads").Get<Ekiphan.Api.Media.ZipUploadOptions>() ?? new();
+builder.Services.AddSingleton(provider => new Ekiphan.Api.Media.ZipUploadStore(zipUploadOptions,
+    provider.GetRequiredService<ILogger<Ekiphan.Api.Media.ZipUploadStore>>()));
+builder.Services.AddSingleton<Ekiphan.Api.Media.ZipUploadWorker>();
+builder.Services.AddHostedService(provider => provider.GetRequiredService<Ekiphan.Api.Media.ZipUploadWorker>());
 
 var productMediaImportSettings = builder.Configuration
     .GetSection(Ekiphan.Application.MediaImport.ProductMediaImportOptions.SectionName)
@@ -218,6 +223,9 @@ builder.Services.AddRateLimiter(
                     QueueLimit = 0,
                     AutoReplenishment = true,
                 }));
+        options.AddPolicy("zip-chunk", context => RateLimitPartition.GetConcurrencyLimiter(
+            context.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? context.User.FindFirstValue("sub") ?? "unknown",
+            _ => new ConcurrencyLimiterOptions { PermitLimit = 2, QueueLimit = 0 }));
     });
 
 var jwtSettings = builder.Configuration
@@ -510,6 +518,7 @@ app.MapAdminMediaEndpoints(jwtSettings.IsConfigured);
 app.MapMediaProcessingEndpoints(jwtSettings.IsConfigured);
 app.MapProductMediaImportEndpoints(jwtSettings.IsConfigured);
 app.MapCatalogPdfImportEndpoints(jwtSettings.IsConfigured);
+app.MapZipUploadEndpoints(jwtSettings.IsConfigured);
 app.MapQuoteSubmission(quoteConsentSettings);
 app.MapAdminQuoteEndpoints(jwtSettings.IsConfigured);
 app.MapContactEndpoints(quoteConsentSettings, jwtSettings.IsConfigured);

@@ -1,6 +1,8 @@
 "use client";
+import { uploadZip, processZip, type ZipProgress } from "../../../lib/resumable-zip-upload";
 
 import { useState } from "react";
+import { ZipUploadSessions } from "./zip-upload-sessions";
 import styles from "../catalog/products/products.module.css";
 
 type PreviewFile = {
@@ -90,11 +92,13 @@ async function readError(response: Response) {
 }
 
 export function ProductMediaImport() {
+  const [uploadId, setUploadId] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<PreviewResult | null>(null);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [result, setResult] = useState<ExecutionResult | null>(null);
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<ZipProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function previewZip() {
@@ -107,22 +111,9 @@ export function ProductMediaImport() {
     setResult(null);
 
     try {
-      const form = new FormData();
-      form.set("file", file);
-
-      const response = await fetch(
-        "/api/admin/product-media-import/preview",
-        {
-          method: "POST",
-          body: form
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(await readError(response));
-      }
-
-      setPreview((await response.json()) as PreviewResult);
+      const uploaded = await uploadZip<PreviewResult>(file, "product", setProgress, setUploadId);
+      setUploadId(uploaded.id);
+      setPreview(uploaded.preview);
     } catch (reason) {
       setError(
         reason instanceof Error ? reason.message : "ZIP önizlenemedi."
@@ -133,34 +124,13 @@ export function ProductMediaImport() {
   }
 
   async function validateImport() {
-    if (!preview) return;
+    if (!preview || !uploadId) return;
 
     setBusy(true);
     setError(null);
 
     try {
-      const response = await fetch(
-        "/api/admin/product-media-import/validate",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            uploadToken: preview.uploadToken,
-            manualMappings: null,
-            importOptions: {
-              skipUnmatchedFiles: true,
-              replaceExistingPrimaryImage: false,
-              skipDuplicateContent: true
-            }
-          })
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(await readError(response));
-      }
-
-      setValidation((await response.json()) as ValidationResult);
+      setValidation(await processZip<ValidationResult>(uploadId, "validate", undefined, setProgress));
     } catch (reason) {
       setError(
         reason instanceof Error ? reason.message : "Eşleştirme doğrulanamadı."
@@ -171,7 +141,7 @@ export function ProductMediaImport() {
   }
 
   async function executeImport() {
-    if (!validation) return;
+    if (!validation || !uploadId) return;
 
     if (
       !window.confirm(
@@ -185,22 +155,7 @@ export function ProductMediaImport() {
     setError(null);
 
     try {
-      const response = await fetch(
-        "/api/admin/product-media-import/execute",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            validationToken: validation.validationToken
-          })
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(await readError(response));
-      }
-
-      setResult((await response.json()) as ExecutionResult);
+      setResult(await processZip<ExecutionResult>(uploadId, "execute", undefined, setProgress, validation.validationToken));
     } catch (reason) {
       setError(
         reason instanceof Error ? reason.message : "Görseller içe aktarılamadı."
@@ -212,10 +167,14 @@ export function ProductMediaImport() {
 
   return (
     <div className={styles.editor}>
-      <h2>Toplu ürün görsel importu</h2>
+      {progress && <div role="status" aria-live="polite"><p>{progress.message}{progress.phase === "transfer" ? `: %${progress.percent}` : ""}</p><progress max={100} value={progress.phase === "processing" ? undefined : progress.percent} /></div>}
+      <h2>Toplu Ürün Görsel İçe Aktarma</h2>
+      <ZipUploadSessions kind="product" disabled={busy}
+        refreshKey={`${busy}:${file?.name}:${uploadId}:${error}`}
+        onClosed={id => { setError(null); if (id === uploadId) { setUploadId(null); setPreview(null); setResult(null); setProgress(null); setValidation(null); } }} />
 
       <p>
-        ZIP içindeki görseller dosya adındaki SKU üzerinden ürünlerle
+        ZIP/RAR içindeki görseller dosya adındaki SKU üzerinden ürünlerle
         otomatik eşleştirilir.
       </p>
       <p>WebP önerilir · JPG, JPEG, PNG desteklenir · Görsel başına maksimum 4 MB.</p>
@@ -227,13 +186,15 @@ export function ProductMediaImport() {
       )}
 
       <label>
-        ZIP dosyası
+        ZIP/RAR dosyası
         <input
           type="file"
-          accept=".zip,application/zip"
+          accept=".zip,.rar,application/zip,application/vnd.rar,application/x-rar-compressed"
           disabled={busy}
           onChange={(event) => {
             setFile(event.target.files?.[0] ?? null);
+            setUploadId(null);
+            setProgress(null);
             setPreview(null);
             setValidation(null);
             setResult(null);
@@ -247,7 +208,7 @@ export function ProductMediaImport() {
         disabled={busy || !file}
         onClick={() => void previewZip()}
       >
-        {busy ? "İşleniyor…" : "ZIP'i önizle"}
+        {busy ? "İşleniyor…" : "Arşivi önizle"}
       </button>
 
       {preview && (

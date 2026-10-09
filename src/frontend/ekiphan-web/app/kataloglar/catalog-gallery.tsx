@@ -1,6 +1,7 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import styles from "./catalogs.module.css";
 
 type Catalog = {
@@ -18,18 +19,32 @@ const PAGE_SIZE = 8;
 export function CatalogGallery({ catalogs, locale = "tr" }: { catalogs: Catalog[]; locale?: "tr" | "en" }) {
   const en = locale === "en";
   const [selected, setSelected] = useState<Catalog | null>(null);
+  const closeButton = useRef<HTMLButtonElement>(null);
   const [page, setPage] = useState(0);
   const [failedCovers, setFailedCovers] = useState<Set<string>>(() => new Set());
   const totalPages = Math.ceil(catalogs.length / PAGE_SIZE);
   const visibleCatalogs = catalogs.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   useEffect(() => {
+    if (!selected) return;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const { scrollX, scrollY } = window;
+    const body = document.body;
+    const previous = { position: body.style.position, top: body.style.top, left: body.style.left,
+      width: body.style.width, overflow: body.style.overflow };
+    Object.assign(body.style, { position: "fixed", top: `-${scrollY}px`, left: `-${scrollX}px`, width: "100%", overflow: "hidden" });
+    closeButton.current?.focus({ preventScroll: true });
     const close = (event: KeyboardEvent) => {
       if (event.key === "Escape") setSelected(null);
     };
     window.addEventListener("keydown", close);
-    return () => window.removeEventListener("keydown", close);
-  }, []);
+    return () => {
+      window.removeEventListener("keydown", close);
+      Object.assign(body.style, previous);
+      window.scrollTo({ left: scrollX, top: scrollY, behavior: "instant" });
+      previousFocus?.focus({ preventScroll: true });
+    };
+  }, [selected]);
 
   const changePage = (nextPage: number) => {
     setPage(nextPage);
@@ -73,18 +88,18 @@ export function CatalogGallery({ catalogs, locale = "tr" }: { catalogs: Catalog[
         )}
       </section>
 
-      {selected && (
+      {selected && createPortal(
         <div className={styles.modal} role="dialog" aria-modal="true" aria-label={en ? `${selected.title} PDF preview` : `${selected.title} PDF önizlemesi`} onMouseDown={() => setSelected(null)}>
           <section className={styles.modalPanel} onMouseDown={(event) => event.stopPropagation()}>
             <header className={styles.viewerHeader}>
               <div className={styles.modalMeta}><p>{selected.category} · {selected.eyebrow}</p><h2>{selected.title}</h2></div>
-              <button className={styles.close} type="button" onClick={() => setSelected(null)} aria-label={en ? "Close preview" : "Önizlemeyi kapat"}>{en ? "Close" : "Kapat"} <span>×</span></button>
+              <button ref={closeButton} className={styles.close} type="button" onClick={() => setSelected(null)} aria-label={en ? "Close preview" : "Önizlemeyi kapat"}>{en ? "Close" : "Kapat"} <span>×</span></button>
             </header>
             <div className={styles.viewerSurface}>
               <iframe className={styles.pdfFrame} src={`${encodeURI(selected.pdfUrl)}#page=1&zoom=80&pagemode=none`} title={`${selected.title} PDF kataloğu`} />
             </div>
           </section>
-        </div>
+        </div>, document.body
       )}
     </>
   );

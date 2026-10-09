@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { uploadZip, uploadSingle, processZip, type ZipProgress } from "../../../lib/resumable-zip-upload";
+import { ZipUploadSessions } from "./zip-upload-sessions";
 import styles from "../catalog/products/products.module.css";
 
 type PreviewFile = {
@@ -48,6 +50,8 @@ async function readError(response: Response): Promise<string> {
 }
 
 export function CatalogPdfImport() {
+  const [uploadId, setUploadId] = useState<string | null>(null);
+  const [progress, setProgress] = useState<ZipProgress | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<PreviewResult | null>(null);
   const [result, setResult] = useState<ExecutionResult | null>(null);
@@ -95,15 +99,9 @@ export function CatalogPdfImport() {
     setResult(null);
 
     try {
-      const form = new FormData();
-      form.set("file", file);
-      const response = await fetch("/api/admin/catalog-pdf-import/preview", {
-        method: "POST",
-        body: form
-      });
-
-      if (!response.ok) throw new Error(await readError(response));
-      const next = (await response.json()) as PreviewResult;
+      const uploaded = await uploadZip<PreviewResult>(file, "catalog", setProgress, setUploadId);
+      setUploadId(uploaded.id);
+      const next = uploaded.preview;
       setPreview(next);
       setTitles(Object.fromEntries(next.files.map((item) => [item.entryPath, item.suggestedTitle])));
     } catch (reason) {
@@ -118,24 +116,14 @@ export function CatalogPdfImport() {
   }
 
   async function executeImport() {
-    if (!file || !canExecute) return;
+    if (!file || !uploadId || !canExecute) return;
 
     setBusy(true);
     setError(null);
     setResult(null);
 
     try {
-      const form = new FormData();
-      form.set("file", file);
-      form.set("confirmed", "true");
-      form.set("titles", JSON.stringify(titles));
-      const response = await fetch("/api/admin/catalog-pdf-import/execute", {
-        method: "POST",
-        body: form
-      });
-
-      if (!response.ok) throw new Error(await readError(response));
-      setResult((await response.json()) as ExecutionResult);
+      setResult(await processZip<ExecutionResult>(uploadId, "execute", titles, setProgress));
     } catch (reason) {
       setError(
         reason instanceof Error
@@ -149,22 +137,28 @@ export function CatalogPdfImport() {
 
   return (
     <section className={styles.editor} aria-labelledby="catalog-pdf-import-title">
-      <h2 id="catalog-pdf-import-title">Katalog PDF Import</h2>
+      {progress && <div role="status" aria-live="polite"><p>{progress.message}{progress.phase === "transfer" ? `: %${progress.percent}` : ""}</p><progress max={100} value={progress.phase === "processing" ? undefined : progress.percent} /></div>}
+      <h2 id="catalog-pdf-import-title">Toplu Katalog PDF İçe Aktarma</h2>
+      <ZipUploadSessions kind="catalog" disabled={busy}
+        refreshKey={`${busy}:${file?.name}:${uploadId}:${error}`}
+        onClosed={id => { setError(null); if (id === uploadId) { setUploadId(null); setPreview(null); setResult(null); setProgress(null); setTitles({}); } }} />
       <p>
-        ZIP içindeki geçerli PDF katalogları önizlenir. Maksimum ZIP 1,5 GB,
+        ZIP/RAR içindeki geçerli PDF katalogları önizlenir. Maksimum arşiv 1,5 GB,
         açılmış içerik 2 GB ve her PDF 500 MB olabilir.
       </p>
 
       {error && <div className={styles.error} role="alert">{error}</div>}
 
       <label>
-        Katalog ZIP dosyası
+        Katalog ZIP/RAR dosyası
         <input
           type="file"
-          accept=".zip,application/zip"
+          accept=".zip,.rar,application/zip,application/vnd.rar,application/x-rar-compressed"
           disabled={busy}
           onChange={(event) => {
             setFile(event.target.files?.[0] ?? null);
+            setUploadId(null);
+            setProgress(null);
             setPreview(null);
             setResult(null);
             setError(null);
@@ -209,15 +203,14 @@ export function CatalogPdfImport() {
   );
 }
 
-export function SingleCatalogPdfUpload({ onUploaded, catalogs = [] }: { onUploaded: () => Promise<void>; catalogs?: { id: string; title: string }[] }) {
-  const [replaceId, setReplaceId] = useState("");
+export function SingleCatalogPdfUpload({ onUploaded }: { onUploaded: () => Promise<void> }) {
+  const [uploadId, setUploadId] = useState<string | null>(null);
+  const [progress, setProgress] = useState<ZipProgress | null>(null);
   const [file, setFile] = useState<File | null>(null);
-  const [title, setTitle] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const suggest = (name: string) => name.replace(/\.pdf$/i, "").replace(/[_-]+/g, " ")
-    .replace(/\s+/g, " ").trim().replace(/\b\p{L}/gu, value => value.toLocaleUpperCase("tr-TR"));
+
 
   async function upload() {
     if (!file) return;
@@ -229,13 +222,10 @@ export function SingleCatalogPdfUpload({ onUploaded, catalogs = [] }: { onUpload
     }
     setBusy(true); setError(null); setMessage(null);
     try {
-      const form = new FormData(); form.set("file", file); form.set("title", title.trim());
-      if (replaceId) form.set("replaceId", replaceId);
-      const response = await fetch("/api/admin/catalog-pdf-import/single", { method: "POST", body: form });
-      if (!response.ok) throw new Error(await readError(response));
-      const result = await response.json() as { warning?: string | null };
+      const result = await uploadSingle<{ warning?: string | null }>(file, "pdf",
+        {}, setProgress, setUploadId);
       setMessage(result.warning ?? "Katalog PDF ve WebP kapağı yüklendi.");
-      setFile(null); setTitle(""); setReplaceId(""); await onUploaded();
+      setFile(null); await onUploaded();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Katalog PDF yüklenemedi.");
     } finally { setBusy(false); }
@@ -243,18 +233,15 @@ export function SingleCatalogPdfUpload({ onUploaded, catalogs = [] }: { onUpload
 
   return <section className={styles.editor} aria-labelledby="single-catalog-title">
     <h2 id="single-catalog-title">Tek Katalog PDF Yükle</h2>
-    <label>Katalog<select value={replaceId} disabled={busy} onChange={event => setReplaceId(event.target.value)}>
-      <option value="">Yeni katalog oluştur</option>
-      {catalogs.map(catalog => <option key={catalog.id} value={catalog.id}>{catalog.title} — PDF ve kapağı güncelle</option>)}
-    </select></label>
+    <ZipUploadSessions kind="pdf" disabled={busy} refreshKey={`${busy}:${uploadId}:${error}`}
+      onClosed={id => { if (id === uploadId) { setUploadId(null); setProgress(null); } }} />
+    {progress && <div role="status" aria-live="polite"><p>{progress.message}{progress.phase === "transfer" ? `: %${progress.percent}` : ""}</p><progress max={100} value={progress.phase === "processing" ? undefined : progress.percent} /></div>}
     {error && <div className={styles.error} role="alert">{error}</div>}
     {message && <div className={styles.success} role="status">{message}</div>}
-    <label>PDF dosyası<input type="file" accept=".pdf,application/pdf" disabled={busy}
+    <label>PDF dosyası seç<input type="file" accept=".pdf,application/pdf" disabled={busy}
       onChange={event => { const selected = event.target.files?.[0] ?? null; setFile(selected);
-        setTitle(selected ? suggest(selected.name) : ""); setError(null); setMessage(null); }} /></label>
-    <label>Katalog başlığı<input required maxLength={250} value={title}
-      onChange={event => setTitle(event.target.value)} /></label>
-    <button type="button" disabled={busy || !file || !title.trim()} onClick={() => void upload()}>
+        setError(null); setMessage(null); }} /></label>
+    <button type="button" disabled={busy || !file} onClick={() => void upload()}>
       {busy ? "Yükleniyor…" : "Yükle"}
     </button>
     <small>Yalnız PDF · Maksimum 500 MB · İlk sayfadan WebP kapak üretilir.</small>

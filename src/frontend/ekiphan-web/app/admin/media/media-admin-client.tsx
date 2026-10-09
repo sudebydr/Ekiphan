@@ -9,6 +9,8 @@ import type { ProblemDetails } from "../../../lib/admin-product-relation-types";
 import styles from "../catalog/products/products.module.css";
 import { CatalogPdfImport, SingleCatalogPdfUpload } from "./catalog-pdf-import";
 import { ProductMediaImport } from "./product-media-import";
+import { uploadSingle, type ZipProgress } from "../../../lib/resumable-zip-upload";
+import { ZipUploadSessions } from "./zip-upload-sessions";
 
 type Target = { id: string; name: string };
 
@@ -35,6 +37,8 @@ export function MediaAdminClient() {
   const [englishDescription, setEnglishDescription] = useState("");
   const [externalUrl, setExternalUrl] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+  const [uploadId, setUploadId] = useState<string | null>(null);
+  const [progress, setProgress] = useState<ZipProgress | null>(null);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [assetFilter, setAssetFilter] = useState("");
@@ -152,18 +156,11 @@ export function MediaAdminClient() {
     }
     setBusy(true); setError(null); setMessage(null);
     try {
-      for (const file of files) {
-        const form = new FormData();
-        const fallbackTitle = file.name.replace(/\.[^.]+$/, "");
-        form.set("file", file); form.set("assetType", "Image");
-        form.set("languageCode", "tr");
-        form.set("title", files.length === 1 ? title : fallbackTitle);
-        form.set("altText", altText || fallbackTitle);
-        if (files.length === 1 && description) form.set("description", description);
-        const response = await fetch("/api/admin/media", { method: "POST", body: form });
-        if (!response.ok) throw new Error(await readError(response));
-      }
-      setMessage(`${files.length} dosya medyaya eklendi.`); setFiles([]); await load();
+      const result = await uploadSingle<{ importedFiles: number; skippedFiles: number; errorFiles: number; errors: { message: string }[] }>(
+        files[0], "image", {}, setProgress, setUploadId);
+      if (result.errorFiles) throw new Error(result.errors.map(e => e.message).join(" ") || "Görsel ürüne bağlanamadı.");
+      setMessage(result.importedFiles ? "Görsel ilgili ürüne bağlandı." : "Bu görsel üründe zaten mevcut; tekrar eklenmedi.");
+      setFiles([]); await load();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Dosya yüklenemedi.");
     } finally { setBusy(false); }
@@ -349,19 +346,16 @@ export function MediaAdminClient() {
         <ProductMediaImport />
         <CatalogPdfImport />
         <form className={styles.editor} onSubmit={upload}><h2>Tek Ürün Görseli Yükle</h2>
+          <ZipUploadSessions kind="image" disabled={busy} refreshKey={`${busy}:${uploadId}:${error}`}
+            onClosed={id => { if (id === uploadId) { setUploadId(null); setProgress(null); } }} />
+          {progress && <div role="status" aria-live="polite"><p>{progress.message}{progress.phase === "transfer" ? `: %${progress.percent}` : ""}</p><progress max={100} value={progress.phase === "processing" ? undefined : progress.percent} /></div>}
           <label>Dosya<input type="file" required
             accept=".webp,.jpg,.jpeg,.png,image/webp,image/jpeg,image/png"
             onChange={(e) => setFiles(Array.from(e.target.files ?? []))} /></label>
-          <label>Türkçe başlık<input required={files.length <= 1} maxLength={250} value={title} onChange={(e) => setTitle(e.target.value)} /></label>
-          <label>Alt metin<input required maxLength={500} value={altText} onChange={(e) => setAltText(e.target.value)} /></label>
-          <label>Açıklama<textarea maxLength={2000} value={description} onChange={(e) => setDescription(e.target.value)} /></label>
-          <button disabled={busy || files.length === 0}>Güvenli yükle ({files.length})</button>
-          <small>Önerilen format: WebP · Maksimum dosya boyutu: 4 MB · Ürüne aşağıdaki manuel medya atama alanından bağlayın.</small>
-          <small>Tehdit tarayıcısı yapılandırılmamışsa sistem güvenlik gereği yüklemeyi reddeder.</small>
+          <button disabled={busy || files.length === 0}>Görseli Yükle</button>
+          <small>JPG, JPEG, PNG veya WebP · En fazla 4 MB. Dosya adındaki ürün koduyla otomatik eşleştirilir.</small>
         </form>
-        <SingleCatalogPdfUpload onUploaded={load} catalogs={library.assets
-          .filter(asset => asset.assetType === "Pdf" && asset.url?.includes("/media/catalogs/"))
-          .map(asset => ({ id: asset.id, title: assetName(asset) }))} />
+        <SingleCatalogPdfUpload onUploaded={load} />
         <form className={styles.editor} onSubmit={createVideo}><h2>Harici video</h2>
           <label>HTTPS video adresi<input type="url" pattern="https://.*" required value={externalUrl} onChange={(e) => setExternalUrl(e.target.value)} /></label>
           <label>Türkçe başlık<input required maxLength={250} value={title} onChange={(e) => setTitle(e.target.value)} /></label>

@@ -36,3 +36,38 @@
   .accordion { min-width:0; border-bottom:1px solid #ded9d1; }
   .branch { max-height:min(40dvh,20rem); padding:0 .25rem .5rem .75rem; }
 }
+
+/* EKIPHAN_SIMPLE_MENU */
+.panel.simplePanel {
+  width: var(--menu-width, 360px);
+  height: min(43rem, var(--menu-height, 43rem));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.simpleList {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.simpleLink {
+  display: block;
+  flex: 0 0 auto;
+  padding: .8rem .75rem;
+  border-radius: .25rem;
+  font-size: .8rem;
+}
+
+@media (max-width: 900px) {
+  .panel.simplePanel {
+    position: static;
+    width: 100%;
+    height: auto;
+    max-height: calc(100dvh - 150px);
+  }
+}

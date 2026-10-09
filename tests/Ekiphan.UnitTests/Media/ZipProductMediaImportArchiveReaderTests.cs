@@ -68,6 +68,27 @@ public sealed class ZipProductMediaImportArchiveReaderTests
             ReadAsync(new TestStorage(), options, ("SKU.png", Png)));
     }
 
+    [Fact]
+    public async Task SeekableDiskUploadDoesNotCopyWholeArchiveAgain()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "ekiphan-zip-source-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            await File.WriteAllBytesAsync(path, CreateZip([("SKU.png", Png)]));
+            var storage = new TestStorage();
+            var reader = new ZipProductMediaImportArchiveReader(Options.Create(new ProductMediaImportOptions()),
+                storage, new ProductMediaSkuParser(), new Sha256ProductMediaDuplicateDetector(),
+                new MediaFileSignatureValidator(), NullLogger<ZipProductMediaImportArchiveReader>.Instance);
+            await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var result = await reader.ReadAsync("test", stream, "images.zip", "application/zip", stream.Length);
+            Assert.Single(result.Entries);
+            Assert.DoesNotContain("archive", storage.Files.Keys);
+            Assert.Contains(result.Entries[0].TemporaryFileId, storage.Files.Keys);
+            Assert.True(File.Exists(path));
+        }
+        finally { File.Delete(path); }
+    }
+
     private static Task<ProductMediaArchiveReadResult> ReadAsync(params (string Path, byte[] Content)[] entries) =>
         ReadAsync(new TestStorage(), new ProductMediaImportOptions(), entries);
 

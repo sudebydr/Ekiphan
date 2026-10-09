@@ -12,6 +12,47 @@ namespace Ekiphan.UnitTests.Media;
 public sealed class CatalogPdfImportServiceTests
 {
     [Fact]
+    public async Task SingleUploadDerivesTitleReusesDuplicateAndUpdatesSameCatalog()
+    {
+        await using var db = CreateContext();
+        var root = Path.Combine(Path.GetTempPath(), $"ekiphan-single-match-{Guid.NewGuid():N}");
+        try
+        {
+            var service = new CatalogPdfImportService(db, new LocalMediaFileStorage(root), new StubCoverRenderer());
+            var bytes = Encoding.ASCII.GetBytes("%PDF-test");
+            var first = await service.UploadSingleAsync(new MemoryStream(bytes), "fabrika-2026.pdf", bytes.Length, null);
+            Assert.Equal("Fabrika 2026", first.Title);
+            var duplicate = await service.UploadSingleAsync(new MemoryStream(bytes), "fabrika-2026.pdf", bytes.Length, null);
+            Assert.Equal(first.MediaAssetId, duplicate.MediaAssetId);
+            Assert.Contains("tekrar eklenmedi", duplicate.Warning);
+            var changed = Encoding.ASCII.GetBytes("%PDF-changed");
+            var updated = await service.UploadSingleAsync(new MemoryStream(changed), "fabrika-2026.pdf", changed.Length, null);
+            Assert.Equal(first.MediaAssetId, updated.MediaAssetId);
+            var again = await service.UploadSingleAsync(new MemoryStream(changed), "fabrika-2026.pdf", changed.Length, null);
+            Assert.Equal(first.MediaAssetId, again.MediaAssetId);
+            Assert.Single(await db.MediaAssets.Where(x => x.AssetType == MediaAssetType.Pdf).ToListAsync());
+            Assert.EndsWith("-cover.webp", updated.CoverUrl);
+        }
+        finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
+
+    [Fact]
+    public async Task SingleUploadRejectsAmbiguousCatalogWithoutWritingFiles()
+    {
+        await using var db = CreateContext();
+        foreach (var name in new[] { "one", "two" })
+            db.MediaAssets.Add(MediaAsset.CreateFile(Guid.NewGuid(), MediaAssetType.Pdf, "ambiguous.pdf",
+                $"catalogs/ambiguous/{name}.pdf", "application/pdf", 9, new string('A', 64), "Local"));
+        await db.SaveChangesAsync();
+        var bytes = Encoding.ASCII.GetBytes("%PDF-test");
+        var error = await Assert.ThrowsAsync<ArgumentException>(() => new CatalogPdfImportService(db,
+            new LocalMediaFileStorage(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))), new StubCoverRenderer())
+            .UploadSingleAsync(new MemoryStream(bytes), "ambiguous.pdf", bytes.Length, null));
+        Assert.Contains("birden fazla katalog", error.Message);
+        Assert.Equal(2, await db.MediaAssets.CountAsync());
+    }
+
+    [Fact]
     public async Task PreviewAcceptsTheApprovedPdfManifest()
     {
         await using var zip = CreateManifestZip();
@@ -310,6 +351,39 @@ public sealed class CatalogPdfImportServiceTests
             Assert.Equal(cover.Id, (await db.MediaAssets.SingleAsync(x => x.AssetType == MediaAssetType.Pdf)).CoverMediaAssetId);
         }
         finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
+
+    [Fact]
+    public async Task PreviewRejectsSuspiciousCompressionRatio()
+    {
+        await using var zip = CreateManifestZip(archive => Add(archive, "bomb.pdf", "%PDF-" + new string(' ', 100000)));
+        var error = await Assert.ThrowsAsync<ArgumentException>(() => Service().PreviewAsync(zip, "catalog.zip", zip.Length));
+        Assert.Contains("compression ratio", error.Message);
+    }
+
+    [Fact]
+    public async Task PreviewRejectsEncryptedCentralDirectoryBeforeImport()
+    {
+        using var original = CreateZip(["one.pdf"]);
+        var bytes = original.ToArray();
+        for (var i = 0; i < bytes.Length - 46; i++)
+            if (BitConverter.ToUInt32(bytes, i) == 0x02014b50) bytes[i + 8] |= 1;
+        await using var zip = new MemoryStream(bytes);
+        var error = await Assert.ThrowsAsync<ArgumentException>(() => Service().PreviewAsync(zip, "catalog.zip", zip.Length));
+        Assert.Contains("Encrypted", error.Message);
+    }
+
+    [Fact]
+    public async Task PreviewRejectsExpandedSizeUsingSyntheticDirectoryMetadataWithoutLargeAllocation()
+    {
+        using var original = CreateZip(["one.pdf", "two.pdf", "three.pdf", "four.pdf", "five.pdf", "six.pdf"]);
+        var bytes = original.ToArray();
+        for (var i = 0; i < bytes.Length - 46; i++)
+            if (BitConverter.ToUInt32(bytes, i) == 0x02014b50)
+                BitConverter.GetBytes(400 * 1024 * 1024).CopyTo(bytes, i + 24);
+        await using var zip = new MemoryStream(bytes);
+        var error = await Assert.ThrowsAsync<ArgumentException>(() => Service().PreviewAsync(zip, "catalog.zip", zip.Length));
+        Assert.Contains("expanded size", error.Message);
     }
 
     private static CatalogPdfImportService Service() => new(null!, null!);

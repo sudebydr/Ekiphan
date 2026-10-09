@@ -1,4 +1,4 @@
-using System.IO.Compression;
+using Ekiphan.Infrastructure.MediaImport;
 using System.Text;
 using System.Globalization;
 using Ekiphan.Application.CatalogPdfImport;
@@ -32,11 +32,18 @@ public sealed class CatalogPdfImportService(EkiphanDbContext db, IMediaFileStora
 
     public async Task<CatalogPdfPreview> PreviewAsync(Stream content, string fileName, long length, CancellationToken cancellationToken = default)
     {
-        if (!Path.GetExtension(fileName).Equals(".zip", StringComparison.OrdinalIgnoreCase) || length is <= 0 or > 1536L * 1024 * 1024)
-            throw new ArgumentException("A ZIP file up to 1.5 GB is required.");
+        if (!(Path.GetExtension(fileName).Equals(".zip", StringComparison.OrdinalIgnoreCase) || Path.GetExtension(fileName).Equals(".rar", StringComparison.OrdinalIgnoreCase)) || length is <= 0 or > 1536L * 1024 * 1024)
+            throw new ArgumentException("En fazla 1,5 GB ZIP veya RAR arşivi gerekli.");
 
-        using var archive = new ZipArchive(content, ZipArchiveMode.Read, leaveOpen: true);
+        if (!content.CanSeek) throw new ArgumentException("Catalog ZIP stream must be seekable.");
+        content.Position = 0;
+        using var archive = ImportArchive.Open(content, fileName, 100, 2L * 1024 * 1024 * 1024);
         if (archive.Entries.Count > 100) throw new ArgumentException("ZIP contains too many entries.");
+        if (archive.Entries.Sum(entry => entry.Length) > 2L * 1024 * 1024 * 1024)
+            throw new ArgumentException("ZIP expanded size exceeds the 2 GB limit.");
+        if (archive.Entries.Any(entry => entry.Length > 0 && !entry.IsSolid &&
+            entry.Length / Math.Max(1d, entry.CompressedLength) > 100))
+            throw new ArgumentException("ZIP compression ratio is unsafe.");
         var files = new List<CatalogPdfPreviewFile>();
         var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var entry in archive.Entries)
@@ -139,7 +146,7 @@ public sealed class CatalogPdfImportService(EkiphanDbContext db, IMediaFileStora
             throw new ArgumentException("ZIP contains an invalid catalog file.");
         if (!content.CanSeek) throw new ArgumentException("Catalog ZIP stream must be seekable.");
         content.Position = 0;
-        using var archive = new ZipArchive(content, ZipArchiveMode.Read, leaveOpen: true);
+        using var archive = ImportArchive.Open(content, fileName, 100, 2L * 1024 * 1024 * 1024);
         var items = preview.Files.Where(item => item.Status == "Matched").ToArray();
         var keys = items.Select(item => StorageKey(item.CatalogSlug!)).ToArray();
         var existingKeys = (await db.MediaAssets
@@ -218,12 +225,12 @@ public sealed class CatalogPdfImportService(EkiphanDbContext db, IMediaFileStora
 
     public static string StorageKey(string slug) => $"catalogs/{slug}/{slug}.pdf";
     public static string CoverStorageKey(string slug) => $"catalogs/{slug}/{slug}-cover.webp";
-    public static string Title(string fileName)
+    public static string Title(string fileName, bool preserveYear = false)
     {
         var known = Manifest.SingleOrDefault(item => Normalize(item.FileName) == Normalize(fileName));
-        if (known is not null) return known.Title;
+        if (known is not null && !preserveYear) return known.Title;
         var value = Path.GetFileNameWithoutExtension(fileName).Replace('_', ' ').Replace('-', ' ');
-        value = System.Text.RegularExpressions.Regex.Replace(value, @"(?:\s+|[_.-])(?:20)?\d{2}(?:[.\-]\d{1,2}){0,2}$", "", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+        if (!preserveYear) value = System.Text.RegularExpressions.Regex.Replace(value, @"(?:\s+|[_.-])(?:20)?\d{2}(?:[.\-]\d{1,2}){0,2}$", "", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
         value = System.Text.RegularExpressions.Regex.Replace(value, @"\s+", " ").Trim();
         return System.Globalization.CultureInfo.GetCultureInfo("tr-TR").TextInfo.ToTitleCase(value.ToLowerInvariant());
     }
@@ -241,12 +248,26 @@ public sealed class CatalogPdfImportService(EkiphanDbContext db, IMediaFileStora
             throw new ArgumentException("The selected file is not a valid PDF.");
         content.Position = 0;
 
-        var catalogTitle = string.IsNullOrWhiteSpace(title) ? Title(fileName) : title.Trim();
+        var catalogTitle = string.IsNullOrWhiteSpace(title) ? Title(fileName, preserveYear: true) : title.Trim();
         if (catalogTitle.Length > 250) throw new ArgumentException("Catalog title cannot exceed 250 characters.");
         var baseSlug = Slug(fileName);
+        if (string.IsNullOrWhiteSpace(baseSlug)) throw new ArgumentException("Dosya adından geçerli katalog adı oluşturulamadı.");
+        var prefix = $"catalogs/{baseSlug}/";
+        var matches = await db.MediaAssets.Include(x => x.Translations)
+            .Where(x => x.AssetType == MediaAssetType.Pdf && x.StorageKey != null && x.StorageKey.StartsWith(prefix))
+            .ToListAsync(cancellationToken);
+        if (matches.Count > 1) throw new ArgumentException("Dosya adı birden fazla katalogla eşleşiyor; otomatik yükleme yapılamadı.");
+        if (matches.Count == 1)
+        {
+            var existing = matches[0];
+            var incomingHash = Convert.ToHexString(await SHA256.HashDataAsync(content, cancellationToken));
+            content.Position = 0;
+            if (string.Equals(existing.Sha256Checksum, incomingHash, StringComparison.OrdinalIgnoreCase))
+                return new(existing.Id, existing.Translations.FirstOrDefault(x => x.LanguageCode == "tr")?.Title ?? catalogTitle,
+                    existing.OriginalFileName!, $"/media/{existing.StorageKey}", await CoverUrlAsync(existing, cancellationToken), "Bu PDF katalogda zaten mevcut; tekrar eklenmedi.");
+            return await ReplaceAsync(existing.Id, content, fileName, length, catalogTitle, cancellationToken);
+        }
         var slug = baseSlug;
-        for (var suffix = 2; await db.MediaAssets.AnyAsync(x => x.StorageKey == StorageKey(slug), cancellationToken); suffix++)
-            slug = $"{baseSlug}-{suffix}";
         var pdfKey = StorageKey(slug);
         var coverKey = CoverStorageKey(slug);
         var savedKeys = new List<string>();

@@ -106,13 +106,10 @@ function ErrorState({ caught, locale = "tr" }: { caught: unknown; locale?: "tr" 
 }
 
 function quickSpecifications(product: CatalogProductDetail, en = false) {
-  const fromAttributes = product.attributes.slice(0, 3).map((attribute) => ({ label: attribute.name, value: attributeValue(attribute, en) }));
-  const fallbacks = [
-    ...(product.categories[0] ? [{ label: en ? "Category" : "Kategori", value: product.categories[0].name }] : []),
-    ...(product.brand ? [{ label: en ? "Brand" : "Marka", value: product.brand.name }] : []),
-    { label: en ? "Product code" : "Ürün kodu", value: product.sku }
-  ];
-  return [...fromAttributes, ...fallbacks].slice(0, 4);
+  return product.attributes
+    .filter(attribute => attributeValue(attribute, en) !== "—" && !/arama eş|search synonym|seo/i.test(attribute.name))
+    .slice(0, 4)
+    .map(attribute => ({ label: attribute.name, value: attributeValue(attribute, en) }));
 }
 
 export default async function ProductDetailPage({ params, searchParams }: {
@@ -175,7 +172,7 @@ export default async function ProductDetailPage({ params, searchParams }: {
             <h1 id="product-title">{product.name}</h1>
             <p className={styles.modelLine}><span>{en ? "Product Code:" : "Ürün Kodu:"} {product.sku}</span></p>
             {product.shortDescription && <p className={styles.lead}>{product.shortDescription}</p>}
-            <dl className={styles.quickSpecs}>{specs.map((spec) => <div key={`${spec.label}-${spec.value}`}><dt>{spec.label}</dt><dd>{spec.value}</dd></div>)}</dl>
+            {specs.length > 0 && <dl className={styles.quickSpecs}>{specs.map((spec) => <div key={`${spec.label}-${spec.value}`}><dt>{spec.label}</dt><dd>{spec.value}</dd></div>)}</dl>}
             <div className={styles.primaryAction}>
               <AddToQuoteButton productId={product.id} slug={product.slug} name={product.name} sku={product.sku} brandName={product.brand?.name ?? null} imageUrl={product.images[0]?.url ?? null} className={styles.quoteButton} showQuantityControl quantityClassName={styles.quantityControl} locale={language} />
               <Link href={en ? "/en/contact" : "/iletisim"}>{en ? "Request a Quote" : "Teklif al"} <span aria-hidden="true">→</span></Link>

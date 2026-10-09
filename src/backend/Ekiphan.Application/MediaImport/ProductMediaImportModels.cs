@@ -136,6 +136,7 @@ public interface IProductMediaImportTokenService
     string CreateUpload(ProductMediaStoredUpload upload);
     bool TryGetUpload(string token, out ProductMediaStoredUpload upload);
     string CreateValidation(ProductMediaStoredValidation validation);
+    bool TryGetValidation(string token, out ProductMediaStoredValidation validation);
     bool TryUseValidation(string token, out ProductMediaStoredValidation validation);
 }
 public interface IProductMediaDuplicateDetector

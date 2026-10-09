@@ -108,7 +108,7 @@ export async function getCatalogPdfDocuments(): Promise<CatalogPdfDocument[]> {
     const localApi = ["localhost", "127.0.0.1", "[::1]"].includes(new URL(apiBaseUrl()).hostname);
     return documents.map((document) => ({
       ...document,
-      url: document.url.startsWith("/") ? `${apiBaseUrl()}${document.url}` : document.url,
+      url: document.url,
       // Local /media rewrites keep covers same-origin and allowed by img-src 'self'.
       coverUrl: !localApi && document.coverUrl.startsWith("/media/") ? `${apiBaseUrl()}${document.coverUrl}` : document.coverUrl
     }));

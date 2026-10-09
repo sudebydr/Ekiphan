@@ -89,8 +89,8 @@ export function ProductDetailSections({ productName, category, description, feat
 
       <div className={styles.panel} role="tabpanel" id="product-detail-panel" aria-labelledby={`product-tab-${activeTab}`} tabIndex={0}>
         {activeTab === "overview" && <><div className={styles.overview}>
-          <div className={styles.intro}><span className={styles.kicker}>{category}</span><h2>{en ? "Reliable performance for professional kitchens" : "Profesyonel mutfaklar için maksimum performans"}</h2><i aria-hidden="true"/>{description && <p>{description}</p>}</div>
-          {features.length > 0 ? <ol className={styles.features}>{features.map((feature, index) => <li key={`${feature.title}-${index}`}><span>{String(index + 1).padStart(2, "0")}</span><div><h3>{feature.title}</h3>{feature.detail && <p>{feature.detail}</p>}</div></li>)}</ol> : <p className={styles.empty}>{en ? "No additional product highlights are available." : "Bu ürün için ek özellik bilgisi bulunmuyor."}</p>}
+          {description && <div className={styles.intro}><p>{description}</p></div>}
+          {features.length > 0 ? <ol className={styles.features}>{features.map((feature, index) => <li key={`${feature.title}-${index}`}><span>{String(index + 1).padStart(2, "0")}</span><div><h3>{feature.title}</h3>{feature.detail && <p>{feature.detail}</p>}</div></li>)}</ol> : null}
         </div>{afterOverview}</>}
 
         {activeTab === "specs" && <div className={styles.specifications}>
