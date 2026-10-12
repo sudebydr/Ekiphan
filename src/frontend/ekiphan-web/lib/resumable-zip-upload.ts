@@ -1,3 +1,5 @@
+import { sha256 as incrementalSha256 } from "@noble/hashes/sha2.js";
+
 export type UploadKind = "catalog" | "product" | "image" | "pdf";
 export type ZipProgress = { percent: number; phase: "transfer" | "processing" | "ready"; message: string };
 type State = { id: string; offset: number; length: number; phase: string; operation: string | null;
@@ -50,9 +52,23 @@ async function retry<T>(work: () => Promise<T>, progress: (attempt: number) => v
     }
   }
 }
-async function sha256(blob: Blob): Promise<string> {
-  const hash = await crypto.subtle.digest("SHA-256", await blob.arrayBuffer());
-  return Array.from(new Uint8Array(hash), byte => byte.toString(16).padStart(2, "0")).join("").toUpperCase();
+export async function sha256(blob: Blob): Promise<string> {
+  const subtle = globalThis.crypto?.subtle;
+  // Web Crypto is one-shot: only use it for bounded upload chunks/fingerprints.
+  if (subtle && blob.size <= chunkBytes) {
+    const hash = await subtle.digest("SHA-256", await blob.arrayBuffer());
+    return Array.from(new Uint8Array(hash), byte => byte.toString(16).padStart(2, "0")).join("").toUpperCase();
+  }
+  // Plain HTTP has no SubtleCrypto. Incremental SHA-256 never buffers the whole file.
+  const hash = incrementalSha256.create();
+  try {
+    for (let offset = 0; offset < blob.size; offset += fingerprintBytes) {
+      hash.update(new Uint8Array(await blob.slice(offset, offset + fingerprintBytes).arrayBuffer()));
+    }
+    return Array.from(hash.digest(), byte => byte.toString(16).padStart(2, "0")).join("").toUpperCase();
+  } finally {
+    hash.destroy();
+  }
 }
 function put(id: string, offset: number, body: Blob, hash: string, onProgress: (bytes: number) => void): Promise<void> {
   return new Promise((resolve, reject) => {

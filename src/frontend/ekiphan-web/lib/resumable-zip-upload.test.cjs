@@ -5,6 +5,60 @@ const vm = require("node:vm");
 const ts = require("typescript");
 const { webcrypto } = require("node:crypto");
 
+test("HTTP fallback matches SHA-256 known vectors without SubtleCrypto or crypto", async () => {
+  for (const crypto of [{}, null]) {
+    const { api } = client({ crypto });
+    for (const value of ["", "abc", "x".repeat(65)]) {
+      const expected = require("node:crypto").createHash("sha256").update(value).digest("hex").toUpperCase();
+      assert.equal(await api.sha256(new Blob([value])), expected);
+    }
+  }
+});
+
+test("secure context retains Web Crypto for bounded chunks", async () => {
+  let calls = 0;
+  const { api } = client({ crypto: { subtle: { digest: (...args) => {
+    calls++; return webcrypto.subtle.digest(...args);
+  } } } });
+  await api.sha256(new Blob(["abc"]));
+  assert.equal(calls, 1);
+});
+
+test("incremental hash reads at most 1 MiB and never reads a whole large blob", async () => {
+  const bytes = new Uint8Array(5 * 1024 * 1024 + 17).fill(173);
+  const source = new Blob([bytes]);
+  for (const crypto of [{}, webcrypto]) {
+    let reads = 0;
+    const blob = { size: source.size,
+      arrayBuffer() { throw new Error("whole-file buffering is forbidden"); },
+      slice(start, end) {
+        assert.ok(end - start <= 1024 * 1024);
+        reads++; return source.slice(start, end);
+      }
+    };
+    const { api } = client({ crypto });
+    assert.equal(await api.sha256(blob), require("node:crypto").createHash("sha256").update(bytes).digest("hex").toUpperCase());
+    assert.equal(reads, 6);
+  }
+});
+
+test("HTTP fallback preserves ZIP/RAR and single-file upload hashes, retry and resume", async () => {
+  const bytes = new Uint8Array(4 * 1024 * 1024 + 11).fill(53);
+  const firstHash = require("node:crypto").createHash("sha256").update(bytes.subarray(0, 4 * 1024 * 1024)).digest("hex").toUpperCase();
+  for (const [kind, name] of [["product", "images.rar"], ["catalog", "catalog.zip"], ["image", "sku.webp"], ["pdf", "catalog.pdf"]]) {
+    const { api, state, requests, storage } = client({ crypto: {}, interrupt: true });
+    const file = new File([bytes], name, { lastModified: 123 });
+    if (kind === "image" || kind === "pdf") await api.uploadSingle(file, kind, {}, () => {});
+    else await api.uploadZip(file, kind, () => {});
+    assert.equal(state.chunks[0].sha256, firstHash);
+    assert.equal(requests.filter(item => item[1] === "PUT").length, 3);
+    const resumed = client({ crypto: {}, existing: state, storage });
+    if (kind === "image" || kind === "pdf") await resumed.api.uploadSingle(file, kind, {}, () => {});
+    else await resumed.api.uploadZip(file, kind, () => {});
+    assert.equal(resumed.requests.filter(item => item[1] === "PUT").length, 0);
+  }
+});
+
 test("five successive ZIP previews remain accessible without implicit DELETE", async () => {
   const { api, requests } = client();
   for (let i = 0; i < 5; i++) {
@@ -24,11 +78,11 @@ test("product validation uses owner-bound durable ZIP session, not expired previ
   assert.ok(!requests.some(item => item[0].includes("product-media-import/validate")));
 });
 
-function client({ interrupt = false, existing = null, fatal = false, storage = new Map(), closeStatus = 204, errorCode = null } = {}) {
+function client({ interrupt = false, existing = null, fatal = false, storage = new Map(), closeStatus = 204, errorCode = null, crypto = webcrypto } = {}) {
   const state = existing ?? { id: "upload", offset: 0, length: 0, phase: "uploading", operation: null, chunks: [] };
   const requests = [];
   let failed = false;
-  const context = { exports: {}, Blob, File, crypto: webcrypto, Uint8Array,
+  const context = { exports: {}, require, Blob, File, crypto, Uint8Array,
     setTimeout: callback => setTimeout(callback, 0),
     localStorage: { getItem: key => storage.get(key) ?? (existing ? "upload" : null), setItem: (key, value) => storage.set(key, value),
       get length() { return storage.size; }, key: index => [...storage.keys()][index], removeItem: key => storage.delete(key) },
